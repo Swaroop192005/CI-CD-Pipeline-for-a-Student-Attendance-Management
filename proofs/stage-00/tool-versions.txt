@@ -1,0 +1,60 @@
+Environment readiness check
+Captured: 2026-10-05T06:21:06Z
+Host kernel: Linux 6.18.44-fc-v70 x86_64
+
+== java -version ==
+openjdk version "21.0.11" 2026-04-21
+OpenJDK Runtime Environment (build 21.0.11+10-1-24.04.2-Ubuntu)
+OpenJDK 64-Bit Server VM (build 21.0.11+10-1-24.04.2-Ubuntu, mixed mode, sharing)
+
+== mvn -v ==
+Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+Maven home: /opt/maven
+Java version: 21.0.11, vendor: Ubuntu, runtime: /usr/lib/jvm/java-21-openjdk-amd64
+Default locale: en_US, platform encoding: UTF-8
+
+== git --version ==
+git version 2.43.0
+
+== docker --version ==
+Docker version 29.6.2, build dfc4efb
+
+== docker compose version ==
+Docker Compose version v5.3.1
+
+== docker info (server) ==
+Server:
+ Containers: 0
+  Running: 0
+  Paused: 0
+  Stopped: 0
+ Images: 3
+ Server Version: 29.6.2
+ Storage Driver: overlayfs
+  driver-type: io.containerd.snapshotter.v1
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Cgroup Version: 1
+ Plugins:
+  Volume: local
+
+== chromium --version ==
+Chromium 141.0.7390.37 
+
+== chromedriver --version ==
+ChromeDriver 141.0.7390.122 (b477534e7e10d193e916cd4e2967c589383625b2-refs/branch-heads/7390@{#2667})
+
+== ansible --version ==
+ansible [core 2.19.13]
+  config file = None
+  configured module search path = ['/root/.ansible/plugins/modules', '/usr/share/ansible/plugins/modules']
+
+== docker images (pre-pulled) ==
+eclipse-temurin:21-jre-jammy  407MB
+jenkins/jenkins:lts-jdk21  720MB
+hello-world:latest  25.9kB
+
+== CPU / memory ==
+4
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       613Mi        14Gi        13Mi       548Mi        15Gi
