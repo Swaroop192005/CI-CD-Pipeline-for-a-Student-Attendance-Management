@@ -1,0 +1,8 @@
+# Default owner for the whole repository.
+*                       @Swaroop192005
+
+# Pipeline and infrastructure definitions get an explicit look.
+/Jenkinsfile            @Swaroop192005
+/Dockerfile             @Swaroop192005
+/ansible/               @Swaroop192005
+/jenkins/               @Swaroop192005

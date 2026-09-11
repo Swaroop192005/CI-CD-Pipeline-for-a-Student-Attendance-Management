@@ -1,0 +1,34 @@
+name: Engineering task
+description: Build, pipeline, container, provisioning or documentation work
+title: "[task]: "
+labels: ["type:chore"]
+body:
+  - type: input
+    id: stage
+    attributes:
+      label: Project stage
+      placeholder: "stage-12"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Build/Maven, Jenkins/CI, Selenium, Docker, Registry, Ansible, Documentation, Repository hygiene]
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Required outcome
+      description: What must exist or work once this task is done?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence to capture
+      description: Which file under proofs/ will prove this task was executed?
+      placeholder: "proofs/stage-12/pipeline-run.log"
+    validations:
+      required: true

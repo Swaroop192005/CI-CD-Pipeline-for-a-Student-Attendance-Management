@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Branch and commit policy
+    url: https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/blob/main/CONTRIBUTING.md
+    about: Read the branch naming rules and Definition of Done before opening an issue.
+  - name: Project documentation index
+    url: https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/tree/main/docs
+    about: Stage-by-stage requirements, architecture and evidence.

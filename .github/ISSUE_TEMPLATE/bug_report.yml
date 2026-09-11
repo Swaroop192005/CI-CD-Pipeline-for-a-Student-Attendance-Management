@@ -1,0 +1,59 @@
+name: Bug report
+description: A defect in the Student Attendance Management Portal
+title: "[bug]: "
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe what the system did and what it should have done.
+        A defect that reaches `develop` should end up with a regression test.
+  - type: input
+    id: stage
+    attributes:
+      label: Project stage
+      description: Which of the 15 tasks does this affect?
+      placeholder: "stage-06"
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Affected role
+      options: [Faculty, HOD, Administrator, Student, Operator, All]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Sign in as faculty1
+        2. Open /attendance/new
+        3. Submit a record dated tomorrow
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      description: Quote the requirement ID from the SRS where possible (e.g. FR-06).
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: Include the error message, stack trace or failing assertion.
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build or tag
+      placeholder: "v1.0.0 / Jenkins build #17"
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Screenshot, log excerpt, or the Selenium failure screenshot path.
