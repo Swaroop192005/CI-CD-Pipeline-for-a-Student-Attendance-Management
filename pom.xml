@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.16</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.college.attendance</groupId>
+  <artifactId>attendance-portal-parent</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Student Attendance Management Portal</name>
+  <description>
+    Role-aware attendance system of record for an engineering college,
+    delivered through a Git - Jenkins - Selenium - Docker - Ansible pipeline.
+  </description>
+
+  <modules>
+    <module>app</module>
+  </modules>
+
+  <properties>
+    <java.version>21</java.version>
+    <maven.compiler.release>21</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- Pinned tool versions: see docs/00-environment-prerequisites.md -->
+    <selenium.version>4.50.0</selenium.version>
+    <jacoco.version>0.8.13</jacoco.version>
+
+    <!-- Coverage floor for the domain and service packages (NFR-11). -->
+    <jacoco.line.coverage.minimum>0.70</jacoco.line.coverage.minimum>
+  </properties>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>
