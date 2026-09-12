@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!--
+  Skeleton landing page (Stage 4). It exists so that the initial commit is
+  a running, verifiable application rather than an empty project: it proves
+  the servlet context, the template engine, the configuration binding and
+  the static resource handler all work before any feature is written.
+-->
+<head th:replace="~{fragments/layout :: head('Home')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('dashboard')}"></header>
+<main>
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Student Attendance Management Portal</h1>
+      <p class="subtitle">Application skeleton is running.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Runtime status</h2>
+    <dl class="meta-list">
+      <div>
+        <dt>Environment</dt>
+        <dd data-testid="status-environment" th:text="${appEnvironment}">local</dd>
+      </div>
+      <div>
+        <dt>Context path</dt>
+        <dd data-testid="status-context-path" th:text="${contextPath}">/attendance</dd>
+      </div>
+      <div>
+        <dt>Eligibility threshold</dt>
+        <dd data-testid="status-threshold" th:text="${eligibilityThreshold} + '%'">75%</dd>
+      </div>
+      <div>
+        <dt>Health endpoint</dt>
+        <dd><a th:href="@{/actuator/health}" data-testid="status-health-link">/actuator/health</a></dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>Next</h2>
+    <p class="subtitle">
+      Attendance recording, the role-based review workflow, search and the
+      summary dashboard are delivered on feature branches in project
+      stages 5 and 6.
+    </p>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

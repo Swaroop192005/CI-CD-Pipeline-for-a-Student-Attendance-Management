@@ -1,0 +1,128 @@
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=40387 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] Student Attendance Management Portal                               [pom]
+[INFO] Attendance Portal :: Application                                   [war]
+[INFO] 
+[INFO] ----------< com.college.attendance:attendance-portal-parent >-----------
+[INFO] Building Student Attendance Management Portal 1.0.0-SNAPSHOT       [1/2]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ attendance-portal-parent ---
+[INFO] 
+[INFO] ---------------< com.college.attendance:attendance-app >----------------
+[INFO] Building Attendance Portal :: Application 1.0.0-SNAPSHOT           [2/2]
+[INFO]   from app/pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ attendance-app ---
+[INFO] Deleting /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/app/target
+[INFO] 
+[INFO] --- jacoco:0.8.13:prepare-agent (prepare-agent) @ attendance-app ---
+[INFO] argLine set to -javaagent:/root/.m2/repository/org/jacoco/org.jacoco.agent/0.8.13/org.jacoco.agent-0.8.13-runtime.jar=destfile=/home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/app/target/jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ attendance-app ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ attendance-app ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 6 source files with javac [debug parameters release 21] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ attendance-app ---
+[INFO] Copying 1 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ attendance-app ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ attendance-app ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=40387 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+[INFO] Running com.college.attendance.AttendancePortalApplicationTests
+06:26:31.018 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.college.attendance.AttendancePortalApplicationTests]: AttendancePortalApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+06:26:31.200 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.AttendancePortalApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::               (v3.5.16)
+
+2026-10-05T06:26:31.960Z  INFO 1984 --- [attendance-portal] [           main] c.c.a.AttendancePortalApplicationTests   : Starting AttendancePortalApplicationTests using Java 21.0.11 with PID 1984 (started by root in /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/app)
+2026-10-05T06:26:31.962Z  INFO 1984 --- [attendance-portal] [           main] c.c.a.AttendancePortalApplicationTests   : The following 1 profile is active: "test"
+2026-10-05T06:26:33.314Z  INFO 1984 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-10-05T06:26:33.347Z  INFO 1984 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 19 ms. Found 0 JPA repository interfaces.
+2026-10-05T06:26:34.000Z  INFO 1984 --- [attendance-portal] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-10-05T06:26:34.057Z  INFO 1984 --- [attendance-portal] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.53.Final
+2026-10-05T06:26:34.105Z  INFO 1984 --- [attendance-portal] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-10-05T06:26:34.477Z  INFO 1984 --- [attendance-portal] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-10-05T06:26:34.521Z  INFO 1984 --- [attendance-portal] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-10-05T06:26:34.852Z  INFO 1984 --- [attendance-portal] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:attendance-test user=SA
+2026-10-05T06:26:34.854Z  INFO 1984 --- [attendance-portal] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-10-05T06:26:34.932Z  INFO 1984 --- [attendance-portal] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-10-05T06:26:35.417Z  INFO 1984 --- [attendance-portal] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-10-05T06:26:35.424Z  INFO 1984 --- [attendance-portal] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-10-05T06:26:35.530Z  WARN 1984 --- [attendance-portal] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 78baccb0-7136-4fe3-b685-932bc1d34130
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-10-05T06:26:35.540Z  INFO 1984 --- [attendance-portal] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-10-05T06:26:36.121Z  INFO 1984 --- [attendance-portal] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+2026-10-05T06:26:36.921Z  INFO 1984 --- [attendance-portal] [           main] c.c.a.AttendancePortalApplicationTests   : Started AttendancePortalApplicationTests in 5.47 seconds (process running for 6.966)
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (/root/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.922 s -- in com.college.attendance.AttendancePortalApplicationTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- war:3.4.0:war (default-war) @ attendance-app ---
+[INFO] Packaging webapp
+[INFO] Assembling webapp [attendance-app] in [/home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/app/target/attendance]
+[INFO] Processing war project
+[INFO] Building war: /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/app/target/attendance.war
+[INFO] 
+[INFO] --- spring-boot:3.5.16:repackage (repackage) @ attendance-app ---
+[INFO] Replacing main artifact /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/app/target/attendance.war with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/app/target/attendance.war.original
+[INFO] 
+[INFO] --- jacoco:0.8.13:report (report) @ attendance-app ---
+[INFO] Loading execution data file /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/app/target/jacoco.exec
+[INFO] Analyzed bundle 'Attendance Portal :: Application' with 6 classes
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for Student Attendance Management Portal 1.0.0-SNAPSHOT:
+[INFO] 
+[INFO] Student Attendance Management Portal ............... SUCCESS [  0.094 s]
+[INFO] Attendance Portal :: Application ................... SUCCESS [ 11.682 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  12.056 s
+[INFO] Finished at: 2026-10-05T06:26:39Z
+[INFO] ------------------------------------------------------------------------

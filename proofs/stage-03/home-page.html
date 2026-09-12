@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<!--
+  Skeleton landing page (Stage 4). It exists so that the initial commit is
+  a running, verifiable application rather than an empty project: it proves
+  the servlet context, the template engine, the configuration binding and
+  the static resource handler all work before any feature is written.
+-->
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Home · Attendance Portal</title>
+  <link rel="stylesheet" href="/attendance/css/app.css"/>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/attendance/dashboard" data-testid="brand">Attendance Portal</a>
+  <span class="env-badge env-local"
+        data-testid="env-badge">local</span>
+  <nav>
+    <a href="/attendance/dashboard" data-testid="nav-dashboard" class="active">Dashboard</a>
+    <a href="/attendance/attendance" data-testid="nav-attendance">Attendance</a>
+    
+    
+    
+  </nav>
+  <span class="whoami">
+    <span data-testid="current-user">user</span>
+    <span class="role" data-testid="current-role"></span>
+    <form action="/attendance/logout" method="post" style="display:inline"><input type="hidden" name="_csrf" value="Dfw3aD-ugy5BORfWzBg_r08NTHOiVR09hoI6NXtTRCCIL-w4aMoEXFyetExsWi-w_jULzitoYRKWNykQ4LcPVEgwcRS4G99c"/>
+      <button class="btn btn-secondary btn-sm" type="submit" data-testid="logout">Sign out</button>
+    </form>
+  </span>
+</header>
+<main>
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Student Attendance Management Portal</h1>
+      <p class="subtitle">Application skeleton is running.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Runtime status</h2>
+    <dl class="meta-list">
+      <div>
+        <dt>Environment</dt>
+        <dd data-testid="status-environment">local</dd>
+      </div>
+      <div>
+        <dt>Context path</dt>
+        <dd data-testid="status-context-path">/attendance</dd>
+      </div>
+      <div>
+        <dt>Eligibility threshold</dt>
+        <dd data-testid="status-threshold">75%</dd>
+      </div>
+      <div>
+        <dt>Health endpoint</dt>
+        <dd><a href="/attendance/actuator/health" data-testid="status-health-link">/actuator/health</a></dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>Next</h2>
+    <p class="subtitle">
+      Attendance recording, the role-based review workflow, search and the
+      summary dashboard are delivered on feature branches in project
+      stages 5 and 6.
+    </p>
+  </div>
+</main>
+<footer class="app-footer">
+  Student Attendance Management Portal ·
+  environment <span>local</span> ·
+  eligibility threshold <span>75%</span>
+</footer>
+</body>
+</html>

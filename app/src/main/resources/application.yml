@@ -1,0 +1,65 @@
+# Student Attendance Management Portal - application configuration
+#
+# Every setting below can be overridden by an environment variable using
+# Spring Boot's relaxed binding (for example SERVER_PORT,
+# SPRING_DATASOURCE_URL, ATTENDANCE_ENVIRONMENT). Stage 8 parameterises
+# ATTENDANCE_ENVIRONMENT from the Jenkins pipeline and Stage 13 templates
+# the whole set from Ansible. See docs/stage-03 section 6.4.
+
+spring:
+  application:
+    name: attendance-portal
+
+  datasource:
+    # File mode keeps data across restarts; the container maps a volume here.
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/attendance;DB_CLOSE_ON_EXIT=FALSE}
+    driver-class-name: org.h2.Driver
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  thymeleaf:
+    cache: ${SPRING_THYMELEAF_CACHE:true}
+
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    # Identical whether the WAR runs embedded or is deployed to Tomcat as
+    # attendance.war, so every URL in docs and tests is stable.
+    context-path: ${SERVER_SERVLET_CONTEXT_PATH:/attendance}
+  error:
+    include-message: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+
+attendance:
+  environment: ${ATTENDANCE_ENVIRONMENT:local}
+  eligibility-threshold: ${ATTENDANCE_ELIGIBILITY_THRESHOLD:75}
+  seed-data: ${ATTENDANCE_SEED_DATA:true}
+
+info:
+  app:
+    name: Student Attendance Management Portal
+    environment: ${attendance.environment}
+
+logging:
+  level:
+    root: INFO
+    com.college.attendance: INFO

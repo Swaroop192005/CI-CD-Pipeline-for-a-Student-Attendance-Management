@@ -1,0 +1,13 @@
+# Tests run against an isolated in-memory datastore so that no test can
+# see another test's rows and no local data file is touched.
+spring:
+  datasource:
+    url: jdbc:h2:mem:attendance-test;DB_CLOSE_DELAY=-1;MODE=LEGACY
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  thymeleaf:
+    cache: false
+attendance:
+  environment: test
+  seed-data: false

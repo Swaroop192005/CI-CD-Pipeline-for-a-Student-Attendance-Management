@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+  Shared page chrome. Every navigation target and status element carries a
+  stable data-testid so that the Selenium suite (Stage 9) never selects on
+  CSS classes or text, which are free to change (SRS NFR-10).
+-->
+<head th:fragment="head(title)">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title th:text="|${title} · Attendance Portal|">Attendance Portal</title>
+  <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+
+<body>
+<header th:fragment="topbar(active)" class="topbar">
+  <a class="brand" th:href="@{/dashboard}" data-testid="brand">Attendance Portal</a>
+  <span class="env-badge"
+        th:classappend="'env-' + ${appEnvironment}"
+        th:text="${appEnvironment}"
+        data-testid="env-badge">local</span>
+  <nav>
+    <a th:href="@{/dashboard}" th:classappend="${active == 'dashboard'} ? 'active'"
+       data-testid="nav-dashboard">Dashboard</a>
+    <a th:href="@{/attendance}" th:classappend="${active == 'attendance'} ? 'active'"
+       data-testid="nav-attendance">Attendance</a>
+    <a sec:authorize="hasAnyRole('FACULTY','ADMIN')"
+       th:href="@{/attendance/new}" th:classappend="${active == 'new'} ? 'active'"
+       data-testid="nav-new-record">New record</a>
+    <a sec:authorize="hasAnyRole('HOD','ADMIN')"
+       th:href="@{/review}" th:classappend="${active == 'review'} ? 'active'"
+       data-testid="nav-review">Review queue</a>
+    <a sec:authorize="hasRole('ADMIN')"
+       th:href="@{/students}" th:classappend="${active == 'students'} ? 'active'"
+       data-testid="nav-students">Students</a>
+  </nav>
+  <span class="whoami">
+    <span data-testid="current-user" sec:authentication="name">user</span>
+    <span class="role" data-testid="current-role" th:text="${currentRole}">ROLE</span>
+    <form th:action="@{/logout}" method="post" style="display:inline">
+      <button class="btn btn-secondary btn-sm" type="submit" data-testid="logout">Sign out</button>
+    </form>
+  </span>
+</header>
+
+<div th:fragment="alerts">
+  <div th:if="${successMessage}" class="alert alert-success" data-testid="alert-success"
+       th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="alert alert-error" data-testid="alert-error"
+       th:text="${errorMessage}"></div>
+  <div th:if="${infoMessage}" class="alert alert-info" data-testid="alert-info"
+       th:text="${infoMessage}"></div>
+</div>
+
+<footer th:fragment="footer" class="app-footer">
+  Student Attendance Management Portal ·
+  environment <span th:text="${appEnvironment}">local</span> ·
+  eligibility threshold <span th:text="${eligibilityThreshold} + '%'">75%</span>
+</footer>
+</body>
+</html>
