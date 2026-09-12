@@ -1,0 +1,49 @@
+Stage 4 - initial commit history on main
+Captured: 2026-10-05T06:33:29Z
+
+483d5ec  2026-09-12  Swaroop Naik  feat(web): add bootable application skeleton with health and layout
+f7efd79  2026-09-11  Swaroop Naik  build(maven): add reactor POM and application module
+0569df0  2026-09-11  Swaroop Naik  chore(repo): add issue templates, pull request template and owners
+b2857e2  2026-09-11  Swaroop Naik  chore(repo): add README, gitignore and contribution policy
+5cae25e  2026-09-10  Swaroop Naik  docs(architecture): add SRS, use cases, architecture and data model
+dfe7a83  2026-09-09  Swaroop Naik  docs(planning): add backlog, sprint plan, DoD and DevOps workflow
+05d464c  2026-09-08  Swaroop Naik  docs(scope): define problem, stakeholders and frozen MVP scope
+
+== files tracked at end of stage 4 ==
+.github/CODEOWNERS
+.github/ISSUE_TEMPLATE/bug_report.yml
+.github/ISSUE_TEMPLATE/config.yml
+.github/ISSUE_TEMPLATE/feature_request.yml
+.github/ISSUE_TEMPLATE/task.yml
+.github/PULL_REQUEST_TEMPLATE.md
+.gitignore
+CONTRIBUTING.md
+README.md
+app/pom.xml
+app/src/main/java/com/college/attendance/AttendancePortalApplication.java
+app/src/main/java/com/college/attendance/ServletInitializer.java
+app/src/main/java/com/college/attendance/config/AttendanceProperties.java
+app/src/main/java/com/college/attendance/config/SecurityConfig.java
+app/src/main/java/com/college/attendance/web/GlobalModelAttributes.java
+app/src/main/java/com/college/attendance/web/HomeController.java
+app/src/main/resources/application.yml
+app/src/main/resources/static/css/app.css
+app/src/main/resources/templates/fragments/layout.html
+app/src/main/resources/templates/home.html
+app/src/test/java/com/college/attendance/AttendancePortalApplicationTests.java
+app/src/test/resources/application-test.yml
+docs/00-environment-prerequisites.md
+docs/stage-01-problem-definition.md
+docs/stage-02-agile-planning.md
+docs/stage-03-requirements-architecture.md
+pom.xml
+proofs/stage-00/tool-versions.txt
+proofs/stage-03/app-startup.log
+proofs/stage-03/health-check.json
+proofs/stage-03/home-page.html
+proofs/stage-03/mvn-verify.log
+proofs/stage-03/screenshot-login.png
+proofs/stage-03/screenshot-skeleton-home.png
+
+== commit count ==
+7
