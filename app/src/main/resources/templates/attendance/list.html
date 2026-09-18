@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Attendance records')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('attendance')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Attendance records</h1>
+      <p class="subtitle">
+        <span data-testid="result-count" th:text="${records.totalElements}">0</span> record(s),
+        most recent session first.
+      </p>
+    </div>
+    <a sec:authorize="hasAnyRole('FACULTY','ADMIN')" class="btn btn-primary"
+       th:href="@{/attendance/new}" data-testid="new-record-button">Record attendance</a>
+  </div>
+
+  <div class="card">
+    <div th:if="${records.isEmpty()}" class="empty-state" data-testid="empty-state">
+      <strong>No attendance records yet</strong>
+      Once a class session is recorded it will appear here.
+    </div>
+
+    <div th:unless="${records.isEmpty()}" class="table-wrap">
+      <table data-testid="records-table">
+        <thead>
+        <tr>
+          <th>Roll number</th>
+          <th>Student</th>
+          <th>Subject</th>
+          <th>Session date</th>
+          <th class="num">Period</th>
+          <th>Attendance</th>
+          <th>Workflow</th>
+          <th>Marked by</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${records.content}" th:attr="data-record-id=${r.id}" data-testid="record-row">
+          <td data-testid="cell-roll" th:text="${r.student.rollNumber}">1CS21CS001</td>
+          <td th:text="${r.student.fullName}">Aditya Rao</td>
+          <td data-testid="cell-subject" th:text="${r.subjectCode}">CS501</td>
+          <td data-testid="cell-date" th:text="${#temporals.format(r.sessionDate,'dd MMM yyyy')}">01 Jan 2026</td>
+          <td class="num" th:text="${r.periodNumber}">1</td>
+          <td>
+            <span class="badge" th:classappend="'badge-' + ${r.attendanceStatus}"
+                  data-testid="cell-attendance-status"
+                  th:text="${r.attendanceStatus.label}">Present</span>
+          </td>
+          <td>
+            <span class="badge" th:classappend="'badge-' + ${r.workflowStatus}"
+                  data-testid="cell-workflow-status"
+                  th:text="${r.workflowStatus.label}">Draft</span>
+          </td>
+          <td th:text="${r.markedBy}">faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" th:href="@{/attendance/{id}(id=${r.id})}"
+               data-testid="view-record">View</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" th:if="${records.totalPages > 1}" data-testid="pagination">
+      <span class="page-info" data-testid="page-info">
+        Page <span th:text="${records.number + 1}">1</span>
+        of <span th:text="${records.totalPages}">1</span>
+      </span>
+      <a class="btn btn-secondary btn-sm"
+         th:if="${records.hasPrevious()}"
+         th:href="@{/attendance(page=${records.number - 1})}"
+         data-testid="page-previous">Previous</a>
+      <a class="btn btn-secondary btn-sm"
+         th:if="${records.hasNext()}"
+         th:href="@{/attendance(page=${records.number + 1})}"
+         data-testid="page-next">Next</a>
+    </div>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
