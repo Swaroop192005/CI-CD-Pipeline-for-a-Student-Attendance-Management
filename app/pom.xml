@@ -85,6 +85,31 @@
         <artifactId>spring-boot-maven-plugin</artifactId>
       </plugin>
 
+      <!--
+        Surefire runs *Test (fast unit and slice tests); Failsafe runs *IT
+        (integration tests) in the verify phase. Splitting them is what lets
+        the Jenkins pipeline fail fast on a unit regression before paying for
+        the slower integration run.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>integration-tests</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <includes>
+            <include>**/*IT.java</include>
+          </includes>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
