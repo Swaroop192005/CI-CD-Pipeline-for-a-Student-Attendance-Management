@@ -81,6 +81,15 @@ public class AttendanceController {
         }
     }
 
+    /**
+     * Record detail.
+     *
+     * <p>Not yet scoped per role: any authenticated user can open any
+     * record. Record-level scoping for students (US-09, FR-25) lands with
+     * the search predicate in Stage 6, so that the list and the detail
+     * view are restricted by the same rule rather than by two that can
+     * drift apart. The current behaviour is a known gap, not a decision.
+     */
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
         AttendanceRecord record = attendanceService.require(id);

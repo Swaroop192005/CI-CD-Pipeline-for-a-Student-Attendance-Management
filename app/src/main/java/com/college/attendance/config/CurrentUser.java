@@ -62,11 +62,26 @@ public class CurrentUser {
     /**
      * For a student account, the roll number their view is restricted to.
      * Empty for every other role, which means "not restricted".
+     *
+     * <p>An empty result must only ever mean "this role is not scoped". A
+     * student account with no linked roll number is a misconfiguration, not
+     * an unscoped account, so it throws rather than returning empty: if the
+     * two cases shared a return value, the one account that most needs
+     * restricting would be the one that got unrestricted access.
+     *
+     * @throws MisconfiguredAccountException the account has the student role
+     *                                       but no roll number to scope by
      */
     @Transactional(readOnly = true)
     public Optional<String> restrictedToRollNumber() {
-        return account()
-                .filter(u -> u.getRole() == Role.STUDENT)
-                .map(AppUser::getLinkedRollNumber);
+        Optional<AppUser> student = account().filter(u -> u.getRole() == Role.STUDENT);
+        if (student.isEmpty()) {
+            return Optional.empty();
+        }
+        String rollNumber = student.get().getLinkedRollNumber();
+        if (rollNumber == null || rollNumber.isBlank()) {
+            throw new MisconfiguredAccountException(student.get().getUsername());
+        }
+        return Optional.of(rollNumber);
     }
 }
