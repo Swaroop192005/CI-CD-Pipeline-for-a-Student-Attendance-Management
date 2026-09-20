@@ -1,0 +1,50 @@
+Stage 5 - git evidence for feature 1
+Captured: 2026-10-05T06:49:19Z
+
+== git log --graph (develop after merge) ==
+*   90948d0 (HEAD -> develop, origin/develop) Merge pull request #12 from feature/attendance-core
+|\  
+| * e3728c7 (origin/feature/attendance-core, feature/attendance-core) docs(stage-05): refresh verification log after the review fix
+| * bd72c2f fix(security): refuse a student account with no linked roll number
+| * 4494f28 docs(stage-05): capture local verification evidence for feature 1
+| * f9487e8 test(service): cover creation, correction and authorisation rules
+| * 6707345 feat(web): add attendance list, detail and record-entry form
+| * 5c0a18b feat(service): add attendance creation and correction
+| * 7a99f21 feat(security): add role-based authentication and seeded fixtures
+| * d5f812b feat(domain): add student, account and attendance record entities
+|/  
+* e7e970e (origin/main, main) docs(stage-04): record repository initialisation
+* 483d5ec feat(web): add bootable application skeleton with health and layout
+* f7efd79 build(maven): add reactor POM and application module
+* 0569df0 chore(repo): add issue templates, pull request template and owners
+* b2857e2 chore(repo): add README, gitignore and contribution policy
+
+== commits contributed by the feature branch ==
+90948d0 Merge pull request #12 from feature/attendance-core
+e3728c7 docs(stage-05): refresh verification log after the review fix
+bd72c2f fix(security): refuse a student account with no linked roll number
+4494f28 docs(stage-05): capture local verification evidence for feature 1
+f9487e8 test(service): cover creation, correction and authorisation rules
+6707345 feat(web): add attendance list, detail and record-entry form
+5c0a18b feat(service): add attendance creation and correction
+7a99f21 feat(security): add role-based authentication and seeded fixtures
+d5f812b feat(domain): add student, account and attendance record entities
+
+== merge commit ==
+90948d02170aa25002c065f3da41d998218bd555
+Swaroop Naik <167417428+Swaroop192005@users.noreply.github.com>
+Merge pull request #12 from feature/attendance-core
+
+feat: record and view attendance (feature 1, US-01/US-02)
+
+First vertical slice through security, controller, service, repository
+and H2. Includes the fail-open authorisation fix raised in review.
+
+Closes #1
+== branches ==
+* develop
+  feature/attendance-core
+  main
+  remotes/origin/develop
+  remotes/origin/feature/attendance-core
+  remotes/origin/main
