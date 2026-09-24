@@ -5,18 +5,24 @@ import com.college.attendance.domain.AttendanceRecord;
 import com.college.attendance.domain.Student;
 import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.dto.AttendanceForm;
+import com.college.attendance.dto.AttendanceSearch;
 import com.college.attendance.repository.AttendanceRecordRepository;
+import com.college.attendance.repository.AttendanceSpecifications;
 import com.college.attendance.repository.StudentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Creating, reading and correcting attendance records.
@@ -45,14 +51,66 @@ public class AttendanceService {
 
     // ---- Read -------------------------------------------------------------
 
+    /**
+     * Loads a record, refusing it if the acting user is not entitled to
+     * see it.
+     *
+     * <p>Scoping is applied here rather than in the controller so that the
+     * detail view and the list are restricted by the same rule - two
+     * separate checks would eventually drift apart, and the one that
+     * drifted would be the hole.
+     */
     @Transactional(readOnly = true)
     public AttendanceRecord require(Long id) {
-        return records.findById(id).orElseThrow(() -> new RecordNotFoundException(id));
+        AttendanceRecord record = records.findById(id)
+                .orElseThrow(() -> new RecordNotFoundException(id));
+        assertVisible(record);
+        return record;
+    }
+
+    /**
+     * A page of records matching the filters, scoped to what the acting
+     * user may see.
+     *
+     * <p>The student predicate is AND-ed on top of the user's own filters,
+     * so a student cannot widen their view past their own approved
+     * records by changing a query parameter (FR-25).
+     */
+    @Transactional(readOnly = true)
+    public Page<AttendanceRecord> search(AttendanceSearch criteria, Pageable pageable) {
+        Specification<AttendanceRecord> spec = AttendanceSpecifications.matching(criteria);
+
+        Optional<String> ownRollNumber = currentUser.restrictedToRollNumber();
+        if (ownRollNumber.isPresent()) {
+            spec = spec.and(AttendanceSpecifications.rollNumber(ownRollNumber.get()))
+                    .and(AttendanceSpecifications.workflowStatus(WorkflowStatus.APPROVED));
+        }
+
+        Pageable sorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                Sort.by(Sort.Order.desc("sessionDate"), Sort.Order.asc("periodNumber")));
+        return records.findAll(spec, sorted);
     }
 
     @Transactional(readOnly = true)
     public Page<AttendanceRecord> list(Pageable pageable) {
-        return records.findAllByOrderBySessionDateDescPeriodNumberAsc(pageable);
+        return search(new AttendanceSearch(), pageable);
+    }
+
+    /**
+     * Whether the acting user is entitled to see this record. A student
+     * may see only their own, and only once approved (FR-25).
+     */
+    private void assertVisible(AttendanceRecord record) {
+        Optional<String> ownRollNumber = currentUser.restrictedToRollNumber();
+        if (ownRollNumber.isEmpty()) {
+            return;
+        }
+        boolean ownRecord = ownRollNumber.get().equals(record.getStudent().getRollNumber());
+        boolean official = record.getWorkflowStatus() == WorkflowStatus.APPROVED;
+        if (!ownRecord || !official) {
+            throw new NotPermittedException(
+                    "You can only view your own attendance records, once they have been approved.");
+        }
     }
 
     @Transactional(readOnly = true)
