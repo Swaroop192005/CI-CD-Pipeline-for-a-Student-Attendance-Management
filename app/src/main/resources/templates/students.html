@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Student roll')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('students')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Student roll</h1>
+      <p class="subtitle">
+        <span data-testid="student-count" th:text="${students.size()}">0</span> active student(s).
+        Seeded fixtures - no real student data is held in this system.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="table-wrap">
+      <table data-testid="students-table">
+        <thead>
+        <tr>
+          <th>Roll number</th>
+          <th>Name</th>
+          <th>E-mail</th>
+          <th>Department</th>
+          <th class="num">Semester</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${students}" data-testid="student-row">
+          <td data-testid="student-roll" th:text="${s.rollNumber}">1CS21CS001</td>
+          <td th:text="${s.fullName}">Aditya Rao</td>
+          <td th:text="${s.email}">a@college.edu</td>
+          <td th:text="${s.department}">Computer Science</td>
+          <td class="num" th:text="${s.semester}">5</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

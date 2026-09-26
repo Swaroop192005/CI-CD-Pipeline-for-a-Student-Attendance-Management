@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('dashboard')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Attendance summary</h1>
+      <p class="subtitle" sec:authorize="!hasRole('STUDENT')">
+        Department-wide. Percentages count approved records only, so a draft
+        is never published as a fact about a student.
+      </p>
+      <p class="subtitle" sec:authorize="hasRole('STUDENT')" data-testid="student-scope-note">
+        Your own approved attendance.
+      </p>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat approved">
+      <div class="label">Overall attendance</div>
+      <div class="value" data-testid="stat-percentage"
+           th:text="${#numbers.formatDecimal(summary.attendancePercent,1,1)} + '%'">0.0%</div>
+      <div class="hint">
+        <span data-testid="stat-attended" th:text="${summary.sessionsAttended}">0</span>
+        of <span data-testid="stat-counted" th:text="${summary.sessionsCounted}">0</span>
+        counted sessions
+      </div>
+    </div>
+    <div class="stat draft">
+      <div class="label">Draft</div>
+      <div class="value" data-testid="stat-draft" th:text="${summary.draftCount}">0</div>
+      <div class="hint">Not yet submitted</div>
+    </div>
+    <div class="stat submitted">
+      <div class="label">Awaiting review</div>
+      <div class="value" data-testid="stat-submitted" th:text="${summary.submittedCount}">0</div>
+      <div class="hint">With the Head of Department</div>
+    </div>
+    <div class="stat approved">
+      <div class="label">Approved</div>
+      <div class="value" data-testid="stat-approved" th:text="${summary.approvedCount}">0</div>
+      <div class="hint">Official</div>
+    </div>
+    <div class="stat rejected">
+      <div class="label">Rejected</div>
+      <div class="value" data-testid="stat-rejected" th:text="${summary.rejectedCount}">0</div>
+      <div class="hint">Sent back for correction</div>
+    </div>
+  </div>
+
+  <div class="card" sec:authorize="hasRole('STUDENT')">
+    <h2>Examination eligibility</h2>
+    <p data-testid="eligibility-verdict">
+      <span class="badge" th:classappend="${summary.meetingThreshold} ? 'badge-ok' : 'badge-risk'"
+            th:text="${summary.meetingThreshold} ? 'Eligible' : 'Below threshold'">Eligible</span>
+      Your approved attendance is
+      <strong th:text="${#numbers.formatDecimal(summary.attendancePercent,1,1)} + '%'">0.0%</strong>
+      against a required
+      <strong th:text="${summary.eligibilityThreshold} + '%'">75%</strong>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>By subject</h2>
+    <div th:if="${summary.subjects.isEmpty()}" class="empty-state" data-testid="subjects-empty">
+      <strong>Nothing approved yet</strong>
+      Per-subject figures appear once records have been approved.
+    </div>
+    <div th:unless="${summary.subjects.isEmpty()}" class="table-wrap">
+      <table data-testid="subject-table">
+        <thead>
+        <tr>
+          <th>Subject</th>
+          <th class="num">Sessions counted</th>
+          <th class="num">Attended</th>
+          <th class="num">Percentage</th>
+          <th style="width:160px">Standing</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${summary.subjects}" data-testid="subject-row">
+          <td data-testid="subject-code" th:text="${s.subjectCode}">CS501</td>
+          <td class="num" th:text="${s.sessionsCounted}">0</td>
+          <td class="num" th:text="${s.sessionsAttended}">0</td>
+          <td class="num" data-testid="subject-percent"
+              th:text="${#numbers.formatDecimal(s.percent,1,1)} + '%'">0.0%</td>
+          <td>
+            <div class="bar"
+                 th:classappend="${s.isBelowThreshold(summary.eligibilityThreshold)} ? 'low'">
+              <span th:style="'width:' + ${s.percent} + '%'"></span>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" sec:authorize="!hasRole('STUDENT')">
+    <h2>At risk — below <span th:text="${summary.eligibilityThreshold} + '%'">75%</span></h2>
+    <p class="subtitle">
+      Surfaced while there is still time to act, which is the whole point:
+      under the paper process these students found out when the hall ticket
+      was withheld.
+    </p>
+    <div th:if="${summary.atRisk.isEmpty()}" class="empty-state" data-testid="at-risk-empty">
+      <strong>No student is below the threshold</strong>
+      Based on approved records.
+    </div>
+    <div th:unless="${summary.atRisk.isEmpty()}" class="table-wrap">
+      <table data-testid="at-risk-table">
+        <thead>
+        <tr>
+          <th>Roll number</th>
+          <th>Student</th>
+          <th class="num">Counted</th>
+          <th class="num">Attended</th>
+          <th class="num">Percentage</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${summary.atRisk}" data-testid="at-risk-row">
+          <td data-testid="at-risk-roll" th:text="${s.rollNumber}">1CS21CS001</td>
+          <td th:text="${s.fullName}">Aditya Rao</td>
+          <td class="num" th:text="${s.sessionsCounted}">0</td>
+          <td class="num" th:text="${s.sessionsAttended}">0</td>
+          <td class="num">
+            <span class="badge badge-risk" data-testid="at-risk-percent"
+                  th:text="${#numbers.formatDecimal(s.percent,1,1)} + '%'">0.0%</span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
