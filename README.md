@@ -39,15 +39,15 @@ project tasks complete.
 
 | # | Capability | Roles | Status |
 |---|---|---|---|
-| F1 | Record attendance for a (student, subject, date, period) | Faculty, Admin | Planned |
-| F2 | View records — paginated list and detail view | All | Planned |
-| F3 | Update a record while it is still editable | Faculty (author), Admin | Planned |
-| F4 | Search and filter by roll number, subject, date range and status | Faculty, HOD, Admin | Planned |
-| F5 | Role-based status workflow `DRAFT → SUBMITTED → APPROVED / REJECTED` | Faculty submits, HOD decides | Planned |
-| F6 | Summary dashboard with attendance percentage and at-risk list | Faculty, HOD, Admin, Student (own) | Planned |
-| F7 | Authentication and role-based authorisation | All | Planned |
-| F8 | Student roll view | Admin | Planned |
-| F9 | Health endpoint for automated probes | Operators | Planned |
+| F1 | Record attendance for a (student, subject, date, period) | Faculty, Admin | Delivered — one record per student, subject, session date and period, enforced by a database constraint |
+| F2 | View records — paginated list and detail view | All | Delivered — 10 rows per page, most recent session first, full audit trail on the detail view |
+| F3 | Update a record while it is still editable | Faculty (author), Admin | Delivered — draft and rejected records only; the original author is preserved on correction |
+| F4 | Search and filter by roll number, subject, date range and status | Faculty, HOD, Admin | Delivered — five optional filters combined with AND, surviving pagination |
+| F5 | Role-based status workflow `DRAFT → SUBMITTED → APPROVED / REJECTED` | Faculty submits, HOD decides | Delivered — one code path for every transition, each stamped with actor and time |
+| F6 | Summary dashboard with attendance percentage and at-risk list | Faculty, HOD, Admin, Student (own) | Delivered — approved records only, with a per-subject breakdown and an at-risk list |
+| F7 | Authentication and role-based authorisation | All | Delivered — BCrypt, CSRF, and rules enforced at both the URL and the service layer |
+| F8 | Student roll view | Admin | Delivered |
+| F9 | Health endpoint for automated probes | Operators | Delivered — public, and reached only after seeding completes |
 
 ---
 

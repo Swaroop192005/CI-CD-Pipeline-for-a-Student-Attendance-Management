@@ -1,0 +1,53 @@
+=== Role-based status workflow, exercised end to end ===
+Record #1 initial status: Draft
+
+-- faculty1 submits #1 for review (DRAFT -> SUBMITTED)
+   HTTP 302
+   status now: Submitted
+
+-- faculty1 tries to correct a submitted record (must be refused, FR-11)
+   GET edit form -> HTTP 409
+
+-- faculty1 tries to approve their own record (must be refused, FR-17)
+   HTTP 403
+   status still: Submitted
+
+-- hod1 rejects #1 with no reason (must be refused, FR-18)
+   status still: Submitted
+
+-- hod1 rejects #1 with a reason (SUBMITTED -> REJECTED)
+   status now: Rejected
+
+-- faculty1 re-submits after correction (REJECTED -> SUBMITTED, FR-19)
+   status now: Submitted
+
+-- hod1 approves #1 (SUBMITTED -> APPROVED)
+   status now: Approved
+
+-- hod1 tries to reject an approved record (must be refused: APPROVED is final)
+   status still: Approved
+
+=== Authorisation checks ===
+   student1 GET /attendance/new    -> HTTP 403 (expect 403)
+   student1 GET /review            -> HTTP 403 (expect 403)
+   student1 GET /students          -> HTTP 403 (expect 403)
+   faculty1 GET /students          -> HTTP 403 (expect 403)
+   hod1     GET /review            -> HTTP 200 (expect 200)
+
+=== Student self-service scoping (FR-25) ===
+   records visible to student1: 1
+   distinct roll numbers shown: 1CS21CS001 
+   workflow statuses shown:     Approved 
+
+=== Search (FR-13) ===
+   roll=1CS21CS001 AND subject=CS503 -> 10 record(s)
+   attendanceStatus=ABSENT           -> 42 record(s)
+   rollNumber=NOSUCHROLL             -> 0 record(s), empty state present: 1
+
+=== Dashboard (FR-23) ===
+   stat-percentage:   100.0%
+   stat-draft:        299
+   stat-submitted:    0
+   stat-approved:     1
+   stat-rejected:     0
+   at-risk rows:      0
