@@ -1,0 +1,158 @@
+# Jenkins Configuration as Code.
+#
+# The controller's configuration lives here, in the same repository as the
+# application it builds, so that a rebuilt controller is identical to this
+# one. Nothing below is configured by clicking through the UI.
+
+jenkins:
+  systemMessage: >
+    Student Attendance Management Portal - CI/CD controller.
+    Configured from jenkins/casc.yaml in the project repository.
+  numExecutors: 2
+  mode: NORMAL
+  scmCheckoutRetryCount: 2
+
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: "${JENKINS_ADMIN_ID}"
+          password: "${JENKINS_ADMIN_PASSWORD}"
+
+  authorizationStrategy:
+    # Signed-in users have full control; anonymous users get nothing.
+    # Adequate for a single-maintainer lab controller - a matrix strategy
+    # would be the right choice once there is more than one maintainer.
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+
+  # CSRF protection uses the controller's default crumb issuer; it needs
+  # no configuration here.
+
+unclassified:
+  location:
+    url: http://localhost:8081/
+    adminAddress: "naikswaroop1910@gmail.com"
+
+  timestamper:
+    allPipelines: true
+
+tool:
+  git:
+    installations:
+      - name: Default
+        home: git
+  maven:
+    installations:
+      - name: maven-3.9
+        # Bind-mounted from the host in docker-compose.yml, because apt
+        # cannot reach deb.debian.org from this lab.
+        home: /opt/maven
+  jdk:
+    installations:
+      - name: jdk-21
+        home: /opt/java/openjdk
+
+jobs:
+  # Stage 7 - the freestyle-equivalent CI job: poll SCM, build with Maven,
+  # archive the artefact. Defined as Job DSL so it is reproducible.
+  - script: |
+      job('attendance-portal-ci') {
+        description('''Stage 7 - continuous integration build.
+          Polls the repository, builds with Maven, runs the unit and
+          integration tests, and archives attendance.war.''')
+
+        logRotator {
+          numToKeep(20)
+          artifactNumToKeep(10)
+        }
+
+        scm {
+          git {
+            remote {
+              url('https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git')
+            }
+            branch('*/develop')
+          }
+        }
+
+        triggers {
+          // Poll every two minutes. A webhook would be better, but the
+          // lab controller is not reachable from GitHub.
+          scm('H/2 * * * *')
+        }
+
+        wrappers {
+          timestamps()
+          timeout {
+            absolute(30)
+          }
+        }
+
+        steps {
+          maven {
+            goals('-B clean verify')
+            mavenInstallation('maven-3.9')
+            // Stated explicitly rather than relying on the controller's
+            // MAVEN_OPTS: the Maven build step does not always inherit it,
+            // and the symptom when it does not is a PKIX error that reads
+            // like a certificate problem rather than a proxy one.
+            mavenOpts('-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=40387 -Dhttp.nonProxyHosts=localhost|127.0.0.1 -Djavax.net.ssl.trustStore=/var/jenkins_conf/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit')
+          }
+        }
+
+        publishers {
+          archiveArtifacts {
+            pattern('app/target/attendance.war')
+            onlyIfSuccessful(true)
+            fingerprint(true)
+          }
+          archiveJunit('**/surefire-reports/*.xml,**/failsafe-reports/*.xml') {
+            allowEmptyResults(false)
+            retainLongStdout(false)
+          }
+        }
+      }
+
+  # Stage 8 onwards - the pipeline-as-code job, reading the Jenkinsfile
+  # from the repository itself.
+  - script: |
+      pipelineJob('attendance-portal-pipeline') {
+        description('''Stages 8-12 - declarative pipeline.
+          Checkout, build, unit test, package, Selenium quality gate,
+          Docker image, registry push and deploy. Definition lives in
+          the repository Jenkinsfile.''')
+
+        logRotator {
+          numToKeep(25)
+          artifactNumToKeep(10)
+        }
+
+        parameters {
+          choiceParam('DEPLOY_ENVIRONMENT', ['staging', 'production', 'local'],
+            'Environment label the deployed application reports. Rendered in the UI banner so a misconfigured deploy is visible rather than silent.')
+          stringParam('APP_PORT', '8090',
+            'Host port the deployed container listens on.')
+          booleanParam('RUN_SELENIUM', true,
+            'Run the Selenium quality gate. Clearing it skips the gate and therefore the deploy.')
+        }
+
+        triggers {
+          scm('H/2 * * * *')
+        }
+
+        definition {
+          cpsScm {
+            scm {
+              git {
+                remote {
+                  url('https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git')
+                }
+                branch('*/develop')
+              }
+            }
+            scriptPath('Jenkinsfile')
+            lightweight(true)
+          }
+        }
+      }
