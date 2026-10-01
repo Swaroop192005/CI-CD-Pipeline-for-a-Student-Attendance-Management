@@ -1,0 +1,99 @@
+Stage 7 - Jenkins CI job evidence
+Captured: 2026-10-05T07:26:07Z
+
+== Controller ==
+Jenkins version: X-Jenkins: 2.580.1
+Installed from: jenkins/jenkins:lts-jdk21 (image), get.jenkins.io is blocked by the lab egress policy
+Controller URL: http://localhost:8081/
+Container: attendance-jenkins  attendance-jenkins:1.0  Up 2 minutes
+
+== Jobs created from jenkins/casc.yaml (no UI clicking) ==
+{
+    "_class": "hudson.model.Hudson",
+    "jobs": [
+        {
+            "_class": "hudson.model.FreeStyleProject",
+            "name": "attendance-portal-ci"
+        },
+        {
+            "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+            "name": "attendance-portal-pipeline"
+        }
+    ]
+}
+
+== Build trigger configuration ==
+    <hudson.triggers.SCMTrigger>
+      <spec>H/2 * * * *</spec>
+      <ignorePostCommitHooks>false</ignorePostCommitHooks>
+    </hudson.triggers.SCMTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+
+== SCM polling log ==
+    JenkinsSkip to contentJenkinsattendance-portal-ciGit Polling LogSearch                                    Manage Jenkins    admin    
+      admin
+            Status
+            Changes
+            Workspace
+            Build Now
+            Delete Project
+            Git Polling Log
+                                                Configure
+                                        Rename
+            Export Configuration
+            Builds
+                                        Loading builds...No buildsNewer buildsOlder builds<!--
+start of main content ⇒
+-->Git Polling LogStarted on Oct 5, 2026, 7:26:00 AM
+Using strategy: Default
+[poll] Last Built Revision: Revision 0312ac1f6e26d58680f0b3addc9315021c83b31c (refs/remotes/origin/develop)
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+No credentials specified
+
+== Build history ==
+{
+    "_class": "hudson.model.FreeStyleProject",
+    "builds": [
+        {
+            "_class": "hudson.model.FreeStyleBuild",
+            "duration": 62538,
+            "number": 2,
+            "result": "SUCCESS"
+        },
+        {
+            "_class": "hudson.model.FreeStyleBuild",
+            "duration": 3534,
+            "number": 1,
+            "result": "FAILURE"
+        }
+    ]
+}
+
+== Build #2 result ==
+{
+    "_class": "hudson.model.FreeStyleBuild",
+    "artifacts": [
+        {
+            "fileName": "attendance.war",
+            "relativePath": "app/target/attendance.war"
+        }
+    ],
+    "duration": 62538,
+    "number": 2,
+    "result": "SUCCESS"
+}
+
+== Test results recorded by Jenkins ==
+{
+    "_class": "hudson.tasks.junit.TestResult",
+    "duration": 31.114,
+    "failCount": 0,
+    "passCount": 80,
+    "skipCount": 0
+}
+
+== Archived artefact ==
+GET /job/attendance-portal-ci/2/artifact/app/target/attendance.war -> HTTP 200, 63815182 bytes
