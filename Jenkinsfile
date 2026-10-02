@@ -51,6 +51,23 @@ pipeline {
         TOMCAT_IMAGE     = 'tomcat:10.1-jdk21-temurin'
         APP_CONTEXT      = '/attendance'
         WAR_PATH         = 'app/target/attendance.war'
+
+        // The quality gate runs the journeys against a throwaway instance of
+        // the artefact just built, on a port of its own so it never collides
+        // with a deployed environment.
+        GATE_CONTAINER   = 'attendance-gate'
+        GATE_PORT        = '8095'
+        RUNTIME_IMAGE    = 'eclipse-temurin:21-jre-jammy'
+
+        // The journeys run against a Selenium container rather than a
+        // browser on the controller: the controller image has no browser and
+        // none of the graphics libraries one needs, and installing them is
+        // not possible here because apt cannot reach the Debian mirrors.
+        // The container also pins the browser and its driver together, which
+        // removes the version-mismatch failure mode entirely.
+        SELENIUM_CONTAINER = 'attendance-selenium'
+        SELENIUM_IMAGE     = 'selenium/standalone-chromium:latest'
+        SELENIUM_PORT      = '4444'
     }
 
     stages {
@@ -126,6 +143,95 @@ pipeline {
                 always {
                     junit allowEmptyResults: true,
                           testResults: '**/target/failsafe-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Quality gate: Selenium') {
+            when {
+                expression { return params.RUN_SELENIUM }
+            }
+            steps {
+                script {
+                    // The suite needs a running application, so a throwaway
+                    // instance is started from the artefact just packaged -
+                    // the same WAR that is deployed if the gate passes.
+                    // Testing a different build than the one deployed would
+                    // make the gate decorative.
+                    sh """
+                        set -e
+                        docker rm -f ${GATE_CONTAINER} ${SELENIUM_CONTAINER} >/dev/null 2>&1 || true
+
+                        # The gate instance runs the WAR in its executable
+                        # form rather than deploying it to Tomcat. It is the
+                        # same artefact either way, and this mode honours
+                        # SERVER_PORT, so the gate can take a port of its own
+                        # without colliding with a deployed environment.
+                        docker run -d --name ${GATE_CONTAINER} --network host \\
+                            -e SERVER_PORT=${GATE_PORT} \\
+                            -e ATTENDANCE_ENVIRONMENT=quality-gate \\
+                            -v "\$(pwd)/${WAR_PATH}:/app/attendance.war:ro" \\
+                            ${RUNTIME_IMAGE} \\
+                            java -jar /app/attendance.war >/dev/null
+
+                        docker run -d --name ${SELENIUM_CONTAINER} --network host \\
+                            --shm-size=2g \\
+                            -e SE_NODE_MAX_SESSIONS=2 \\
+                            ${SELENIUM_IMAGE} >/dev/null
+
+                        echo "Waiting for the application under test..."
+                        for i in \$(seq 1 60); do
+                          curl -sf http://localhost:${GATE_PORT}${APP_CONTEXT}/actuator/health >/dev/null && break
+                          sleep 3
+                        done
+
+                        echo "Waiting for the Selenium node..."
+                        for i in \$(seq 1 60); do
+                          curl -sf http://localhost:${SELENIUM_PORT}/status | grep -q '"ready": *true' && break
+                          sleep 3
+                        done
+
+                        curl -sf http://localhost:${GATE_PORT}${APP_CONTEXT}/actuator/health
+                        echo
+                        echo "Application under test and browser node are both ready."
+                    """
+                }
+            }
+            post {
+                always {
+                    script {
+                        // The suite runs here rather than in `steps` so that
+                        // the report is published and the containers removed
+                        // whether the journeys passed or failed.
+                        def gateResult = sh(returnStatus: true, script: """
+                            "\$MVN" -B -pl selenium-tests verify \\
+                                -DskipSeleniumTests=false \\
+                                -Dapp.base.url=http://localhost:${GATE_PORT}${APP_CONTEXT} \\
+                                -Dselenium.remote.url=http://localhost:${SELENIUM_PORT} \\
+                                -Dselenium.headless=true
+                        """)
+
+                        junit allowEmptyResults: true,
+                              testResults: 'selenium-tests/target/failsafe-reports/*.xml'
+
+                        // A failed journey leaves a screenshot and a page
+                        // dump. Archive them before the workspace is cleaned:
+                        // by the time anyone reads the build, they are the
+                        // only record of what the browser actually saw.
+                        archiveArtifacts artifacts: 'selenium-tests/target/screenshots/**',
+                                         allowEmptyArchive: true,
+                                         onlyIfSuccessful: false
+
+                        sh "docker rm -f ${GATE_CONTAINER} ${SELENIUM_CONTAINER} >/dev/null 2>&1 || true"
+
+                        if (gateResult != 0) {
+                            // Fail the build here, before the deploy stages.
+                            // This is the gate: a failing journey must stop
+                            // the deployment, not merely mark it unstable.
+                            error('Selenium quality gate failed. The deployment stages will not run.')
+                        }
+                        echo 'Selenium quality gate passed.'
+                    }
                 }
             }
         }

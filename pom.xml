@@ -24,6 +24,7 @@
 
   <modules>
     <module>app</module>
+    <module>selenium-tests</module>
   </modules>
 
   <properties>
