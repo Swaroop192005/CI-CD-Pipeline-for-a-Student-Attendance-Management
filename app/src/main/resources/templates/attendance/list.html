@@ -135,11 +135,7 @@
          data-testid="page-previous">Previous</a>
       <a class="btn btn-secondary btn-sm"
          th:if="${records.hasNext()}"
-         th:href="@{/attendance(page=${records.number + 1},
-                                rollNumber=${search.rollNumber}, subjectCode=${search.subjectCode},
-                                from=${search.from}, to=${search.to},
-                                attendanceStatus=${search.attendanceStatus},
-                                workflowStatus=${search.workflowStatus})}"
+         th:href="@{/attendance(page=${records.number + 1})}"
          data-testid="page-next">Next</a>
     </div>
   </div>
