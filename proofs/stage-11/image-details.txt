@@ -1,0 +1,88 @@
+Stage 11 - image details
+Captured: 2026-10-05T08:17:11Z
+
+== docker images ==
+REPOSITORY          TAG       IMAGE ID       SIZE
+attendance-portal   1.0.0     00505b427f6d   525MB
+
+== OCI labels (docker inspect --format '{{json .Config.Labels}}') ==
+{
+    "org.opencontainers.image.created": "2026-10-05T08:14:08Z",
+    "org.opencontainers.image.description": "Role-aware attendance system of record",
+    "org.opencontainers.image.licenses": "academic-project",
+    "org.opencontainers.image.revision": "2b5c3f3",
+    "org.opencontainers.image.source": "https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management",
+    "org.opencontainers.image.title": "Student Attendance Management Portal",
+    "org.opencontainers.image.version": "1.0.0"
+}
+
+== Runtime configuration baked into the image ==
+[
+    "PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "JAVA_HOME=/opt/java/openjdk",
+    "LANG=en_US.UTF-8",
+    "LANGUAGE=en_US:en",
+    "LC_ALL=en_US.UTF-8",
+    "JAVA_VERSION=jdk-21.0.12.1+1",
+    "SERVER_PORT=8080",
+    "SERVER_SERVLET_CONTEXT_PATH=/attendance",
+    "SPRING_DATASOURCE_URL=jdbc:h2:file:/app/data/attendance;DB_CLOSE_ON_EXIT=FALSE",
+    "ATTENDANCE_ENVIRONMENT=container",
+    "ATTENDANCE_ELIGIBILITY_THRESHOLD=75",
+    "ATTENDANCE_SEED_DATA=true",
+    "JAVA_OPTS=-XX:MaxRAMPercentage=75.0 -XX:+UseSerialGC"
+]
+
+== Security posture ==
+  runs as user: attendance
+  in-container id: uid=1001(attendance) gid=1001(attendance) groups=1001(attendance)
+
+== Declared volume and exposed port ==
+{"/app/data":{}}
+{"8080/tcp":{}}
+
+== Healthcheck ==
+{
+    "Test": [
+        "CMD-SHELL",
+        "wget --quiet --tries=1 --spider         \"http://localhost:${SERVER_PORT}${SERVER_SERVLET_CONTEXT_PATH}/actuator/health\" || exit 1"
+    ],
+    "Interval": 15000000000,
+    "Timeout": 5000000000,
+    "StartPeriod": 60000000000,
+    "Retries": 3
+}
+
+== Layers (size, instruction) ==
+SIZE      CREATED BY
+0B        ENTRYPOINT ["sh" "-c" "exec java $JAVA_OPTS …
+0B        HEALTHCHECK {Test:[CMD-SHELL wget --quiet --…
+0B        VOLUME [/app/data]
+0B        EXPOSE [8080/tcp]
+0B        ENV SERVER_PORT=8080 SERVER_SERVLET_CONTEXT_…
+0B        USER attendance
+63.8MB    COPY --chown=attendance:attendance app/targe…
+4.1kB     WORKDIR /app
+406kB     RUN |3 APP_VERSION=1.0.0 GIT_COMMIT=2b5c3f3 …
+0B        LABEL org.opencontainers.image.title=Student…
+0B        ARG BUILD_TIME=2026-10-05T08:14:08Z
+0B        ARG GIT_COMMIT=2b5c3f3
+0B        ARG APP_VERSION=1.0.0
+0B        ENTRYPOINT ["/__cacert_entrypoint.sh"]
+12.3kB    COPY --chmod=755 entrypoint.sh /__cacert_ent…
+12.3kB    RUN /bin/sh -c set -eux;     echo "Verifying…
+166MB     RUN /bin/sh -c set -eux;     ARCH="$(dpkg --…
+0B        ENV JAVA_VERSION=jdk-21.0.12.1+1
+50.7MB    RUN /bin/sh -c set -eux;     apt-get update;…
+0B        ENV LANG=en_US.UTF-8 LANGUAGE=en_US:en LC_AL…
+0B        ENV PATH=/opt/java/openjdk/bin:/usr/local/sb…
+0B        ENV JAVA_HOME=/opt/java/openjdk
+0B        /bin/sh -c #(nop)  CMD ["/bin/bash"]
+87.7MB    /bin/sh -c #(nop) ADD file:b0bf3f64519bf10a5…
+0B        /bin/sh -c #(nop)  LABEL org.opencontainers.…
+0B        /bin/sh -c #(nop)  ARG LAUNCHPAD_BUILD_ARCH
+0B        /bin/sh -c #(nop)  ARG RELEASE
+
+== Base image ==
+  eclipse-temurin:21-jre-jammy  98978296 bytes  linux/amd64
+  Application layer (the WAR) adds 63.8 MB on top.

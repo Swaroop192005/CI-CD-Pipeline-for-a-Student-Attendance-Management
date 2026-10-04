@@ -1,0 +1,29 @@
+# Keep the build context small: a large context is slow to send to the
+# daemon and makes layer caching less effective.
+#
+# The one thing the context must contain is app/target/attendance.war, so
+# target/ is excluded selectively rather than wholesale.
+
+.git/
+.github/
+docs/
+proofs/
+jenkins/
+ansible/
+docker/
+selenium-tests/
+data/
+
+# Build output, except the artefact the image is built around.
+app/target/*
+!app/target/attendance.war
+
+*.md
+!README.md
+.gitignore
+.dockerignore
+*.log
+*.db
+*.mv.db
+.idea/
+.vscode/
