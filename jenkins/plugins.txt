@@ -1,0 +1,30 @@
+# Plugins the pipeline needs. Pinned to no version: the controller is
+# itself pinned to lts-jdk21, and letting the plugin manager resolve
+# compatible versions against that controller is more reliable than
+# pinning versions that may not match.
+
+# Pipeline (Jenkinsfile) support
+workflow-aggregator
+pipeline-stage-view
+
+# SCM
+git
+
+# Build tooling
+maven-plugin
+pipeline-maven
+
+# Reporting - the Selenium quality gate publishes through these
+junit
+jacoco
+htmlpublisher
+
+# Configuration as code, so the controller is reproducible
+configuration-as-code
+job-dsl
+
+# Credentials and utilities
+credentials-binding
+timestamper
+ws-cleanup
+build-timeout

@@ -1,0 +1,103 @@
+---
+# Provisions an application server for the Student Attendance Management
+# Portal, from a bare node to a running, health-checked service.
+#
+#   ansible-playbook site.yml
+#   ansible-playbook site.yml -e app_version=1.0.2       # deploy a release
+#   ansible-playbook site.yml --check --diff             # dry run
+#
+# Every task is written to be idempotent: a second run against an already
+# provisioned node must report changed=0. That is not a nicety. A playbook
+# that reports changes on every run gives an operator no way to tell a real
+# drift from the usual noise, so they stop reading the recap - and then
+# miss the run that mattered.
+
+- name: Provision the attendance application server
+  hosts: attendance_servers
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Report what is about to be provisioned
+      ansible.builtin.debug:
+        msg: >-
+          Provisioning {{ inventory_hostname }}
+          ({{ ansible_distribution }} {{ ansible_distribution_version }})
+          with attendance {{ app_version }} as '{{ app_environment }}'
+
+    - name: Ensure apt can reach its mirrors through the lab proxy
+      # The managed node inherits no proxy configuration. Without this, the
+      # very first apt task fails with a timeout that looks like a broken
+      # mirror rather than a missing proxy setting.
+      ansible.builtin.copy:
+        content: |
+          # Managed by Ansible
+          Acquire::https::Proxy "{{ proxy_url }}";
+        dest: /etc/apt/apt.conf.d/01proxy
+        owner: root
+        group: root
+        mode: "0644"
+      when: proxy_url is defined and proxy_url | length > 0
+
+    - name: Refresh the apt cache
+      # Explicitly, and before any role installs anything. The roles use
+      # cache_valid_time so repeat runs do not re-index for nothing, but on
+      # a genuinely clean node that would skip the very first refresh if the
+      # lists directory happens to carry a recent timestamp - and the
+      # failure then reads as "no package matching unzip", which points at
+      # the package rather than at the empty cache.
+      ansible.builtin.apt:
+        update_cache: true
+      changed_when: false
+      retries: 3
+      delay: 5
+      register: apt_refresh
+      until: apt_refresh is succeeded
+
+  roles:
+    - role: common
+      tags: [common, base]
+    - role: java
+      tags: [java, base]
+    - role: attendance_app
+      tags: [app, deploy]
+    - role: nginx
+      tags: [nginx, edge]
+
+  post_tasks:
+    - name: Wait for the application to answer its health endpoint
+      # Through nginx, not straight to the application: a deployment is not
+      # done until it is reachable by the path a user actually takes.
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ nginx_port }}{{ health_path }}"
+        status_code: 200
+        return_content: true
+      register: health
+      retries: "{{ health_retries }}"
+      delay: "{{ health_delay }}"
+      until: health.status is defined and health.status == 200
+      changed_when: false
+
+    - name: Confirm the health endpoint reports UP
+      ansible.builtin.assert:
+        that:
+          - health.json.status == 'UP'
+        success_msg: "Health check passed: {{ health.json }}"
+        fail_msg: "Health endpoint answered but did not report UP: {{ health.json | default(health.content) }}"
+
+    - name: Confirm the deployed release is the one requested
+      # A healthy service running the wrong version is the failure mode a
+      # health check alone cannot see.
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ nginx_port }}{{ app_context_path }}/actuator/info"
+        return_content: true
+      register: info
+      changed_when: false
+
+    - name: Report the provisioned service
+      ansible.builtin.debug:
+        msg:
+          - "Health      : {{ health.json.status }}"
+          - "Environment : {{ info.json.app.environment }}"
+          - "Release     : {{ app_version }}"
+          - "URL         : http://{{ ansible_host }}:{{ nginx_port }}{{ app_context_path }}"

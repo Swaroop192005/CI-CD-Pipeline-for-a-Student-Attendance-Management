@@ -1,0 +1,63 @@
+Stage 13 - provisioned node, verified
+Captured: 2026-10-05T08:44:15Z
+
+Everything below is what the playbook created. The node image ships
+only Ubuntu, sshd, python3 and systemd.
+
+== PACKAGES ==
+  curl                             7.81.0-1ubuntu1.29
+  nginx                            1.18.0-6ubuntu14.21
+  openjdk-21-jre-headless:amd64    21.0.12.1+1-1~22.04.4
+
+== USER AND GROUP ==
+  attendance:x:1501:1501::/opt/attendance:/usr/sbin/nologin
+  attendance:x:1501:
+
+== DIRECTORIES ==
+  drwxr-x--- root         attendance   /etc/attendance
+  drwxr-xr-x attendance   attendance   /opt/attendance
+  drwxr-xr-x attendance   attendance   /opt/attendance/releases
+  drwxr-x--- attendance   attendance   /var/lib/attendance
+  drwxr-x--- attendance   attendance   /var/log/attendance
+
+== FILES ==
+  -rw-r----- root   attendance /etc/attendance/attendance.env
+  -rw-r--r-- root   root   /etc/logrotate.d/attendance
+  -rw-r--r-- root   root   /etc/nginx/sites-available/attendance.conf
+  -rw-r--r-- root   root   /etc/systemd/system/attendance.service
+
+== PORTS ==
+  0.0.0.0:8080 users:(("java",pid=5330,fd=10))
+  127.0.0.53%lo:53 users:(("systemd-resolve",pid=38,fd=14))
+  0.0.0.0:80 users:(("nginx",pid=3020,fd=8),("nginx",pid=3019,fd=8),("nginx",pid=3018,fd=8),("nginx",pid=3017,fd=8),("nginx",pid=2946,fd=8))
+  0.0.0.0:22 users:(("sshd",pid=53,fd=3))
+
+== SERVICES ==
+  attendance     enabled=enabled   active=active
+  nginx          enabled=enabled   active=active
+  ssh            enabled=enabled   active=active
+
+== LIVE RELEASE ==
+  current -> /opt/attendance/releases/1.0.1
+  APP_VERSION=1.0.1
+
+== SERVICE ENVIRONMENT (rendered from the template) ==
+  # Managed by Ansible - changes here are overwritten on the next run.
+  #
+  # Every setting the application reads, in one place. The image and the WAR
+  # are identical across environments; this file is what makes an environment
+  # what it is (SRS NFR-08).
+  
+  SERVER_PORT=8080
+  SERVER_SERVLET_CONTEXT_PATH=/attendance
+  
+  SPRING_DATASOURCE_URL=jdbc:h2:file:/var/lib/attendance/attendance;DB_CLOSE_ON_EXIT=FALSE
+  
+  ATTENDANCE_ENVIRONMENT=production
+  ATTENDANCE_ELIGIBILITY_THRESHOLD=75
+  ATTENDANCE_SEED_DATA=true
+  
+  JAVA_OPTS=-XX:MaxRAMPercentage=70.0 -XX:+UseSerialGC
+  
+  # Recorded so that `cat` on this file answers which release is live.
+  APP_VERSION=1.0.1

@@ -1,0 +1,48 @@
+Stage 8 - parameterised environment setting, proven by two live deploys
+Captured: 2026-10-05T07:38:36Z
+
+The parameter is not merely accepted by the job. The pipeline's
+'Verify deployment' stage asserts that the running application
+reports the environment that was requested and fails the build if it
+does not - a deploy that is healthy but configured for the wrong
+environment is exactly what that check exists to catch.
+
+== Build #5 - DEPLOY_ENVIRONMENT=staging, APP_PORT=8090 ==
+  Deployment target container: attendance-tomcat-staging
+  Deploying 1.0.5-3b4a92f to Tomcat as 'staging' on port 8090
+  Health check passed after 8 attempt(s)
+  Deployed application reports environment: 'staging'
+  Parameter verified: requested 'staging', deployed 'staging'
+  Deployed application URL: http://localhost:8090/attendance
+
+== Build #6 - DEPLOY_ENVIRONMENT=production, APP_PORT=8091 ==
+  Deployment target container: attendance-tomcat-production
+  Deploying 1.0.6-3b4a92f to Tomcat as 'production' on port 8091
+  Health check passed after 6 attempt(s)
+  Deployed application reports environment: 'production'
+  Parameter verified: requested 'production', deployed 'production'
+  Deployed application URL: http://localhost:8091/attendance
+
+== Both deployments running at once, each with its own label ==
+attendance-tomcat-production  tomcat:10.1-jdk21-temurin  0.0.0.0:8091->8080/tcp  Up 39 seconds
+attendance-tomcat-staging  tomcat:10.1-jdk21-temurin  0.0.0.0:8090->8080/tcp  Up 2 minutes
+
+  GET :8090/attendance/actuator/info   {"app":{"name":"Student Attendance Management Portal","environment":"staging"}}
+  GET :8091/attendance/actuator/info   {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+  GET :8090/attendance/actuator/health {"status":"UP"}
+  GET :8091/attendance/actuator/health {"status":"UP"}
+
+== Stage timings, build #5 ==
+  Declarative: Checkout SCM   SUCCESS       654 ms
+  Checkout                    SUCCESS      1109 ms
+  Build                       SUCCESS      4051 ms
+  Unit test                   SUCCESS     24105 ms
+  Package                     SUCCESS      5365 ms
+  Integration test            SUCCESS     15193 ms
+  Deploy to Tomcat            SUCCESS      6086 ms
+  Verify deployment           SUCCESS     22463 ms
+  Declarative: Post Actions   SUCCESS       293 ms
+  TOTAL                       SUCCESS     80596 ms
+
+== Archived artefact from the pipeline ==
+  attendance.war -> HTTP 200, 63815182 bytes

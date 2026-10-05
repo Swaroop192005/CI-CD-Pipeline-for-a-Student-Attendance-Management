@@ -1,0 +1,14 @@
+{
+    "repositories": [
+        "attendance-portal"
+    ]
+}
+{
+    "name": "attendance-portal",
+    "tags": [
+        "latest",
+        "1.0.0",
+        "1.0.14-c5dcba3",
+        "1.0.13-c5dcba3"
+    ]
+}

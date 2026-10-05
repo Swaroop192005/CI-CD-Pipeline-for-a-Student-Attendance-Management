@@ -1,0 +1,111 @@
+
+PLAY [Provision the attendance application server] *****************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [attendance-node]
+
+TASK [Report what is about to be provisioned] **********************************
+ok: [attendance-node] => {
+    "msg": "Provisioning attendance-node (Ubuntu 22.04) with attendance 1.0.0 as 'production'"
+}
+
+TASK [Ensure apt can reach its mirrors through the lab proxy] ******************
+ok: [attendance-node]
+
+TASK [Refresh the apt cache] ***************************************************
+ok: [attendance-node]
+
+TASK [common : Ensure the service group exists] ********************************
+ok: [attendance-node]
+
+TASK [common : Ensure the service account exists] ******************************
+ok: [attendance-node]
+
+TASK [common : Ensure the directory layout exists] *****************************
+ok: [attendance-node] => (item=/opt/attendance)
+ok: [attendance-node] => (item=/opt/attendance/releases)
+ok: [attendance-node] => (item=/var/lib/attendance)
+ok: [attendance-node] => (item=/var/log/attendance)
+ok: [attendance-node] => (item=/etc/attendance)
+
+TASK [common : Ensure the operator utilities are installed] ********************
+ok: [attendance-node]
+
+TASK [common : Ensure log rotation is configured] ******************************
+ok: [attendance-node]
+
+TASK [java : Ensure the Java runtime is installed] *****************************
+ok: [attendance-node]
+
+TASK [java : Record the installed Java version] ********************************
+ok: [attendance-node]
+
+TASK [java : Report the Java runtime in use] ***********************************
+ok: [attendance-node] => {
+    "msg": "openjdk version \"21.0.12.1\" 2026-08-18"
+}
+
+TASK [attendance_app : Check whether this release is already present] **********
+ok: [attendance-node]
+
+TASK [attendance_app : Create the release directory] ***************************
+ok: [attendance-node]
+
+TASK [attendance_app : Write the service environment file] *********************
+ok: [attendance-node]
+
+TASK [attendance_app : Install the systemd unit] *******************************
+ok: [attendance-node]
+
+TASK [attendance_app : Point `current` at this release] ************************
+ok: [attendance-node]
+
+TASK [attendance_app : Enable and start the service] ***************************
+ok: [attendance-node]
+
+TASK [attendance_app : Prune old releases] *************************************
+ok: [attendance-node]
+
+TASK [nginx : Ensure nginx is installed] ***************************************
+ok: [attendance-node]
+
+TASK [nginx : Remove the distribution's default site] **************************
+ok: [attendance-node]
+
+TASK [nginx : Install the attendance site configuration] ***********************
+ok: [attendance-node]
+
+TASK [nginx : Enable the attendance site] **************************************
+ok: [attendance-node]
+
+TASK [nginx : Validate the nginx configuration] ********************************
+ok: [attendance-node]
+
+TASK [nginx : Enable and start nginx] ******************************************
+ok: [attendance-node]
+
+TASK [Wait for the application to answer its health endpoint] ******************
+ok: [attendance-node]
+
+TASK [Confirm the health endpoint reports UP] **********************************
+ok: [attendance-node] => {
+    "changed": false,
+    "msg": "Health check passed: {'status': 'UP'}"
+}
+
+TASK [Confirm the deployed release is the one requested] ***********************
+ok: [attendance-node]
+
+TASK [Report the provisioned service] ******************************************
+ok: [attendance-node] => {
+    "msg": [
+        "Health      : UP",
+        "Environment : production",
+        "Release     : 1.0.0",
+        "URL         : http://127.0.0.1:80/attendance"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+attendance-node            : ok=29   changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+

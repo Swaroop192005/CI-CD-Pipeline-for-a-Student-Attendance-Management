@@ -1,0 +1,103 @@
+Stage 14 - idempotency, health check and rollback
+Captured: 2026-10-05T08:43:52Z
+
+================================================================
+IDEMPOTENCY
+================================================================
+
+  A playbook that reports changes on every run gives an operator no
+  way to tell real drift from the usual noise, so they stop reading
+  the recap - and then miss the run that mattered.
+
+  Run 1 - clean node, everything to do:
+    attendance-node            : ok=33   changed=16   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+  Run 2 - same playbook, same node, nothing to do:
+    attendance-node            : ok=29   changed=0    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+
+  changed=0 on the second run. Every task is written to converge on
+  a state rather than to perform an action: the artefact is copied
+  only when that release is absent, templates are compared before
+  being written, and the service is restarted only by a handler that
+  something actually notified.
+
+================================================================
+HEALTH CHECK
+================================================================
+
+  Three things are checked, because any one alone can be true while
+  the service is unusable:
+    - the systemd unit is active
+    - the application answers through nginx, on the path a user takes
+    - the release that is live is the one that is configured
+
+      "msg": [
+          "Unit        : active",
+          "Health      : UP",
+          "Live release: 1.0.1",
+          "Configured  : 1.0.1"
+      ]
+
+  From outside the node:
+    GET :8200/attendance/actuator/health -> {"status":"UP"}
+    GET :8200/attendance/actuator/info   -> {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+
+================================================================
+ROLLBACK - driven by a real failure, not a simulated one
+================================================================
+
+  A truncated artefact was deployed as release 1.0.2, which is what
+  a bad build or an interrupted transfer actually produces.
+
+  1. The deployment was REFUSED by its own health check:
+
+     [ERROR]: Task failed: Module failed: Status code was 502 and not [200]: HTTP Error 502: Bad Gateway
+     attendance-node            : ok=27   changed=5    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+
+     The node at that moment:
+       systemctl is-active attendance  -> activating (crash-looping)
+       readlink -f /opt/attendance/current -> /opt/attendance/releases/1.0.2
+       application log -> Error: Invalid or corrupt jarfile
+       health via nginx -> HTTP 502
+
+  2. Rollback:
+
+            "Live now  : 1.0.2",
+            "Available : 1.0.2, 1.0.1, 1.0.0"
+        "msg": "Rolling back from 1.0.2 to 1.0.1"
+            "Rolled back : 1.0.2 -> 1.0.1",
+            "Health      : UP"
+
+     attendance-node            : ok=15   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+  3. Verified after recovery:
+        "msg": [
+            "Unit        : active",
+            "Health      : UP",
+            "Live release: 1.0.1",
+            "Configured  : 1.0.1"
+        ]
+
+  Rollback is repointing a symlink and restarting, because the
+  release directories are kept on the node. A rollback that had to
+  re-fetch an artefact would depend on the registry, the network and
+  the build that produced it still existing - which are precisely
+  the things that may be broken at the moment one is needed.
+
+  The playbook also refuses safely. When the template path was wrong
+  on the first attempt it failed BEFORE touching the symlink, so the
+  node was left exactly as it was rather than half rolled back.
+
+================================================================
+RELEASES ON THE NODE
+================================================================
+  ls -l /opt/attendance/releases:
+    1.0.0
+    1.0.1
+    1.0.2
+
+  current -> /opt/attendance/releases/1.0.1
+
+  systemctl status:
+    active
+    active

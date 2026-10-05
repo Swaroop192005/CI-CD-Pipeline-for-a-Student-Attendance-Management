@@ -1,0 +1,25 @@
+# Local Docker registry for the project.
+#
+# No managed container registry is reachable from this lab (recorded in
+# docs/00-environment-prerequisites.md, limitation L3), so the pipeline
+# publishes to a registry of its own on port 5000.
+#
+# The registry's storage is a named volume, so pushed images survive a
+# restart of the registry itself - which matters for Stage 14, where
+# rollback means pulling a tag that was pushed by an earlier build.
+
+services:
+  registry:
+    image: registry:2
+    container_name: attendance-registry
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      REGISTRY_STORAGE_DELETE_ENABLED: "true"
+      REGISTRY_HTTP_ADDR: "0.0.0.0:5000"
+    volumes:
+      - registry_data:/var/lib/registry
+
+volumes:
+  registry_data:

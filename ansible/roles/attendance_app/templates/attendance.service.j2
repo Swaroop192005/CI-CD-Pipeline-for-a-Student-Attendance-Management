@@ -1,0 +1,40 @@
+# Managed by Ansible - changes here are overwritten on the next run.
+[Unit]
+Description=Student Attendance Management Portal
+Documentation=https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ app_group }}
+EnvironmentFile={{ app_config_dir }}/attendance.env
+
+# Runs from the `current` symlink, not from a version directory, so a
+# rollback is a symlink change plus a restart rather than a unit rewrite.
+WorkingDirectory={{ app_data_dir }}
+ExecStart=/usr/bin/java $JAVA_OPTS -jar {{ app_current_link }}/attendance.war
+
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+
+# Give the JVM time to shut down cleanly before systemd escalates to
+# SIGKILL; a forced kill mid-write is how an H2 file gets corrupted.
+TimeoutStopSec=30
+KillSignal=SIGTERM
+
+StandardOutput=append:{{ app_log_dir }}/attendance.log
+StandardError=append:{{ app_log_dir }}/attendance.log
+
+# Hardening. The service needs to write to its data and log directories
+# and nowhere else.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths={{ app_data_dir }} {{ app_log_dir }}
+
+[Install]
+WantedBy=multi-user.target

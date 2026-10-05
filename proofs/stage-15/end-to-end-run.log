@@ -1,0 +1,127 @@
+========================================================================
+ STAGE 15 - COMPLETE DEVOPS WORKFLOW, ONE COMMIT END TO END
+ Student Attendance Management Portal
+ Captured: 2026-10-05T08:54:51Z
+========================================================================
+
+  Commit  : 34dc877  docs(readme): record that the fifteen project tasks are complete
+  Version : 1.0.17-34dc877
+
+------------------------------------------------------------------------
+ 1. GIT - the commit that starts the chain
+------------------------------------------------------------------------
+  34dc877f5385c4bcf428206c858402ce41f57de3
+  Swaroop Naik <naikswaroop1910@gmail.com>
+  2026-10-05 12:00:00 +0530
+  docs(readme): record that the fifteen project tasks are complete
+
+------------------------------------------------------------------------
+ 2. JENKINS - every stage of the pipeline
+------------------------------------------------------------------------
+  Declarative: Checkout SCM     SUCCESS        469 ms
+  Checkout                      SUCCESS       1099 ms
+  Build                         SUCCESS       5200 ms
+  Unit test                     SUCCESS      24336 ms
+  Package                       SUCCESS       6396 ms
+  Integration test              SUCCESS      13081 ms
+  Quality gate: Selenium        SUCCESS      79547 ms
+  Build and publish image       SUCCESS      11064 ms
+  Deploy container              SUCCESS      10318 ms
+  Deploy to Tomcat              SUCCESS       6060 ms
+  Verify deployment             SUCCESS      19307 ms
+  Declarative: Post Actions     SUCCESS        277 ms
+  TOTAL                         SUCCESS     178349 ms
+
+  Triggered from commit 34dc877 on develop.
+
+------------------------------------------------------------------------
+ 3. TESTS - unit, integration and browser, in one report
+------------------------------------------------------------------------
+  passed  : 100
+  failed  : 0
+  skipped : 0
+  duration: 87.4 s
+
+  73 unit and slice tests + 7 integration tests + 20 Selenium journeys.
+
+------------------------------------------------------------------------
+ 4. SELENIUM QUALITY GATE
+------------------------------------------------------------------------
+  Application under test and browser node are both ready.
+  Selenium quality gate passed.
+
+  The gate runs the journeys against a throwaway instance of the
+  artefact just packaged - the same WAR that is deployed if it passes.
+
+------------------------------------------------------------------------
+ 5. DOCKER IMAGE AND REGISTRY
+------------------------------------------------------------------------
+
+  Published by the pipeline:
+    localhost:5000/attendance-portal:1.0.17-34dc877
+
+  Registry catalogue, read back from the registry itself:
+    {
+        "name": "attendance-portal",
+        "tags": [
+            "latest",
+            "1.0.0",
+            "1.0.17-34dc877",
+            "1.0.14-c5dcba3",
+            "1.0.16-34dc877",
+            "1.0.15-48fb3df",
+            "1.0.13-c5dcba3"
+        ]
+    }
+
+------------------------------------------------------------------------
+ 6. CONTAINER DEPLOYMENT - pulled from the registry
+------------------------------------------------------------------------
+  + echo Deploying localhost:5000/attendance-portal:1.0.17-34dc877 as attendance-app-staging on port 8100
+  Deploying localhost:5000/attendance-portal:1.0.17-34dc877 as attendance-app-staging on port 8100
+  1.0.17-34dc877: Pulling from attendance-portal
+  Digest: sha256:075734518b8c10b356fce9f43955a5f0637ae919c8aebbab2e58dddb9a5cf6af
+  + echo Container healthy after 4 attempt(s)
+  Container healthy after 4 attempt(s)
+  + echo Containerised application URL: http://localhost:8100/attendance
+  Containerised application URL: http://localhost:8100/attendance
+
+attendance-app-staging  localhost:5000/attendance-portal:1.0.17-34dc877  Up 2 minutes (healthy)
+attendance-app-production  localhost:5000/attendance-portal:1.0.16-34dc877  Up 5 minutes (healthy)
+
+------------------------------------------------------------------------
+ 7. TOMCAT DEPLOYMENT - the same artefact, the other mode
+------------------------------------------------------------------------
+  Deploying 1.0.17-34dc877 to Tomcat as 'staging' on port 8090
+  Parameter verified: requested 'staging', deployed 'staging'
+  Deployed application URL: http://localhost:8090/attendance
+
+attendance-tomcat-staging  tomcat:10.1-jdk21-temurin  Up About a minute
+attendance-tomcat-production  tomcat:10.1-jdk21-temurin  Up 4 minutes
+
+------------------------------------------------------------------------
+ 8. ANSIBLE PROVISIONING - the same artefact onto a managed node
+------------------------------------------------------------------------
+  attendance-node            : ok=31   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+      "msg": [
+          "Health      : UP",
+          "Environment : production",
+          "Release     : 1.0.17-34dc877",
+          "URL         : http://127.0.0.1:80/attendance"
+      ]
+
+------------------------------------------------------------------------
+ 9. HEALTH CHECKS - every deployment target, right now
+------------------------------------------------------------------------
+  Tomcat     :8091  {"status":"UP"}
+  Container  :8101  {"status":"UP"}
+  Ansible node :80  {"status":"UP"}
+
+  Tomcat     info   {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+  Container  info   {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+  Ansible    info   {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+
+========================================================================
+ ONE COMMIT -> BUILD -> TEST -> GATE -> IMAGE -> REGISTRY -> DEPLOY
+ -> PROVISION -> HEALTHY, WITH NO MANUAL STEP
+========================================================================

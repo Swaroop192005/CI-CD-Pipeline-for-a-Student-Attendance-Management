@@ -1,0 +1,50 @@
+---
+# Variables for the application servers.
+#
+# Everything the Stage 13 configuration specification names is a variable
+# here, so that changing a port or a path is a one-line edit rather than a
+# search through the roles.
+
+# ---- Identity ------------------------------------------------------------
+app_name: attendance
+app_user: attendance
+app_group: attendance
+app_uid: 1501
+app_gid: 1501
+
+# ---- Directories ---------------------------------------------------------
+app_root: /opt/attendance
+app_releases_dir: "{{ app_root }}/releases"
+app_current_link: "{{ app_root }}/current"
+app_data_dir: /var/lib/attendance
+app_log_dir: /var/log/attendance
+app_config_dir: /etc/attendance
+
+# ---- Runtime -------------------------------------------------------------
+app_port: 8080
+app_context_path: /attendance
+app_environment: production
+app_eligibility_threshold: 75
+app_seed_data: true
+java_package: openjdk-21-jre-headless
+app_java_opts: "-XX:MaxRAMPercentage=70.0 -XX:+UseSerialGC"
+
+# ---- Release -------------------------------------------------------------
+# Which release to run. Stage 14's rollback is this variable pointed at the
+# previous version - the releases directory keeps both, which is what makes
+# rollback a configuration change rather than a rebuild.
+app_version: "1.0.0"
+app_artifact_source: "/artifacts/attendance-{{ app_version }}.war"
+
+# How many releases to keep. Enough to roll back more than once, few enough
+# not to fill the disk with 60 MB artefacts.
+app_releases_to_keep: 5
+
+# ---- Edge ----------------------------------------------------------------
+nginx_port: 80
+nginx_server_name: _
+
+# ---- Health --------------------------------------------------------------
+health_path: "{{ app_context_path }}/actuator/health"
+health_retries: 30
+health_delay: 3

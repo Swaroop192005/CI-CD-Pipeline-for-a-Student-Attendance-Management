@@ -1,0 +1,686 @@
+[2026-10-05T07:35:27.721Z] Started by user admin
+[2026-10-05T07:35:28.291Z] Obtained Jenkinsfile from git https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git
+[2026-10-05T07:35:28.465Z] [Pipeline] Start of Pipeline
+[2026-10-05T07:35:28.621Z] [Pipeline] node
+[2026-10-05T07:35:28.637Z] Running on Jenkins in /var/jenkins_home/jobs/attendance-portal-pipeline/workspace
+[2026-10-05T07:35:28.648Z] [Pipeline] {
+[2026-10-05T07:35:28.667Z] [Pipeline] stage
+[2026-10-05T07:35:28.671Z] [Pipeline] { (Declarative: Checkout SCM)
+[2026-10-05T07:35:28.689Z] [Pipeline] checkout
+[2026-10-05T07:35:28.693Z] Selected Git installation does not exist. Using Default
+[2026-10-05T07:35:28.693Z] The recommended git tool is: NONE
+[2026-10-05T07:35:28.693Z] No credentials specified
+[2026-10-05T07:35:28.693Z]  > git rev-parse --resolve-git-dir /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/.git # timeout=10
+[2026-10-05T07:35:28.701Z] Fetching changes from the remote Git repository
+[2026-10-05T07:35:28.703Z]  > git config remote.origin.url https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git # timeout=10
+[2026-10-05T07:35:28.710Z] Fetching upstream changes from https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git
+[2026-10-05T07:35:28.710Z]  > git --version # timeout=10
+[2026-10-05T07:35:28.714Z]  > git --version # 'git version 2.47.3'
+[2026-10-05T07:35:28.714Z]  > git fetch --tags --force --progress -- https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+[2026-10-05T07:35:29.262Z]  > git rev-parse refs/remotes/origin/develop^{commit} # timeout=10
+[2026-10-05T07:35:29.268Z] Checking out Revision 3b4a92f73fc5e58c3f3f865f7b109502f5fd5253 (refs/remotes/origin/develop)
+[2026-10-05T07:35:29.268Z]  > git config core.sparsecheckout # timeout=10
+[2026-10-05T07:35:29.273Z]  > git checkout -f 3b4a92f73fc5e58c3f3f865f7b109502f5fd5253 # timeout=10
+[2026-10-05T07:35:29.283Z] Commit message: "Merge branch 'chore/pipeline-per-environment-target' into develop"
+[2026-10-05T07:35:29.283Z]  > git rev-list --no-walk 91b45cbb9835f4924c46ae7d947387b3b06e9d7a # timeout=10
+[2026-10-05T07:35:29.304Z] [Pipeline] }
+[2026-10-05T07:35:29.322Z] [Pipeline] // stage
+[2026-10-05T07:35:29.336Z] [Pipeline] withEnv
+[2026-10-05T07:35:29.338Z] [Pipeline] {
+[2026-10-05T07:35:29.360Z] [Pipeline] withEnv
+[2026-10-05T07:35:29.362Z] [Pipeline] {
+[2026-10-05T07:35:29.376Z] [Pipeline] timestamps
+[2026-10-05T07:35:29.376Z] The timestamps step is unnecessary when timestamps are enabled for all Pipeline builds.
+[2026-10-05T07:35:29.378Z] [Pipeline] {
+[2026-10-05T07:35:29.392Z] [Pipeline] timeout
+[2026-10-05T07:35:29.392Z] Timeout set to expire in 40 min
+[2026-10-05T07:35:29.394Z] [Pipeline] {
+[2026-10-05T07:35:29.412Z] [Pipeline] stage
+[2026-10-05T07:35:29.413Z] [Pipeline] { (Checkout)
+[2026-10-05T07:35:29.460Z] [Pipeline] checkout
+[2026-10-05T07:35:29.464Z] Selected Git installation does not exist. Using Default
+[2026-10-05T07:35:29.464Z] The recommended git tool is: NONE
+[2026-10-05T07:35:29.464Z] No credentials specified
+[2026-10-05T07:35:29.464Z]  > git rev-parse --resolve-git-dir /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/.git # timeout=10
+[2026-10-05T07:35:29.469Z] Fetching changes from the remote Git repository
+[2026-10-05T07:35:29.472Z]  > git config remote.origin.url https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git # timeout=10
+[2026-10-05T07:35:29.478Z] Fetching upstream changes from https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git
+[2026-10-05T07:35:29.479Z]  > git --version # timeout=10
+[2026-10-05T07:35:29.484Z]  > git --version # 'git version 2.47.3'
+[2026-10-05T07:35:29.484Z]  > git fetch --tags --force --progress -- https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git +refs/heads/*:refs/remotes/origin/* # timeout=10
+[2026-10-05T07:35:29.842Z]  > git rev-parse refs/remotes/origin/develop^{commit} # timeout=10
+[2026-10-05T07:35:29.848Z] Checking out Revision 3b4a92f73fc5e58c3f3f865f7b109502f5fd5253 (refs/remotes/origin/develop)
+[2026-10-05T07:35:29.848Z]  > git config core.sparsecheckout # timeout=10
+[2026-10-05T07:35:29.854Z]  > git checkout -f 3b4a92f73fc5e58c3f3f865f7b109502f5fd5253 # timeout=10
+[2026-10-05T07:35:29.867Z] Commit message: "Merge branch 'chore/pipeline-per-environment-target' into develop"
+[2026-10-05T07:35:29.886Z] [Pipeline] script
+[2026-10-05T07:35:29.891Z] [Pipeline] {
+[2026-10-05T07:35:29.907Z] [Pipeline] sh
+[2026-10-05T07:35:30.165Z] + git rev-parse --short HEAD
+[2026-10-05T07:35:30.182Z] [Pipeline] sh
+[2026-10-05T07:35:30.440Z] + git rev-parse --abbrev-ref HEAD
+[2026-10-05T07:35:30.477Z] [Pipeline] echo
+[2026-10-05T07:35:30.479Z] Building 1.0.5-3b4a92f from HEAD (3b4a92f)
+[2026-10-05T07:35:30.484Z] [Pipeline] echo
+[2026-10-05T07:35:30.486Z] Deployment target container: attendance-tomcat-staging
+[2026-10-05T07:35:30.487Z] [Pipeline] }
+[2026-10-05T07:35:30.501Z] [Pipeline] // script
+[2026-10-05T07:35:30.510Z] [Pipeline] }
+[2026-10-05T07:35:30.523Z] [Pipeline] // stage
+[2026-10-05T07:35:30.539Z] [Pipeline] stage
+[2026-10-05T07:35:30.542Z] [Pipeline] { (Build)
+[2026-10-05T07:35:30.568Z] [Pipeline] sh
+[2026-10-05T07:35:30.826Z] + /opt/maven/bin/mvn -B -DskipTests clean compile
+[2026-10-05T07:35:32.170Z] [INFO] Scanning for projects...
+[2026-10-05T07:35:32.721Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:32.721Z] [INFO] Reactor Build Order:
+[2026-10-05T07:35:32.721Z] [INFO] 
+[2026-10-05T07:35:32.721Z] [INFO] Student Attendance Management Portal                               [pom]
+[2026-10-05T07:35:32.721Z] [INFO] Attendance Portal :: Application                                   [war]
+[2026-10-05T07:35:32.721Z] [INFO] 
+[2026-10-05T07:35:32.721Z] [INFO] ----------< com.college.attendance:attendance-portal-parent >-----------
+[2026-10-05T07:35:32.721Z] [INFO] Building Student Attendance Management Portal 1.0.0-SNAPSHOT       [1/2]
+[2026-10-05T07:35:32.721Z] [INFO]   from pom.xml
+[2026-10-05T07:35:32.721Z] [INFO] --------------------------------[ pom ]---------------------------------
+[2026-10-05T07:35:32.721Z] [INFO] 
+[2026-10-05T07:35:32.721Z] [INFO] --- clean:3.4.1:clean (default-clean) @ attendance-portal-parent ---
+[2026-10-05T07:35:32.721Z] [INFO] 
+[2026-10-05T07:35:32.721Z] [INFO] ---------------< com.college.attendance:attendance-app >----------------
+[2026-10-05T07:35:32.721Z] [INFO] Building Attendance Portal :: Application 1.0.0-SNAPSHOT           [2/2]
+[2026-10-05T07:35:32.721Z] [INFO]   from app/pom.xml
+[2026-10-05T07:35:32.721Z] [INFO] --------------------------------[ war ]---------------------------------
+[2026-10-05T07:35:32.972Z] [INFO] 
+[2026-10-05T07:35:32.972Z] [INFO] --- clean:3.4.1:clean (default-clean) @ attendance-app ---
+[2026-10-05T07:35:32.972Z] [INFO] 
+[2026-10-05T07:35:32.972Z] [INFO] --- jacoco:0.8.13:prepare-agent (prepare-agent) @ attendance-app ---
+[2026-10-05T07:35:32.972Z] [INFO] argLine set to -javaagent:/root/.m2/repository/org/jacoco/org.jacoco.agent/0.8.13/org.jacoco.agent-0.8.13-runtime.jar=destfile=/var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app/target/jacoco.exec
+[2026-10-05T07:35:32.972Z] [INFO] 
+[2026-10-05T07:35:32.972Z] [INFO] --- resources:3.3.1:resources (default-resources) @ attendance-app ---
+[2026-10-05T07:35:33.222Z] [INFO] Copying 1 resource from src/main/resources to target/classes
+[2026-10-05T07:35:33.222Z] [INFO] Copying 10 resources from src/main/resources to target/classes
+[2026-10-05T07:35:33.222Z] [INFO] 
+[2026-10-05T07:35:33.222Z] [INFO] --- compiler:3.14.1:compile (default-compile) @ attendance-app ---
+[2026-10-05T07:35:33.222Z] [INFO] Recompiling the module because of changed source code.
+[2026-10-05T07:35:33.222Z] [INFO] Compiling 39 source files with javac [debug parameters release 21] to target/classes
+[2026-10-05T07:35:34.566Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:34.566Z] [INFO] Reactor Summary for Student Attendance Management Portal 1.0.0-SNAPSHOT:
+[2026-10-05T07:35:34.566Z] [INFO] 
+[2026-10-05T07:35:34.566Z] [INFO] Student Attendance Management Portal ............... SUCCESS [  0.090 s]
+[2026-10-05T07:35:34.566Z] [INFO] Attendance Portal :: Application ................... SUCCESS [  1.897 s]
+[2026-10-05T07:35:34.566Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:34.566Z] [INFO] BUILD SUCCESS
+[2026-10-05T07:35:34.566Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:34.566Z] [INFO] Total time:  2.291 s
+[2026-10-05T07:35:34.566Z] [INFO] Finished at: 2026-10-05T07:35:34Z
+[2026-10-05T07:35:34.566Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:34.575Z] [Pipeline] }
+[2026-10-05T07:35:34.594Z] [Pipeline] // stage
+[2026-10-05T07:35:34.607Z] [Pipeline] stage
+[2026-10-05T07:35:34.610Z] [Pipeline] { (Unit test)
+[2026-10-05T07:35:34.636Z] [Pipeline] sh
+[2026-10-05T07:35:34.897Z] + /opt/maven/bin/mvn -B test
+[2026-10-05T07:35:36.241Z] [INFO] Scanning for projects...
+[2026-10-05T07:35:36.492Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:36.492Z] [INFO] Reactor Build Order:
+[2026-10-05T07:35:36.492Z] [INFO] 
+[2026-10-05T07:35:36.492Z] [INFO] Student Attendance Management Portal                               [pom]
+[2026-10-05T07:35:36.492Z] [INFO] Attendance Portal :: Application                                   [war]
+[2026-10-05T07:35:36.492Z] [INFO] 
+[2026-10-05T07:35:36.492Z] [INFO] ----------< com.college.attendance:attendance-portal-parent >-----------
+[2026-10-05T07:35:36.492Z] [INFO] Building Student Attendance Management Portal 1.0.0-SNAPSHOT       [1/2]
+[2026-10-05T07:35:36.492Z] [INFO]   from pom.xml
+[2026-10-05T07:35:36.492Z] [INFO] --------------------------------[ pom ]---------------------------------
+[2026-10-05T07:35:36.492Z] [INFO] 
+[2026-10-05T07:35:36.492Z] [INFO] ---------------< com.college.attendance:attendance-app >----------------
+[2026-10-05T07:35:36.492Z] [INFO] Building Attendance Portal :: Application 1.0.0-SNAPSHOT           [2/2]
+[2026-10-05T07:35:36.492Z] [INFO]   from app/pom.xml
+[2026-10-05T07:35:36.492Z] [INFO] --------------------------------[ war ]---------------------------------
+[2026-10-05T07:35:37.043Z] [INFO] 
+[2026-10-05T07:35:37.043Z] [INFO] --- jacoco:0.8.13:prepare-agent (prepare-agent) @ attendance-app ---
+[2026-10-05T07:35:37.043Z] [INFO] argLine set to -javaagent:/root/.m2/repository/org/jacoco/org.jacoco.agent/0.8.13/org.jacoco.agent-0.8.13-runtime.jar=destfile=/var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app/target/jacoco.exec
+[2026-10-05T07:35:37.043Z] [INFO] 
+[2026-10-05T07:35:37.043Z] [INFO] --- resources:3.3.1:resources (default-resources) @ attendance-app ---
+[2026-10-05T07:35:37.294Z] [INFO] Copying 1 resource from src/main/resources to target/classes
+[2026-10-05T07:35:37.294Z] [INFO] Copying 10 resources from src/main/resources to target/classes
+[2026-10-05T07:35:37.294Z] [INFO] 
+[2026-10-05T07:35:37.294Z] [INFO] --- compiler:3.14.1:compile (default-compile) @ attendance-app ---
+[2026-10-05T07:35:37.294Z] [INFO] Nothing to compile - all classes are up to date.
+[2026-10-05T07:35:37.294Z] [INFO] 
+[2026-10-05T07:35:37.294Z] [INFO] --- resources:3.3.1:testResources (default-testResources) @ attendance-app ---
+[2026-10-05T07:35:37.294Z] [INFO] Copying 1 resource from src/test/resources to target/test-classes
+[2026-10-05T07:35:37.294Z] [INFO] 
+[2026-10-05T07:35:37.294Z] [INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ attendance-app ---
+[2026-10-05T07:35:37.294Z] [INFO] Recompiling the module because of changed source code.
+[2026-10-05T07:35:37.294Z] [INFO] Compiling 10 source files with javac [debug parameters release 21] to target/test-classes
+[2026-10-05T07:35:39.158Z] [INFO] 
+[2026-10-05T07:35:39.158Z] [INFO] --- surefire:3.5.6:test (default-test) @ attendance-app ---
+[2026-10-05T07:35:39.158Z] [INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[2026-10-05T07:35:39.158Z] [INFO] 
+[2026-10-05T07:35:39.158Z] [INFO] -------------------------------------------------------
+[2026-10-05T07:35:39.158Z] [INFO]  T E S T S
+[2026-10-05T07:35:39.158Z] [INFO] -------------------------------------------------------
+[2026-10-05T07:35:41.024Z] [INFO] Running com.college.attendance.config.CurrentUserTest
+[2026-10-05T07:35:41.274Z] 07:35:41.090 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.college.attendance.config.CurrentUserTest]: CurrentUserTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:41.525Z] 07:35:41.410 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.config.CurrentUserTest
+[2026-10-05T07:35:42.441Z] 
+[2026-10-05T07:35:42.441Z]   .   ____          _            __ _ _
+[2026-10-05T07:35:42.441Z]  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+[2026-10-05T07:35:42.441Z] ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+[2026-10-05T07:35:42.441Z]  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+[2026-10-05T07:35:42.441Z]   '  |____| .__|_| |_|_| |_\__, | / / / /
+[2026-10-05T07:35:42.441Z]  =========|_|==============|___/=/_/_/_/
+[2026-10-05T07:35:42.441Z] 
+[2026-10-05T07:35:42.441Z]  :: Spring Boot ::               (v3.5.16)
+[2026-10-05T07:35:42.441Z] 
+[2026-10-05T07:35:42.691Z] 2026-10-05T07:35:42.454Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.config.CurrentUserTest    : Starting CurrentUserTest using Java 21.0.12.1 with PID 4349 (started by root in /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app)
+[2026-10-05T07:35:42.692Z] 2026-10-05T07:35:42.456Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.config.CurrentUserTest    : The following 1 profile is active: "test"
+[2026-10-05T07:35:44.554Z] 2026-10-05T07:35:44.096Z  INFO 4349 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2026-10-05T07:35:44.554Z] 2026-10-05T07:35:44.215Z  INFO 4349 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 101 ms. Found 3 JPA repository interfaces.
+[2026-10-05T07:35:45.465Z] 2026-10-05T07:35:45.167Z  INFO 4349 --- [attendance-portal] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+[2026-10-05T07:35:45.465Z] 2026-10-05T07:35:45.261Z  INFO 4349 --- [attendance-portal] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.53.Final
+[2026-10-05T07:35:45.465Z] 2026-10-05T07:35:45.318Z  INFO 4349 --- [attendance-portal] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+[2026-10-05T07:35:46.016Z] 2026-10-05T07:35:45.851Z  INFO 4349 --- [attendance-portal] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+[2026-10-05T07:35:46.016Z] 2026-10-05T07:35:45.903Z  INFO 4349 --- [attendance-portal] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+[2026-10-05T07:35:46.568Z] 2026-10-05T07:35:46.329Z  INFO 4349 --- [attendance-portal] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:attendance-test user=SA
+[2026-10-05T07:35:46.568Z] 2026-10-05T07:35:46.332Z  INFO 4349 --- [attendance-portal] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+[2026-10-05T07:35:46.568Z] 2026-10-05T07:35:46.450Z  INFO 4349 --- [attendance-portal] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+[2026-10-05T07:35:46.568Z] 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+[2026-10-05T07:35:46.568Z] 	Database driver: undefined/unknown
+[2026-10-05T07:35:46.568Z] 	Database version: 2.3.232
+[2026-10-05T07:35:46.568Z] 	Autocommit mode: undefined/unknown
+[2026-10-05T07:35:46.568Z] 	Isolation level: undefined/unknown
+[2026-10-05T07:35:46.568Z] 	Minimum pool size: undefined/unknown
+[2026-10-05T07:35:46.568Z] 	Maximum pool size: undefined/unknown
+[2026-10-05T07:35:48.435Z] 2026-10-05T07:35:48.109Z  INFO 4349 --- [attendance-portal] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2026-10-05T07:35:48.435Z] 2026-10-05T07:35:48.194Z  INFO 4349 --- [attendance-portal] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2026-10-05T07:35:48.988Z] 2026-10-05T07:35:48.718Z  INFO 4349 --- [attendance-portal] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+[2026-10-05T07:35:49.539Z] 2026-10-05T07:35:49.377Z  INFO 4349 --- [attendance-portal] [           main] c.college.attendance.config.DataSeeder   : Seeding disabled (attendance.seed-data=false)
+[2026-10-05T07:35:49.790Z] 2026-10-05T07:35:49.591Z  INFO 4349 --- [attendance-portal] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name databaseUserDetailsService
+[2026-10-05T07:35:50.341Z] 2026-10-05T07:35:50.152Z  INFO 4349 --- [attendance-portal] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+[2026-10-05T07:35:51.252Z] 2026-10-05T07:35:50.940Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.config.CurrentUserTest    : Started CurrentUserTest in 9.164 seconds (process running for 11.702)
+[2026-10-05T07:35:51.252Z] Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+[2026-10-05T07:35:51.804Z] WARNING: A Java agent has been loaded dynamically (/root/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+[2026-10-05T07:35:51.804Z] WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+[2026-10-05T07:35:51.804Z] WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+[2026-10-05T07:35:51.804Z] WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[2026-10-05T07:35:52.357Z] [INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.36 s -- in com.college.attendance.config.CurrentUserTest
+[2026-10-05T07:35:52.357Z] [INFO] Running com.college.attendance.repository.AttendanceRecordRepositoryTest
+[2026-10-05T07:35:52.357Z] 2026-10-05T07:35:52.056Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.repository.AttendanceRecordRepositoryTest]: AttendanceRecordRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:52.357Z] 2026-10-05T07:35:52.083Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.repository.AttendanceRecordRepositoryTest
+[2026-10-05T07:35:52.357Z] 
+[2026-10-05T07:35:52.357Z]   .   ____          _            __ _ _
+[2026-10-05T07:35:52.357Z]  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+[2026-10-05T07:35:52.357Z] ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+[2026-10-05T07:35:52.357Z]  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+[2026-10-05T07:35:52.357Z]   '  |____| .__|_| |_|_| |_\__, | / / / /
+[2026-10-05T07:35:52.357Z]  =========|_|==============|___/=/_/_/_/
+[2026-10-05T07:35:52.357Z] 
+[2026-10-05T07:35:52.357Z]  :: Spring Boot ::               (v3.5.16)
+[2026-10-05T07:35:52.357Z] 
+[2026-10-05T07:35:52.357Z] 2026-10-05T07:35:52.128Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.r.AttendanceRecordRepositoryTest   : Starting AttendanceRecordRepositoryTest using Java 21.0.12.1 with PID 4349 (started by root in /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app)
+[2026-10-05T07:35:52.357Z] 2026-10-05T07:35:52.129Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.r.AttendanceRecordRepositoryTest   : The following 1 profile is active: "test"
+[2026-10-05T07:35:52.357Z] 2026-10-05T07:35:52.227Z  INFO 4349 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2026-10-05T07:35:52.357Z] 2026-10-05T07:35:52.239Z  INFO 4349 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 10 ms. Found 3 JPA repository interfaces.
+[2026-10-05T07:35:52.357Z] 2026-10-05T07:35:52.261Z  INFO 4349 --- [attendance-portal] [           main] beddedDataSourceBeanFactoryPostProcessor : Replacing 'dataSource' DataSource bean with embedded version
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.287Z  INFO 4349 --- [attendance-portal] [           main] o.s.j.d.e.EmbeddedDatabaseFactory        : Starting embedded database: url='jdbc:h2:mem:dad3e5dd-b7a4-4f98-b99e-0147f306259d;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false', username='sa'
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.316Z  INFO 4349 --- [attendance-portal] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.318Z  INFO 4349 --- [attendance-portal] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.325Z  INFO 4349 --- [attendance-portal] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.329Z  INFO 4349 --- [attendance-portal] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+[2026-10-05T07:35:52.608Z] 	Database JDBC URL [Connecting through datasource 'org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactory$EmbeddedDataSourceProxy@7e4a1696']
+[2026-10-05T07:35:52.608Z] 	Database driver: undefined/unknown
+[2026-10-05T07:35:52.608Z] 	Database version: 2.3.232
+[2026-10-05T07:35:52.608Z] 	Autocommit mode: undefined/unknown
+[2026-10-05T07:35:52.608Z] 	Isolation level: undefined/unknown
+[2026-10-05T07:35:52.608Z] 	Minimum pool size: undefined/unknown
+[2026-10-05T07:35:52.608Z] 	Maximum pool size: undefined/unknown
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.378Z  INFO 4349 --- [attendance-portal] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2026-10-05T07:35:52.608Z] Hibernate: drop table if exists app_user cascade 
+[2026-10-05T07:35:52.608Z] Hibernate: drop table if exists attendance_record cascade 
+[2026-10-05T07:35:52.608Z] Hibernate: drop table if exists student cascade 
+[2026-10-05T07:35:52.608Z] Hibernate: create table app_user (enabled boolean not null, id bigint generated by default as identity, linked_roll_number varchar(32), username varchar(64) not null unique, password_hash varchar(100) not null, display_name varchar(120) not null, role enum ('ADMIN','FACULTY','HOD','STUDENT') not null, primary key (id))
+[2026-10-05T07:35:52.608Z] Hibernate: create table attendance_record (period_number integer not null, session_date date not null, created_at timestamp(6) with time zone not null, id bigint generated by default as identity, reviewed_at timestamp(6) with time zone, student_id bigint not null, updated_at timestamp(6) with time zone, subject_code varchar(16) not null, marked_by varchar(64) not null, reviewed_by varchar(64), remarks varchar(500), review_comment varchar(500), attendance_status enum ('ABSENT','EXCUSED','LATE','PRESENT') not null, workflow_status enum ('APPROVED','DRAFT','REJECTED','SUBMITTED') not null, primary key (id), constraint uk_attendance_student_subject_date_period unique (student_id, subject_code, session_date, period_number))
+[2026-10-05T07:35:52.608Z] Hibernate: create table student (active boolean not null, semester integer not null check ((semester>=1) and (semester<=8)), id bigint generated by default as identity, roll_number varchar(32) not null unique, department varchar(80) not null, full_name varchar(120) not null, email varchar(160), primary key (id))
+[2026-10-05T07:35:52.608Z] Hibernate: create index idx_attendance_session_date on attendance_record (session_date)
+[2026-10-05T07:35:52.608Z] Hibernate: create index idx_attendance_workflow_status on attendance_record (workflow_status)
+[2026-10-05T07:35:52.608Z] Hibernate: create index idx_attendance_subject_code on attendance_record (subject_code)
+[2026-10-05T07:35:52.608Z] Hibernate: alter table if exists attendance_record add constraint FK9p10lf3n7tcuouo29ery5obq6 foreign key (student_id) references student
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.392Z  INFO 4349 --- [attendance-portal] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.461Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.r.AttendanceRecordRepositoryTest   : Started AttendanceRecordRepositoryTest in 0.374 seconds (process running for 13.223)
+[2026-10-05T07:35:52.608Z] Hibernate: insert into student (active,department,email,full_name,roll_number,semester,id) values (?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] Hibernate: select ar1_0.id from attendance_record ar1_0 join student s1_0 on s1_0.id=ar1_0.student_id where s1_0.roll_number=? and ar1_0.subject_code=? and ar1_0.session_date=? and ar1_0.period_number=? fetch first ? rows only
+[2026-10-05T07:35:52.608Z] Hibernate: select ar1_0.id from attendance_record ar1_0 join student s1_0 on s1_0.id=ar1_0.student_id where s1_0.roll_number=? and ar1_0.subject_code=? and ar1_0.session_date=? and ar1_0.period_number=? fetch first ? rows only
+[2026-10-05T07:35:52.608Z] Hibernate: insert into student (active,department,email,full_name,roll_number,semester,id) values (?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.548Z  WARN 4349 --- [attendance-portal] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 23505, SQLState: 23505
+[2026-10-05T07:35:52.608Z] 2026-10-05T07:35:52.549Z ERROR 4349 --- [attendance-portal] [           main] o.h.engine.jdbc.spi.SqlExceptionHelper   : Unique index or primary key violation: "PUBLIC.UK_ATTENDANCE_STUDENT_SUBJECT_DATE_PERIOD_INDEX_C ON PUBLIC.ATTENDANCE_RECORD(STUDENT_ID NULLS FIRST, SUBJECT_CODE NULLS FIRST, SESSION_DATE NULLS FIRST, PERIOD_NUMBER NULLS FIRST) VALUES ( /* key:2 */ CAST(2 AS BIGINT), 'CS501', DATE '2026-10-04', 1)"; SQL statement:
+[2026-10-05T07:35:52.608Z] insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default) [23505-232]
+[2026-10-05T07:35:52.608Z] Hibernate: insert into student (active,department,email,full_name,roll_number,semester,id) values (?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.608Z] Hibernate: select distinct ar1_0.subject_code from attendance_record ar1_0 order by ar1_0.subject_code
+[2026-10-05T07:35:52.859Z] Hibernate: insert into student (active,department,email,full_name,roll_number,semester,id) values (?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.859Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.859Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.859Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.859Z] Hibernate: select ar1_0.id,ar1_0.attendance_status,ar1_0.created_at,ar1_0.marked_by,ar1_0.period_number,ar1_0.remarks,ar1_0.review_comment,ar1_0.reviewed_at,ar1_0.reviewed_by,ar1_0.session_date,ar1_0.student_id,ar1_0.subject_code,ar1_0.updated_at,ar1_0.workflow_status from attendance_record ar1_0 order by ar1_0.session_date desc,ar1_0.period_number fetch first ? rows only
+[2026-10-05T07:35:52.859Z] Hibernate: insert into student (active,department,email,full_name,roll_number,semester,id) values (?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.859Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.859Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.859Z] Hibernate: insert into attendance_record (attendance_status,created_at,marked_by,period_number,remarks,review_comment,reviewed_at,reviewed_by,session_date,student_id,subject_code,updated_at,workflow_status,id) values (?,?,?,?,?,?,?,?,?,?,?,?,?,default)
+[2026-10-05T07:35:52.859Z] Hibernate: select ar1_0.id,ar1_0.attendance_status,ar1_0.created_at,ar1_0.marked_by,ar1_0.period_number,ar1_0.remarks,ar1_0.review_comment,ar1_0.reviewed_at,ar1_0.reviewed_by,ar1_0.session_date,ar1_0.student_id,ar1_0.subject_code,ar1_0.updated_at,ar1_0.workflow_status from attendance_record ar1_0 order by ar1_0.session_date desc,ar1_0.period_number fetch first ? rows only
+[2026-10-05T07:35:52.859Z] [INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.595 s -- in com.college.attendance.repository.AttendanceRecordRepositoryTest
+[2026-10-05T07:35:52.859Z] [INFO] Running com.college.attendance.AttendancePortalApplicationTests
+[2026-10-05T07:35:52.859Z] 2026-10-05T07:35:52.651Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.AttendancePortalApplicationTests]: AttendancePortalApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:52.859Z] 2026-10-05T07:35:52.657Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.AttendancePortalApplicationTests
+[2026-10-05T07:35:52.859Z] [INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in com.college.attendance.AttendancePortalApplicationTests
+[2026-10-05T07:35:52.859Z] [INFO] Running com.college.attendance.web.AttendanceSecurityTest
+[2026-10-05T07:35:52.859Z] 2026-10-05T07:35:52.691Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.web.AttendanceSecurityTest]: AttendanceSecurityTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:52.859Z] 2026-10-05T07:35:52.708Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.web.AttendanceSecurityTest
+[2026-10-05T07:35:52.859Z] 
+[2026-10-05T07:35:52.859Z]   .   ____          _            __ _ _
+[2026-10-05T07:35:52.859Z]  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+[2026-10-05T07:35:52.859Z] ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+[2026-10-05T07:35:52.859Z]  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+[2026-10-05T07:35:52.859Z]   '  |____| .__|_| |_|_| |_\__, | / / / /
+[2026-10-05T07:35:52.859Z]  =========|_|==============|___/=/_/_/_/
+[2026-10-05T07:35:52.859Z] 
+[2026-10-05T07:35:52.859Z]  :: Spring Boot ::               (v3.5.16)
+[2026-10-05T07:35:52.859Z] 
+[2026-10-05T07:35:52.859Z] 2026-10-05T07:35:52.767Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.web.AttendanceSecurityTest         : Starting AttendanceSecurityTest using Java 21.0.12.1 with PID 4349 (started by root in /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app)
+[2026-10-05T07:35:52.859Z] 2026-10-05T07:35:52.767Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.web.AttendanceSecurityTest         : The following 1 profile is active: "test"
+[2026-10-05T07:35:53.110Z] 2026-10-05T07:35:53.030Z  INFO 4349 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2026-10-05T07:35:53.110Z] 2026-10-05T07:35:53.038Z  INFO 4349 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 6 ms. Found 3 JPA repository interfaces.
+[2026-10-05T07:35:53.360Z] 2026-10-05T07:35:53.177Z  INFO 4349 --- [attendance-portal] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+[2026-10-05T07:35:53.360Z] 2026-10-05T07:35:53.179Z  INFO 4349 --- [attendance-portal] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+[2026-10-05T07:35:53.360Z] 2026-10-05T07:35:53.186Z  INFO 4349 --- [attendance-portal] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+[2026-10-05T07:35:53.360Z] 2026-10-05T07:35:53.186Z  INFO 4349 --- [attendance-portal] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+[2026-10-05T07:35:53.360Z] 2026-10-05T07:35:53.188Z  INFO 4349 --- [attendance-portal] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection conn19: url=jdbc:h2:mem:attendance-test user=SA
+[2026-10-05T07:35:53.360Z] 2026-10-05T07:35:53.188Z  INFO 4349 --- [attendance-portal] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+[2026-10-05T07:35:53.360Z] 2026-10-05T07:35:53.190Z  INFO 4349 --- [attendance-portal] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+[2026-10-05T07:35:53.360Z] 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-2)']
+[2026-10-05T07:35:53.360Z] 	Database driver: undefined/unknown
+[2026-10-05T07:35:53.361Z] 	Database version: 2.3.232
+[2026-10-05T07:35:53.361Z] 	Autocommit mode: undefined/unknown
+[2026-10-05T07:35:53.361Z] 	Isolation level: undefined/unknown
+[2026-10-05T07:35:53.361Z] 	Minimum pool size: undefined/unknown
+[2026-10-05T07:35:53.361Z] 	Maximum pool size: undefined/unknown
+[2026-10-05T07:35:53.361Z] 2026-10-05T07:35:53.244Z  INFO 4349 --- [attendance-portal] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2026-10-05T07:35:53.361Z] 2026-10-05T07:35:53.258Z  INFO 4349 --- [attendance-portal] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2026-10-05T07:35:53.611Z] 2026-10-05T07:35:53.341Z  INFO 4349 --- [attendance-portal] [           main] c.college.attendance.config.DataSeeder   : Seeding disabled (attendance.seed-data=false)
+[2026-10-05T07:35:53.611Z] 2026-10-05T07:35:53.403Z  INFO 4349 --- [attendance-portal] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name databaseUserDetailsService
+[2026-10-05T07:35:53.611Z] 2026-10-05T07:35:53.535Z  INFO 4349 --- [attendance-portal] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+[2026-10-05T07:35:53.862Z] 2026-10-05T07:35:53.778Z  INFO 4349 --- [attendance-portal] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+[2026-10-05T07:35:53.862Z] 2026-10-05T07:35:53.778Z  INFO 4349 --- [attendance-portal] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+[2026-10-05T07:35:53.862Z] 2026-10-05T07:35:53.780Z  INFO 4349 --- [attendance-portal] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 2 ms
+[2026-10-05T07:35:53.862Z] 2026-10-05T07:35:53.808Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.web.AttendanceSecurityTest         : Started AttendanceSecurityTest in 1.096 seconds (process running for 14.571)
+[2026-10-05T07:35:57.091Z] [INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.043 s -- in com.college.attendance.web.AttendanceSecurityTest
+[2026-10-05T07:35:57.091Z] [INFO] Running com.college.attendance.service.WorkflowServiceTest
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.733Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.WorkflowServiceTest]: WorkflowServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.739Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.WorkflowServiceTest
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.769Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 1 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.775Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 2 for 1CS21CS001 in CS501 on 2026-10-04 period 2 by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.790Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 2 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.091Z] [INFO] Running After a rejection
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.821Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.WorkflowServiceTest$AfterRejection]: AfterRejection does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.822Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.WorkflowServiceTest$AfterRejection
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.848Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 3 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.854Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 3 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.857Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 3 moved SUBMITTED -> REJECTED by hod1 (Wrong period)
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.862Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 3 moved REJECTED -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.888Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 4 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.895Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 4 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.898Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 4 moved SUBMITTED -> REJECTED by hod1 (Wrong period)
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.912Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Updated attendance record 4 by faculty1 (author remains faculty1)
+[2026-10-05T07:35:57.091Z] [INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.098 s -- in After a rejection
+[2026-10-05T07:35:57.091Z] [INFO] Running Reviewing a submitted record
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.919Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.WorkflowServiceTest$Reviewing]: Reviewing does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.921Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.WorkflowServiceTest$Reviewing
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.943Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 5 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.949Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 5 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.952Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 5 moved SUBMITTED -> APPROVED by hod1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.976Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 6 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:56.981Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 6 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:57.008Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 7 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:57.013Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 7 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:57.016Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 7 moved SUBMITTED -> APPROVED by hod1 (Cross-checked with the register)
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:57.045Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 8 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:57.050Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 8 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:57.053Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 8 moved SUBMITTED -> REJECTED by hod1 (Period number looks wrong)
+[2026-10-05T07:35:57.091Z] 2026-10-05T07:35:57.074Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 9 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.100Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 10 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.107Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 10 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.135Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 11 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.140Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 11 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.143Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 11 moved SUBMITTED -> APPROVED by hod1
+[2026-10-05T07:35:57.342Z] [INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.228 s -- in Reviewing a submitted record
+[2026-10-05T07:35:57.342Z] [INFO] Running Submitting a draft
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.161Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.WorkflowServiceTest$Submitting]: Submitting does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.163Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.WorkflowServiceTest$Submitting
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.190Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 12 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.196Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 12 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.217Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 13 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.221Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 13 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.240Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 14 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.261Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 15 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.282Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 16 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.286Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 16 moved DRAFT -> SUBMITTED by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.306Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 17 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.310Z  INFO 4349 --- [attendance-portal] [           main] c.c.attendance.service.WorkflowService   : Record 17 moved DRAFT -> SUBMITTED by admin1
+[2026-10-05T07:35:57.342Z] [INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.154 s -- in Submitting a draft
+[2026-10-05T07:35:57.342Z] [INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.582 s -- in com.college.attendance.service.WorkflowServiceTest
+[2026-10-05T07:35:57.342Z] [INFO] Running com.college.attendance.service.DashboardServiceTest
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.321Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.DashboardServiceTest]: DashboardServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:57.342Z] 2026-10-05T07:35:57.322Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.DashboardServiceTest
+[2026-10-05T07:35:57.893Z] [INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.294 s -- in com.college.attendance.service.DashboardServiceTest
+[2026-10-05T07:35:57.893Z] [INFO] Running com.college.attendance.service.AttendanceServiceTest
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.611Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.AttendanceServiceTest]: AttendanceServiceTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.612Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.AttendanceServiceTest
+[2026-10-05T07:35:57.893Z] [INFO] Running Correcting a record
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.637Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.AttendanceServiceTest$Correcting]: Correcting does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.640Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.AttendanceServiceTest$Correcting
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.664Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 61 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.672Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Updated attendance record 61 by admin1 (author remains faculty1)
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.692Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 62 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.700Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Updated attendance record 62 by faculty1 (author remains faculty1)
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.721Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 63 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.744Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 64 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.767Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 65 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.772Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Updated attendance record 65 by faculty1 (author remains faculty1)
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.797Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 66 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.893Z] [INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.170 s -- in Correcting a record
+[2026-10-05T07:35:57.893Z] [INFO] Running Creating a record
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.809Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.AttendanceServiceTest$Creating]: Creating does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.811Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.AttendanceServiceTest$Creating
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.832Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 67 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.838Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 68 for 1CS21CS001 in CS501 on 2026-10-04 period 2 by faculty1
+[2026-10-05T07:35:57.893Z] 2026-10-05T07:35:57.876Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 69 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:58.144Z] 2026-10-05T07:35:57.915Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 70 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:58.144Z] 2026-10-05T07:35:57.931Z  INFO 4349 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 71 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:35:58.144Z] [INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.133 s -- in Creating a record
+[2026-10-05T07:35:58.144Z] [INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.330 s -- in com.college.attendance.service.AttendanceServiceTest
+[2026-10-05T07:35:58.144Z] [INFO] Running com.college.attendance.service.AttendanceSearchTest
+[2026-10-05T07:35:58.144Z] 2026-10-05T07:35:57.943Z  INFO 4349 --- [attendance-portal] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.college.attendance.service.AttendanceSearchTest]: AttendanceSearchTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:35:58.144Z] 2026-10-05T07:35:57.944Z  INFO 4349 --- [attendance-portal] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.service.AttendanceSearchTest
+[2026-10-05T07:35:58.395Z] [INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.338 s -- in com.college.attendance.service.AttendanceSearchTest
+[2026-10-05T07:35:58.646Z] [INFO] 
+[2026-10-05T07:35:58.646Z] [INFO] Results:
+[2026-10-05T07:35:58.646Z] [INFO] 
+[2026-10-05T07:35:58.646Z] [INFO] Tests run: 73, Failures: 0, Errors: 0, Skipped: 0
+[2026-10-05T07:35:58.646Z] [INFO] 
+[2026-10-05T07:35:58.646Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:58.646Z] [INFO] Reactor Summary for Student Attendance Management Portal 1.0.0-SNAPSHOT:
+[2026-10-05T07:35:58.646Z] [INFO] 
+[2026-10-05T07:35:58.646Z] [INFO] Student Attendance Management Portal ............... SUCCESS [  0.002 s]
+[2026-10-05T07:35:58.646Z] [INFO] Attendance Portal :: Application ................... SUCCESS [ 21.994 s]
+[2026-10-05T07:35:58.646Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:58.646Z] [INFO] BUILD SUCCESS
+[2026-10-05T07:35:58.646Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:58.646Z] [INFO] Total time:  22.245 s
+[2026-10-05T07:35:58.646Z] [INFO] Finished at: 2026-10-05T07:35:58Z
+[2026-10-05T07:35:58.646Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:35:58.653Z] Post stage
+[2026-10-05T07:35:58.663Z] [Pipeline] junit
+[2026-10-05T07:35:58.666Z] Recording test results
+[2026-10-05T07:35:58.684Z] [Checks API] No suitable checks publisher found.
+[2026-10-05T07:35:58.698Z] [Pipeline] }
+[2026-10-05T07:35:58.715Z] [Pipeline] // stage
+[2026-10-05T07:35:58.724Z] [Pipeline] stage
+[2026-10-05T07:35:58.726Z] [Pipeline] { (Package)
+[2026-10-05T07:35:58.747Z] [Pipeline] sh
+[2026-10-05T07:35:59.003Z] + /opt/maven/bin/mvn -B -DskipTests package
+[2026-10-05T07:36:00.866Z] [INFO] Scanning for projects...
+[2026-10-05T07:36:00.866Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:00.866Z] [INFO] Reactor Build Order:
+[2026-10-05T07:36:00.866Z] [INFO] 
+[2026-10-05T07:36:00.866Z] [INFO] Student Attendance Management Portal                               [pom]
+[2026-10-05T07:36:00.866Z] [INFO] Attendance Portal :: Application                                   [war]
+[2026-10-05T07:36:00.866Z] [INFO] 
+[2026-10-05T07:36:00.866Z] [INFO] ----------< com.college.attendance:attendance-portal-parent >-----------
+[2026-10-05T07:36:00.866Z] [INFO] Building Student Attendance Management Portal 1.0.0-SNAPSHOT       [1/2]
+[2026-10-05T07:36:00.866Z] [INFO]   from pom.xml
+[2026-10-05T07:36:00.866Z] [INFO] --------------------------------[ pom ]---------------------------------
+[2026-10-05T07:36:00.866Z] [INFO] 
+[2026-10-05T07:36:00.866Z] [INFO] ---------------< com.college.attendance:attendance-app >----------------
+[2026-10-05T07:36:00.866Z] [INFO] Building Attendance Portal :: Application 1.0.0-SNAPSHOT           [2/2]
+[2026-10-05T07:36:00.866Z] [INFO]   from app/pom.xml
+[2026-10-05T07:36:00.866Z] [INFO] --------------------------------[ war ]---------------------------------
+[2026-10-05T07:36:01.417Z] [INFO] 
+[2026-10-05T07:36:01.417Z] [INFO] --- jacoco:0.8.13:prepare-agent (prepare-agent) @ attendance-app ---
+[2026-10-05T07:36:01.417Z] [INFO] argLine set to -javaagent:/root/.m2/repository/org/jacoco/org.jacoco.agent/0.8.13/org.jacoco.agent-0.8.13-runtime.jar=destfile=/var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app/target/jacoco.exec
+[2026-10-05T07:36:01.417Z] [INFO] 
+[2026-10-05T07:36:01.417Z] [INFO] --- resources:3.3.1:resources (default-resources) @ attendance-app ---
+[2026-10-05T07:36:01.417Z] [INFO] Copying 1 resource from src/main/resources to target/classes
+[2026-10-05T07:36:01.417Z] [INFO] Copying 10 resources from src/main/resources to target/classes
+[2026-10-05T07:36:01.417Z] [INFO] 
+[2026-10-05T07:36:01.417Z] [INFO] --- compiler:3.14.1:compile (default-compile) @ attendance-app ---
+[2026-10-05T07:36:01.670Z] [INFO] Nothing to compile - all classes are up to date.
+[2026-10-05T07:36:01.670Z] [INFO] 
+[2026-10-05T07:36:01.670Z] [INFO] --- resources:3.3.1:testResources (default-testResources) @ attendance-app ---
+[2026-10-05T07:36:01.670Z] [INFO] Copying 1 resource from src/test/resources to target/test-classes
+[2026-10-05T07:36:01.670Z] [INFO] 
+[2026-10-05T07:36:01.670Z] [INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ attendance-app ---
+[2026-10-05T07:36:01.670Z] [INFO] Nothing to compile - all classes are up to date.
+[2026-10-05T07:36:01.670Z] [INFO] 
+[2026-10-05T07:36:01.670Z] [INFO] --- surefire:3.5.6:test (default-test) @ attendance-app ---
+[2026-10-05T07:36:01.670Z] [INFO] Tests are skipped.
+[2026-10-05T07:36:01.670Z] [INFO] 
+[2026-10-05T07:36:01.670Z] [INFO] --- war:3.4.0:war (default-war) @ attendance-app ---
+[2026-10-05T07:36:01.922Z] [INFO] Packaging webapp
+[2026-10-05T07:36:01.922Z] [INFO] Assembling webapp [attendance-app] in [/var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app/target/attendance]
+[2026-10-05T07:36:01.922Z] [INFO] Processing war project
+[2026-10-05T07:36:02.181Z] [INFO] Building war: /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app/target/attendance.war
+[2026-10-05T07:36:02.732Z] [INFO] 
+[2026-10-05T07:36:02.732Z] [INFO] --- spring-boot:3.5.16:repackage (repackage) @ attendance-app ---
+[2026-10-05T07:36:03.644Z] [INFO] Replacing main artifact /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app/target/attendance.war with repackaged archive, adding nested dependencies in BOOT-INF/.
+[2026-10-05T07:36:03.644Z] [INFO] The original artifact has been renamed to /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app/target/attendance.war.original
+[2026-10-05T07:36:03.644Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:03.644Z] [INFO] Reactor Summary for Student Attendance Management Portal 1.0.0-SNAPSHOT:
+[2026-10-05T07:36:03.644Z] [INFO] 
+[2026-10-05T07:36:03.644Z] [INFO] Student Attendance Management Portal ............... SUCCESS [  0.003 s]
+[2026-10-05T07:36:03.644Z] [INFO] Attendance Portal :: Application ................... SUCCESS [  2.919 s]
+[2026-10-05T07:36:03.644Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:03.644Z] [INFO] BUILD SUCCESS
+[2026-10-05T07:36:03.644Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:03.644Z] [INFO] Total time:  3.198 s
+[2026-10-05T07:36:03.644Z] [INFO] Finished at: 2026-10-05T07:36:03Z
+[2026-10-05T07:36:03.644Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:03.653Z] [Pipeline] sh
+[2026-10-05T07:36:03.910Z] + ls -la app/target/attendance.war
+[2026-10-05T07:36:03.910Z] -rw-r--r-- 1 root root 63815182 Oct  5 07:36 app/target/attendance.war
+[2026-10-05T07:36:03.915Z] Post stage
+[2026-10-05T07:36:03.931Z] [Pipeline] archiveArtifacts
+[2026-10-05T07:36:03.935Z] Archiving artifacts
+[2026-10-05T07:36:03.955Z] Recording fingerprints
+[2026-10-05T07:36:04.076Z] [Pipeline] }
+[2026-10-05T07:36:04.091Z] [Pipeline] // stage
+[2026-10-05T07:36:04.103Z] [Pipeline] stage
+[2026-10-05T07:36:04.105Z] [Pipeline] { (Integration test)
+[2026-10-05T07:36:04.123Z] [Pipeline] sh
+[2026-10-05T07:36:04.379Z] + /opt/maven/bin/mvn -B failsafe:integration-test failsafe:verify
+[2026-10-05T07:36:05.723Z] [INFO] Scanning for projects...
+[2026-10-05T07:36:06.275Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:06.275Z] [INFO] Reactor Build Order:
+[2026-10-05T07:36:06.275Z] [INFO] 
+[2026-10-05T07:36:06.275Z] [INFO] Student Attendance Management Portal                               [pom]
+[2026-10-05T07:36:06.275Z] [INFO] Attendance Portal :: Application                                   [war]
+[2026-10-05T07:36:06.275Z] [INFO] 
+[2026-10-05T07:36:06.275Z] [INFO] ----------< com.college.attendance:attendance-portal-parent >-----------
+[2026-10-05T07:36:06.275Z] [INFO] Building Student Attendance Management Portal 1.0.0-SNAPSHOT       [1/2]
+[2026-10-05T07:36:06.275Z] [INFO]   from pom.xml
+[2026-10-05T07:36:06.275Z] [INFO] --------------------------------[ pom ]---------------------------------
+[2026-10-05T07:36:06.525Z] [INFO] 
+[2026-10-05T07:36:06.525Z] [INFO] --- failsafe:3.5.6:integration-test (default-cli) @ attendance-portal-parent ---
+[2026-10-05T07:36:06.525Z] [INFO] No tests to run.
+[2026-10-05T07:36:06.525Z] [INFO] 
+[2026-10-05T07:36:06.525Z] [INFO] --- failsafe:3.5.6:verify (default-cli) @ attendance-portal-parent ---
+[2026-10-05T07:36:06.525Z] [INFO] No tests to run.
+[2026-10-05T07:36:06.525Z] [INFO] 
+[2026-10-05T07:36:06.525Z] [INFO] ---------------< com.college.attendance:attendance-app >----------------
+[2026-10-05T07:36:06.525Z] [INFO] Building Attendance Portal :: Application 1.0.0-SNAPSHOT           [2/2]
+[2026-10-05T07:36:06.525Z] [INFO]   from app/pom.xml
+[2026-10-05T07:36:06.525Z] [INFO] --------------------------------[ war ]---------------------------------
+[2026-10-05T07:36:06.777Z] [INFO] 
+[2026-10-05T07:36:06.777Z] [INFO] --- failsafe:3.5.6:integration-test (default-cli) @ attendance-app ---
+[2026-10-05T07:36:06.777Z] [INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[2026-10-05T07:36:06.777Z] [INFO] 
+[2026-10-05T07:36:06.777Z] [INFO] -------------------------------------------------------
+[2026-10-05T07:36:06.777Z] [INFO]  T E S T S
+[2026-10-05T07:36:06.777Z] [INFO] -------------------------------------------------------
+[2026-10-05T07:36:07.693Z] [INFO] Running com.college.attendance.web.AttendanceWebFlowIT
+[2026-10-05T07:36:07.693Z] 07:36:07.558 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.college.attendance.web.AttendanceWebFlowIT]: AttendanceWebFlowIT does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+[2026-10-05T07:36:07.943Z] 07:36:07.715 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.college.attendance.AttendancePortalApplication for test class com.college.attendance.web.AttendanceWebFlowIT
+[2026-10-05T07:36:08.495Z] 
+[2026-10-05T07:36:08.495Z]   .   ____          _            __ _ _
+[2026-10-05T07:36:08.495Z]  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+[2026-10-05T07:36:08.495Z] ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+[2026-10-05T07:36:08.495Z]  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+[2026-10-05T07:36:08.495Z]   '  |____| .__|_| |_|_| |_\__, | / / / /
+[2026-10-05T07:36:08.495Z]  =========|_|==============|___/=/_/_/_/
+[2026-10-05T07:36:08.495Z] 
+[2026-10-05T07:36:08.495Z]  :: Spring Boot ::               (v3.5.16)
+[2026-10-05T07:36:08.495Z] 
+[2026-10-05T07:36:08.495Z] 2026-10-05T07:36:08.361Z  INFO 4603 --- [attendance-portal] [           main] c.c.attendance.web.AttendanceWebFlowIT   : Starting AttendanceWebFlowIT using Java 21.0.12.1 with PID 4603 (started by root in /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/app)
+[2026-10-05T07:36:08.495Z] 2026-10-05T07:36:08.363Z  INFO 4603 --- [attendance-portal] [           main] c.c.attendance.web.AttendanceWebFlowIT   : The following 1 profile is active: "test"
+[2026-10-05T07:36:10.359Z] 2026-10-05T07:36:09.957Z  INFO 4603 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2026-10-05T07:36:10.359Z] 2026-10-05T07:36:10.035Z  INFO 4603 --- [attendance-portal] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 65 ms. Found 3 JPA repository interfaces.
+[2026-10-05T07:36:10.910Z] 2026-10-05T07:36:10.701Z  INFO 4603 --- [attendance-portal] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+[2026-10-05T07:36:10.910Z] 2026-10-05T07:36:10.749Z  INFO 4603 --- [attendance-portal] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.53.Final
+[2026-10-05T07:36:10.910Z] 2026-10-05T07:36:10.779Z  INFO 4603 --- [attendance-portal] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+[2026-10-05T07:36:11.160Z] 2026-10-05T07:36:11.003Z  INFO 4603 --- [attendance-portal] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+[2026-10-05T07:36:11.160Z] 2026-10-05T07:36:11.028Z  INFO 4603 --- [attendance-portal] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+[2026-10-05T07:36:11.411Z] 2026-10-05T07:36:11.289Z  INFO 4603 --- [attendance-portal] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:attendance-test user=SA
+[2026-10-05T07:36:11.411Z] 2026-10-05T07:36:11.291Z  INFO 4603 --- [attendance-portal] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+[2026-10-05T07:36:11.411Z] 2026-10-05T07:36:11.357Z  INFO 4603 --- [attendance-portal] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+[2026-10-05T07:36:11.411Z] 	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+[2026-10-05T07:36:11.411Z] 	Database driver: undefined/unknown
+[2026-10-05T07:36:11.411Z] 	Database version: 2.3.232
+[2026-10-05T07:36:11.411Z] 	Autocommit mode: undefined/unknown
+[2026-10-05T07:36:11.411Z] 	Isolation level: undefined/unknown
+[2026-10-05T07:36:11.411Z] 	Minimum pool size: undefined/unknown
+[2026-10-05T07:36:11.411Z] 	Maximum pool size: undefined/unknown
+[2026-10-05T07:36:12.757Z] 2026-10-05T07:36:12.467Z  INFO 4603 --- [attendance-portal] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2026-10-05T07:36:12.757Z] 2026-10-05T07:36:12.549Z  INFO 4603 --- [attendance-portal] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2026-10-05T07:36:13.308Z] 2026-10-05T07:36:13.165Z  INFO 4603 --- [attendance-portal] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+[2026-10-05T07:36:13.865Z] 2026-10-05T07:36:13.636Z  INFO 4603 --- [attendance-portal] [           main] c.college.attendance.config.DataSeeder   : Seeding disabled (attendance.seed-data=false)
+[2026-10-05T07:36:14.117Z] 2026-10-05T07:36:14.045Z  INFO 4603 --- [attendance-portal] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name databaseUserDetailsService
+[2026-10-05T07:36:15.033Z] 2026-10-05T07:36:14.690Z  INFO 4603 --- [attendance-portal] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+[2026-10-05T07:36:15.584Z] 2026-10-05T07:36:15.282Z  INFO 4603 --- [attendance-portal] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+[2026-10-05T07:36:15.584Z] 2026-10-05T07:36:15.283Z  INFO 4603 --- [attendance-portal] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+[2026-10-05T07:36:15.584Z] 2026-10-05T07:36:15.284Z  INFO 4603 --- [attendance-portal] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+[2026-10-05T07:36:15.584Z] 2026-10-05T07:36:15.362Z  INFO 4603 --- [attendance-portal] [           main] c.c.attendance.web.AttendanceWebFlowIT   : Started AttendanceWebFlowIT in 7.446 seconds (process running for 8.533)
+[2026-10-05T07:36:15.584Z] Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+[2026-10-05T07:36:16.496Z] WARNING: A Java agent has been loaded dynamically (/root/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.8/byte-buddy-agent-1.17.8.jar)
+[2026-10-05T07:36:16.496Z] WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+[2026-10-05T07:36:16.496Z] WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+[2026-10-05T07:36:16.496Z] WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[2026-10-05T07:36:17.047Z] 2026-10-05T07:36:16.916Z  INFO 4603 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 1 for 1CS21CS001 in CS501 on 2026-10-04 period 2 by faculty1
+[2026-10-05T07:36:18.395Z] 2026-10-05T07:36:17.987Z  INFO 4603 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 2 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:36:18.395Z] 2026-10-05T07:36:18.186Z  INFO 4603 --- [attendance-portal] [           main] c.c.a.service.AttendanceService          : Created attendance record 3 for 1CS21CS001 in CS501 on 2026-10-04 period 1 by faculty1
+[2026-10-05T07:36:18.949Z] [INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.24 s -- in com.college.attendance.web.AttendanceWebFlowIT
+[2026-10-05T07:36:18.949Z] [INFO] 
+[2026-10-05T07:36:18.949Z] [INFO] Results:
+[2026-10-05T07:36:18.949Z] [INFO] 
+[2026-10-05T07:36:18.949Z] [INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+[2026-10-05T07:36:18.949Z] [INFO] 
+[2026-10-05T07:36:18.949Z] [INFO] 
+[2026-10-05T07:36:18.949Z] [INFO] --- failsafe:3.5.6:verify (default-cli) @ attendance-app ---
+[2026-10-05T07:36:18.949Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:18.949Z] [INFO] Reactor Summary for Student Attendance Management Portal 1.0.0-SNAPSHOT:
+[2026-10-05T07:36:18.949Z] [INFO] 
+[2026-10-05T07:36:18.949Z] [INFO] Student Attendance Management Portal ............... SUCCESS [  0.221 s]
+[2026-10-05T07:36:18.949Z] [INFO] Attendance Portal :: Application ................... SUCCESS [ 12.449 s]
+[2026-10-05T07:36:18.949Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:18.949Z] [INFO] BUILD SUCCESS
+[2026-10-05T07:36:18.949Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:18.949Z] [INFO] Total time:  13.251 s
+[2026-10-05T07:36:18.949Z] [INFO] Finished at: 2026-10-05T07:36:18Z
+[2026-10-05T07:36:18.949Z] [INFO] ------------------------------------------------------------------------
+[2026-10-05T07:36:19.202Z] Post stage
+[2026-10-05T07:36:19.216Z] [Pipeline] junit
+[2026-10-05T07:36:19.219Z] Recording test results
+[2026-10-05T07:36:19.257Z] [Checks API] No suitable checks publisher found.
+[2026-10-05T07:36:19.281Z] [Pipeline] }
+[2026-10-05T07:36:19.300Z] [Pipeline] // stage
+[2026-10-05T07:36:19.308Z] [Pipeline] stage
+[2026-10-05T07:36:19.310Z] [Pipeline] { (Deploy to Tomcat)
+[2026-10-05T07:36:19.348Z] [Pipeline] script
+[2026-10-05T07:36:19.353Z] [Pipeline] {
+[2026-10-05T07:36:19.382Z] [Pipeline] sh
+[2026-10-05T07:36:19.640Z] + set -e
+[2026-10-05T07:36:19.640Z] + echo Deploying 1.0.5-3b4a92f to Tomcat as 'staging' on port 8090
+[2026-10-05T07:36:19.640Z] Deploying 1.0.5-3b4a92f to Tomcat as 'staging' on port 8090
+[2026-10-05T07:36:19.640Z] + docker rm -f attendance-tomcat-staging
+[2026-10-05T07:36:19.640Z] + docker run -d --name attendance-tomcat-staging -p 8090:8080 -e ATTENDANCE_ENVIRONMENT=staging -e ATTENDANCE_ELIGIBILITY_THRESHOLD=75 -e SPRING_DATASOURCE_URL=jdbc:h2:file:/usr/local/tomcat/data/attendance;DB_CLOSE_ON_EXIT=FALSE tomcat:10.1-jdk21-temurin
+[2026-10-05T07:36:19.892Z] ff15c02df1691c08efa5c84c6d0b8e2f7d5b8c12d05162ce74468f8cade1978d
+[2026-10-05T07:36:20.145Z] + sleep 5
+[2026-10-05T07:36:25.341Z] + docker cp app/target/attendance.war attendance-tomcat-staging:/usr/local/tomcat/webapps/attendance.war
+[2026-10-05T07:36:25.359Z] [Pipeline] }
+[2026-10-05T07:36:25.376Z] [Pipeline] // script
+[2026-10-05T07:36:25.383Z] [Pipeline] }
+[2026-10-05T07:36:25.397Z] [Pipeline] // stage
+[2026-10-05T07:36:25.418Z] [Pipeline] stage
+[2026-10-05T07:36:25.420Z] [Pipeline] { (Verify deployment)
+[2026-10-05T07:36:25.475Z] [Pipeline] script
+[2026-10-05T07:36:25.490Z] [Pipeline] {
+[2026-10-05T07:36:25.522Z] [Pipeline] sh
+[2026-10-05T07:36:25.783Z] + set -e
+[2026-10-05T07:36:25.783Z] + seq 1 60
+[2026-10-05T07:36:25.783Z] + curl -sf http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:25.783Z] + sleep 3
+[2026-10-05T07:36:29.015Z] + curl -sf http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:29.015Z] + sleep 3
+[2026-10-05T07:36:32.250Z] + curl -sf http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:32.250Z] + sleep 3
+[2026-10-05T07:36:35.482Z] + curl -sf http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:35.483Z] + sleep 3
+[2026-10-05T07:36:37.971Z] + curl -sf http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:37.971Z] + sleep 3
+[2026-10-05T07:36:41.208Z] + curl -sf http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:41.208Z] + sleep 3
+[2026-10-05T07:36:44.466Z] + curl -sf http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:44.467Z] + sleep 3
+[2026-10-05T07:36:46.950Z] + curl -sf http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:47.501Z] + echo Health check passed after 8 attempt(s)
+[2026-10-05T07:36:47.501Z] Health check passed after 8 attempt(s)
+[2026-10-05T07:36:47.501Z] + curl -s http://localhost:8090/attendance/actuator/health
+[2026-10-05T07:36:47.501Z] {"status":"UP"}+ echo
+[2026-10-05T07:36:47.501Z] 
+[2026-10-05T07:36:47.501Z] + exit 0
+[2026-10-05T07:36:47.519Z] [Pipeline] sh
+[2026-10-05T07:36:47.783Z] + curl -s http://localhost:8090/attendance/actuator/info
+[2026-10-05T07:36:47.783Z] + sed -n s/.*"environment":"\([^"]*\)".*/\1/p
+[2026-10-05T07:36:47.799Z] [Pipeline] echo
+[2026-10-05T07:36:47.801Z] Deployed application reports environment: 'staging'
+[2026-10-05T07:36:47.824Z] [Pipeline] echo
+[2026-10-05T07:36:47.826Z] Parameter verified: requested 'staging', deployed 'staging'
+[2026-10-05T07:36:47.836Z] [Pipeline] echo
+[2026-10-05T07:36:47.839Z] Deployed application URL: http://localhost:8090/attendance
+[2026-10-05T07:36:47.842Z] [Pipeline] }
+[2026-10-05T07:36:47.861Z] [Pipeline] // script
+[2026-10-05T07:36:47.871Z] [Pipeline] }
+[2026-10-05T07:36:47.883Z] [Pipeline] // stage
+[2026-10-05T07:36:47.896Z] [Pipeline] stage
+[2026-10-05T07:36:47.899Z] [Pipeline] { (Declarative: Post Actions)
+[2026-10-05T07:36:47.920Z] [Pipeline] cleanWs
+[2026-10-05T07:36:47.925Z] [WS-CLEANUP] Deleting project workspace...
+[2026-10-05T07:36:48.124Z] [WS-CLEANUP] done
+[2026-10-05T07:36:48.156Z] [Pipeline] echo
+[2026-10-05T07:36:48.160Z] Pipeline succeeded. 1.0.5-3b4a92f is deployed at http://localhost:8090/attendance
+[2026-10-05T07:36:48.175Z] [Pipeline] }
+[2026-10-05T07:36:48.191Z] [Pipeline] // stage
+[2026-10-05T07:36:48.197Z] [Pipeline] }
+[2026-10-05T07:36:48.210Z] [Pipeline] // timeout
+[2026-10-05T07:36:48.216Z] [Pipeline] }
+[2026-10-05T07:36:48.237Z] [Pipeline] // timestamps
+[2026-10-05T07:36:48.247Z] [Pipeline] }
+[2026-10-05T07:36:48.261Z] [Pipeline] // withEnv
+[2026-10-05T07:36:48.265Z] [Pipeline] }
+[2026-10-05T07:36:48.272Z] [Pipeline] // withEnv
+[2026-10-05T07:36:48.276Z] [Pipeline] }
+[2026-10-05T07:36:48.289Z] [Pipeline] // node
+[2026-10-05T07:36:48.293Z] [Pipeline] End of Pipeline
+[2026-10-05T07:36:48.323Z] Finished: SUCCESS

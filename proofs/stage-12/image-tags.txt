@@ -1,0 +1,71 @@
+Stage 12 - commit to running container, end to end
+Captured: 2026-10-05T08:25:58Z
+
+== The whole path, one pipeline run (build #13) ==
+  Declarative: Checkout SCM     SUCCESS        612 ms
+  Checkout                      SUCCESS       1156 ms
+  Build                         SUCCESS       4292 ms
+  Unit test                     SUCCESS      24164 ms
+  Package                       SUCCESS       5608 ms
+  Integration test              SUCCESS      12644 ms
+  Quality gate: Selenium        SUCCESS      85659 ms
+  Build and publish image       SUCCESS      13027 ms
+  Deploy container              SUCCESS       9810 ms
+  Deploy to Tomcat              SUCCESS       6080 ms
+  Verify deployment             SUCCESS      16319 ms
+  Declarative: Post Actions     SUCCESS        242 ms
+  TOTAL                         SUCCESS     181205 ms
+
+== Versioned image published ==
+
+== Read back from the registry, not merely claimed by the push ==
+  + curl -s http://localhost:5000/v2/attendance-portal/tags/list
+
+== Deployment pulled FROM the registry, not from the local cache ==
+  + echo Deploying localhost:5000/attendance-portal:1.0.13-c5dcba3 as attendance-app-staging on port 8100
+  Deploying localhost:5000/attendance-portal:1.0.13-c5dcba3 as attendance-app-staging on port 8100
+  1.0.13-c5dcba3: Pulling from attendance-portal
+  Digest: sha256:d15441d6c2644ca4dd7a76a46da065728aaa5c09efb28ba9b53fe1e17229b58d
+  Status: Image is up to date for localhost:5000/attendance-portal:1.0.13-c5dcba3
+  + docker rm -f attendance-app-staging
+  + docker run -d --name attendance-app-staging -p 8100:8080 -v attendance-data-staging:/app/data -e ATTENDANCE_ENVIRONMENT=staging --restart unless-stopped --label app.version=1.0.13-c5dcba3 --label app.commit=c5dcba3 localhost:5000/attendance-portal:1.0.13-c5dcba3
+  + echo Container healthy after 4 attempt(s)
+  Container healthy after 4 attempt(s)
+  + docker ps --filter name=attendance-app-staging --format   {{.Names}}  {{.Image}}  {{.Status}}  {{.Ports}}
+  attendance-app-staging  localhost:5000/attendance-portal:1.0.13-c5dcba3  Up 9 seconds (health: starting)  0.0.0.0:8100->8080/tcp
+  {"app":{"name":"Student Attendance Management Portal","environment":"staging"}}+ echo
+  + echo Containerised application URL: http://localhost:8100/attendance
+  Containerised application URL: http://localhost:8100/attendance
+
+== Registry after two builds - versions accumulate, which is what
+   makes the Stage 14 rollback possible ==
+  {
+      "name": "attendance-portal",
+      "tags": [
+          "latest",
+          "1.0.0",
+          "1.0.14-c5dcba3",
+          "1.0.13-c5dcba3"
+      ]
+  }
+
+== Running containers ==
+attendance-app-staging  localhost:5000/attendance-portal:1.0.14-c5dcba3  Up 56 seconds (healthy)  0.0.0.0:8100->8080/tcp
+
+== Image provenance from the running container ==
+  {
+      "app.commit": "c5dcba3",
+      "app.version": "1.0.14-c5dcba3",
+      "org.opencontainers.image.created": "2026-10-05T08:24:51Z",
+      "org.opencontainers.image.description": "Role-aware attendance system of record",
+      "org.opencontainers.image.licenses": "academic-project",
+      "org.opencontainers.image.revision": "c5dcba3",
+      "org.opencontainers.image.source": "https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management",
+      "org.opencontainers.image.title": "Student Attendance Management Portal",
+      "org.opencontainers.image.version": "1.0.14-c5dcba3"
+  }
+
+== Both deployment modes live from the same build ==
+  Tomcat WAR  :8090 -> {"app":{"name":"Student Attendance Management Portal","environment":"staging"}}
+  Container   :8100 -> {"app":{"name":"Student Attendance Management Portal","environment":"staging"}}
+  health 8090 -> {"status":"UP"}     health 8100 -> {"status":"UP"}

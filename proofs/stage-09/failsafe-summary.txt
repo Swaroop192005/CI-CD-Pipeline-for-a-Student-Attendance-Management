@@ -1,0 +1,41 @@
+Stage 9 - Selenium suite, local execution summary
+Captured: 2026-10-05T07:49:48Z
+
+Browser : Chromium 141.0.7390.37 
+Driver  : ChromeDriver 141.0.7390.122
+Selenium: 4.50.0
+Target  : http://localhost:8080/attendance
+Mode    : headless, fixed 1366x900 viewport, fresh driver per test
+
+== Per-journey results ==
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.715 s -- in com.college.attendance.e2e.J1RecordAttendanceIT
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.67 s -- in com.college.attendance.e2e.J2SearchAndFilterIT
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.47 s -- in com.college.attendance.e2e.J3ReviewWorkflowIT
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.217 s -- in com.college.attendance.e2e.J4StudentSelfServiceIT
+Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.789 s -- in com.college.attendance.e2e.J5AuthorisationIT
+
+== Totals ==
+[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+== Measured success criteria asserted inside the journeys ==
+[J1] recorded one session in 1 s (SC1 budget: 120 s)
+[J4] approved record was visible to the student immediately (baseline for this step was 9-14 days)
+
+== Failure-capture mechanism, demonstrated ==
+A test was deliberately made to fail once, to prove the mechanism
+produces real artefacts rather than being merely wired up:
+
+  [selenium] failure captured: /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/selenium-tests/target/screenshots/ScreenshotMechanismDemoIT.deliberateFailure-20261005-074812-479.png
+
+  proofs/stage-09/failure-screenshot-demo.png  (83 KB viewport capture)
+  proofs/stage-09/failure-report-demo.txt      (URL, title, failure, page source)
+
+  Report header:
+    Journey : ScreenshotMechanismDemoIT
+    Test    : deliberate failure, to demonstrate the capture mechanism
+    URL     : http://localhost:8080/attendance/dashboard
+    Title   : Dashboard · Attendance Portal
+    Failure : org.opentest4j.AssertionFailedError: [deliberately wrong, so the mechanism has something to capture] 
+    expected: "PRINCIPAL"
+     but was: "HOD"

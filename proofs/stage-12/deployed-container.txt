@@ -1,0 +1,26 @@
+Stage 12 - deployed container details
+Captured: 2026-10-05T08:26:18Z
+
+NAMES                    IMAGE                                             STATUS                        PORTS
+attendance-app-staging   localhost:5000/attendance-portal:1.0.14-c5dcba3   Up About a minute (healthy)   0.0.0.0:8100->8080/tcp
+
+== health, from the container's own healthcheck ==
+{
+    "Status": "healthy",
+    "FailingStreak": 0,
+    "Log": [
+        {
+            "Start": "2026-10-05T08:25:12.612416523Z",
+            "End": "2026-10-05T08:25:12.67890741Z",
+            "ExitCode": 0,
+            "Output": ""
+        },
+        {
+            "Start": "2026-10-05T08:25:27.681082377Z",
+
+== restart policy (survives a daemon restart) ==
+  {"Name":"unless-stopped","MaximumRetryCount":0}
+
+== data volume, per environment, not removed on redeploy ==
+VOLUME NAME               DRIVER
+attendance-data-staging   local

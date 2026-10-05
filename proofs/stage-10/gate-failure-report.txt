@@ -1,0 +1,344 @@
+Journey : J2SearchAndFilterIT
+Test    : J2d: results paginate at ten rows and filters survive the page change (FR-14)
+URL     : http://localhost:8095/attendance/attendance?page=1
+Title   : Attendance records · Attendance Portal
+Failure : java.lang.AssertionError: [the subject filter must still apply on page 2] 
+Expecting ArrayList:
+  ["CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502"]
+to contain only:
+  ["CS501"]
+element(s) not found:
+  ["CS501"]
+and element(s) not expected:
+  ["CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502",
+    "CS502"]
+
+
+---- page source ----
+<html><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attendance records · Attendance Portal</title>
+  <link rel="stylesheet" href="/attendance/css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/attendance/dashboard" data-testid="brand">Attendance Portal</a>
+  <span class="env-badge env-quality-gate" data-testid="env-badge">quality-gate</span>
+  <nav>
+    <a href="/attendance/dashboard" data-testid="nav-dashboard">Dashboard</a>
+    <a href="/attendance/attendance" data-testid="nav-attendance" class="active">Attendance</a>
+    <a href="/attendance/attendance/new" data-testid="nav-new-record">New record</a>
+    
+    
+  </nav>
+  <span class="whoami">
+    <span data-testid="current-user">faculty1</span>
+    <span class="role" data-testid="current-role">FACULTY</span>
+    <form action="/attendance/logout" method="post" style="display:inline"><input type="hidden" name="_csrf" value="VvMtkBi5zSnYqrtH2SI-kxg8pwB7D2TcoT4yxJrIpwQw7LvIZcUc9Cjf9Ez1zIp2vw8KoXoMimFJPQLxxw4H9q39wjIB1N_6">
+      <button class="btn btn-secondary btn-sm" type="submit" data-testid="logout">Sign out</button>
+    </form>
+  </span>
+</header>
+<main>
+  <div>
+  
+  
+  
+</div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Attendance records</h1>
+      <p class="subtitle">
+        <span data-testid="result-count">300</span> record(s)
+        ,
+        most recent session first.
+      </p>
+    </div>
+    <a class="btn btn-primary" href="/attendance/attendance/new" data-testid="new-record-button">Record attendance</a>
+  </div>
+
+  <!-- Search (FR-13). Filters are echoed into the pagination links below so
+       that they survive paging (FR-14). -->
+  <div class="card">
+    <h2>Search</h2>
+    <form action="/attendance/attendance" method="get" data-testid="search-form">
+      <div class="form-grid">
+        <div>
+          <label for="rollNumber">Roll number</label>
+          <input type="text" id="rollNumber" placeholder="1CS21CS001" data-testid="filter-roll" name="rollNumber" value="">
+        </div>
+        <div>
+          <label for="subjectCode">Subject</label>
+          <select id="subjectCode" data-testid="filter-subject" name="subjectCode">
+            <option value="">All subjects</option>
+            <option value="CS501">CS501</option>
+            <option value="CS502">CS502</option>
+            <option value="CS503">CS503</option>
+          </select>
+        </div>
+        <div>
+          <label for="from">Session date from</label>
+          <input type="date" id="from" data-testid="filter-from" name="from" value="">
+        </div>
+        <div>
+          <label for="to">Session date to</label>
+          <input type="date" id="to" data-testid="filter-to" name="to" value="">
+        </div>
+        <div>
+          <label for="attendanceStatus">Attendance</label>
+          <select id="attendanceStatus" data-testid="filter-attendance-status" name="attendanceStatus">
+            <option value="">Any</option>
+            <option value="PRESENT">Present</option>
+            <option value="ABSENT">Absent</option>
+            <option value="LATE">Late</option>
+            <option value="EXCUSED">Excused</option>
+          </select>
+        </div>
+        <div>
+          <label for="workflowStatus">Workflow</label>
+          <select id="workflowStatus" data-testid="filter-workflow-status" name="workflowStatus">
+            <option value="">Any</option>
+            <option value="DRAFT">Draft</option>
+            <option value="SUBMITTED">Submitted</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit" data-testid="apply-filters">Apply filters</button>
+        <a class="btn btn-secondary" href="/attendance/attendance" data-testid="clear-filters">Clear</a>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    
+
+    <div class="table-wrap">
+      <table data-testid="records-table">
+        <thead>
+        <tr>
+          <th>Roll number</th>
+          <th>Student</th>
+          <th>Subject</th>
+          <th>Session date</th>
+          <th class="num">Period</th>
+          <th>Attendance</th>
+          <th>Workflow</th>
+          <th>Marked by</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr data-testid="record-row" data-record-id="200">
+          <td data-testid="cell-roll">1CS21CS010</td>
+          <td>Jatin Mehta</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/200" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="199">
+          <td data-testid="cell-roll">1CS21CS009</td>
+          <td>Ishita Verma</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/199" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="196">
+          <td data-testid="cell-roll">1CS21CS006</td>
+          <td>Farhan Qureshi</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/196" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="197">
+          <td data-testid="cell-roll">1CS21CS007</td>
+          <td>Gayatri Joshi</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/197" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="198">
+          <td data-testid="cell-roll">1CS21CS008</td>
+          <td>Harish Kumar</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/198" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="195">
+          <td data-testid="cell-roll">1CS21CS005</td>
+          <td>Eshan Gupta</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/195" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="194">
+          <td data-testid="cell-roll">1CS21CS004</td>
+          <td>Divya Nair</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/194" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="193">
+          <td data-testid="cell-roll">1CS21CS003</td>
+          <td>Chirag Patil</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-ABSENT" data-testid="cell-attendance-status">Absent</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/193" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="192">
+          <td data-testid="cell-roll">1CS21CS002</td>
+          <td>Bhavana Shetty</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/192" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        <tr data-testid="record-row" data-record-id="191">
+          <td data-testid="cell-roll">1CS21CS001</td>
+          <td>Aditya Rao</td>
+          <td data-testid="cell-subject">CS502</td>
+          <td data-testid="cell-date">03 Oct 2026</td>
+          <td class="num">2</td>
+          <td>
+            <span class="badge badge-PRESENT" data-testid="cell-attendance-status">Present</span>
+          </td>
+          <td>
+            <span class="badge badge-DRAFT" data-testid="cell-workflow-status">Draft</span>
+          </td>
+          <td>faculty1</td>
+          <td>
+            <a class="btn btn-secondary btn-sm" href="/attendance/attendance/191" data-testid="view-record">View</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination" data-testid="pagination">
+      <span class="page-info" data-testid="page-info">
+        Page <span>2</span>
+        of <span>30</span>
+      </span>
+      <a class="btn btn-secondary btn-sm" href="/attendance/attendance?page=0&amp;rollNumber=&amp;subjectCode=&amp;from=&amp;to=&amp;attendanceStatus=&amp;workflowStatus=" data-testid="page-previous">Previous</a>
+      <a class="btn btn-secondary btn-sm" href="/attendance/attendance?page=2" data-testid="page-next">Next</a>
+    </div>
+  </div>
+</main>
+<footer class="app-footer">
+  Student Attendance Management Portal ·
+  environment <span>quality-gate</span> ·
+  eligibility threshold <span>75%</span>
+</footer>
+
+
+</body></html>

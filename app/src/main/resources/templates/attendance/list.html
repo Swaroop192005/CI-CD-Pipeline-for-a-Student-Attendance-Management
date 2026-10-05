@@ -133,6 +133,9 @@
                                 attendanceStatus=${search.attendanceStatus},
                                 workflowStatus=${search.workflowStatus})}"
          data-testid="page-previous">Previous</a>
+      <!-- Every active filter is echoed into the page links. Without this
+           the second page silently shows unfiltered results, which looks
+           like a data problem rather than a navigation one (FR-14). -->
       <a class="btn btn-secondary btn-sm"
          th:if="${records.hasNext()}"
          th:href="@{/attendance(page=${records.number + 1},

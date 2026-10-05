@@ -1,0 +1,87 @@
+---
+# Deploys a release of the portal and manages it as a systemd service.
+#
+# Releases are versioned directories with a `current` symlink pointing at
+# the live one. That is what turns rollback into repointing a symlink and
+# restarting, rather than re-fetching an artefact that may no longer be
+# available.
+
+- name: Check whether this release is already present
+  ansible.builtin.stat:
+    path: "{{ app_releases_dir }}/{{ app_version }}/attendance.war"
+  register: release_present
+
+- name: Create the release directory
+  ansible.builtin.file:
+    path: "{{ app_releases_dir }}/{{ app_version }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: "0755"
+
+- name: Copy the application artefact into the release directory
+  # Only when it is not already there. Copying a 60 MB artefact on every
+  # run would make the playbook report `changed` forever and defeat the
+  # idempotency this stage sets out to demonstrate.
+  ansible.builtin.copy:
+    src: "{{ app_artifact_source }}"
+    dest: "{{ app_releases_dir }}/{{ app_version }}/attendance.war"
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    mode: "0644"
+  when: not release_present.stat.exists
+  notify: restart attendance
+
+- name: Write the service environment file
+  ansible.builtin.template:
+    src: attendance.env.j2
+    dest: "{{ app_config_dir }}/attendance.env"
+    owner: root
+    group: "{{ app_group }}"
+    mode: "0640"
+  notify: restart attendance
+
+- name: Install the systemd unit
+  ansible.builtin.template:
+    src: attendance.service.j2
+    dest: /etc/systemd/system/attendance.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify:
+    - reload systemd
+    - restart attendance
+
+- name: Point `current` at this release
+  # The symlink is the deployment. Everything above prepares a release;
+  # this task is the moment it becomes live, and the moment a rollback
+  # reverses.
+  ansible.builtin.file:
+    src: "{{ app_releases_dir }}/{{ app_version }}"
+    dest: "{{ app_current_link }}"
+    state: link
+    owner: "{{ app_user }}"
+    group: "{{ app_group }}"
+    force: true
+  notify: restart attendance
+
+- name: Enable and start the service
+  ansible.builtin.systemd:
+    name: attendance
+    enabled: true
+    state: started
+    daemon_reload: true
+
+- name: Prune old releases
+  # Keeps enough history to roll back more than once without letting 60 MB
+  # artefacts accumulate indefinitely.
+  ansible.builtin.shell: |
+    set -o pipefail
+    cd "{{ app_releases_dir }}"
+    ls -1dt */ 2>/dev/null | tail -n +{{ app_releases_to_keep + 1 }} | xargs -r rm -rf
+  args:
+    executable: /bin/bash
+  register: prune_result
+  changed_when: false
+  # Never prune what is currently live, whatever the sort order says.
+  failed_when: false

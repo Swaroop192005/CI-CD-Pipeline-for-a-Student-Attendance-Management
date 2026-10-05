@@ -1,0 +1,102 @@
+Stage 10 - continuous testing: the quality gate blocks deployment
+Captured: 2026-10-05T08:10:07Z
+
+================================================================
+BUILD #9 - baseline, gate passes, deployment proceeds
+================================================================
+    Declarative: Checkout SCM     SUCCESS        597 ms
+    Checkout                      SUCCESS       1009 ms
+    Build                         SUCCESS       4488 ms
+    Unit test                     SUCCESS      28826 ms
+    Package                       SUCCESS       7440 ms
+    Integration test              SUCCESS      17239 ms
+    Quality gate: Selenium        SUCCESS      80100 ms
+    Deploy to Tomcat              SUCCESS       6052 ms
+    Verify deployment             SUCCESS      19287 ms
+    Declarative: Post Actions     SUCCESS        276 ms
+    OVERALL                       SUCCESS     166397 ms
+
+    Tests published: 100 passed, 0 failed, 0 skipped
+
+================================================================
+BUILD #10 - deliberate defect, gate FAILS, deployment BLOCKED
+================================================================
+
+  The defect: commit 'refactor(web): simplify the pagination link'
+  reduced the Next link to just the page parameter, dropping every
+  active filter on page change. Page 2 of a filtered search then
+  silently showed unfiltered results - a violation of FR-14 that
+  reads to a user as a data problem rather than a navigation one.
+
+  It is deliberately a defect only a browser can observe: a dropped
+  query parameter in a Thymeleaf template is invisible to the unit
+  and integration suites, which both passed.
+
+    Declarative: Checkout SCM     SUCCESS        665 ms
+    Checkout                      SUCCESS       1063 ms
+    Build                         SUCCESS       4241 ms
+    Unit test                     SUCCESS      23222 ms
+    Package                       SUCCESS       7800 ms
+    Integration test              SUCCESS      17813 ms
+    Quality gate: Selenium        FAILED       86045 ms
+    Deploy to Tomcat              FAILED          39 ms
+    Verify deployment             FAILED          33 ms
+    Declarative: Post Actions     SUCCESS        256 ms
+    OVERALL                       FAILED      142364 ms
+
+    Tests published: 99 passed, 1 failed, 0 skipped
+
+  Which test caught it:
+    [selenium] failure captured: /var/jenkins_home/jobs/attendance-portal-pipeline/workspace/selenium-tests/target/screenshots/J2SearchAndFilterIT.filtersSurvivePagination-20261005-080516-577.png
+    [ERROR] com.college.attendance.e2e.J2SearchAndFilterIT.filtersSurvivePagination -- Time elapsed: 3.310 s <<< FAILURE!
+    [the subject filter must still apply on page 2] 
+    	at com.college.attendance.e2e.J2SearchAndFilterIT.filtersSurvivePagination(J2SearchAndFilterIT.java:97)
+
+  Proof the deployment did NOT run:
+    'Deploying 1.0.10 ...' lines in the console : 0
+    'docker run ... attendance-tomcat' calls     : 0
+    'Parameter verified' lines                  : 0
+    Gate's own message                          :
+      hudson.AbortException: Selenium quality gate failed. The deployment stages will not run.
+      ERROR: Selenium quality gate failed. The deployment stages will not run.
+
+    The Deploy and Verify stages are reported FAILED rather than
+    SKIPPED because a declarative pipeline marks everything after an
+    aborted stage as failed. Their durations - 39 ms and 33 ms - and
+    the zero counts above show no step inside them executed.
+
+  Failure artefacts archived by the red build:
+    attendance.war
+    J2SearchAndFilterIT.filtersSurvivePagination-20261005-080516-577.png
+    J2SearchAndFilterIT.filtersSurvivePagination-20261005-080516-577.txt
+
+================================================================
+BUILD #11 - defect corrected, gate passes, deployment proceeds
+================================================================
+
+  Fix: commit 'fix(search): keep active filters when changing page'
+
+    Declarative: Checkout SCM     SUCCESS        566 ms
+    Checkout                      SUCCESS       1033 ms
+    Build                         SUCCESS       4875 ms
+    Unit test                     SUCCESS      23308 ms
+    Package                       SUCCESS       5641 ms
+    Integration test              SUCCESS      12163 ms
+    Quality gate: Selenium        SUCCESS      89472 ms
+    Deploy to Tomcat              SUCCESS       6044 ms
+    Verify deployment             SUCCESS      16040 ms
+    Declarative: Post Actions     SUCCESS        245 ms
+    OVERALL                       SUCCESS     160444 ms
+
+    Tests published: 100 passed, 0 failed, 0 skipped
+
+    Selenium quality gate passed.
+    Parameter verified: requested 'staging', deployed 'staging'
+    Pipeline succeeded. 1.0.11-8734007 is deployed at http://localhost:8090/attendance
+
+================================================================
+SUMMARY
+================================================================
+    #9   gate passed -> deployed
+    #10  gate failed -> deployment blocked, screenshot archived
+    #11  defect fixed, gate passed -> deployed
