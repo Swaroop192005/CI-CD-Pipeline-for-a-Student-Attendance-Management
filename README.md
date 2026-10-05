@@ -191,3 +191,16 @@ process and the Definition of Done are in
 [`CONTRIBUTING.md`](CONTRIBUTING.md). In short: branch from `develop` as
 `feature/<short-kebab-description>`, write Conventional Commit messages,
 open a pull request, get CI green, then merge and delete the branch.
+
+---
+
+## Project status
+
+All fifteen project tasks are complete. The full workflow — Git commit →
+Jenkins build → unit and integration tests → Selenium quality gate →
+versioned Docker image → registry → container deployment → Ansible
+provisioning → health check — runs end to end with no manual step.
+
+See [`docs/stage-15-final-report.md`](docs/stage-15-final-report.md) for
+the consolidated report, and [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md)
+for all fifteen task reports combined into one submission document.
