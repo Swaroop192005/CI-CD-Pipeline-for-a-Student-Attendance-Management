@@ -68,6 +68,10 @@ fca7dc5e56730c9c0c56c949fb5812e93e4a0b73
 merge: resolve README feature-table conflict with develop
 
 == verification of the merge result ==
+mvn -B clean verify on the merge result:
+  Tests run: 73, Failures: 0, Errors: 0, Skipped: 0   (Surefire)
+  Tests run:  7, Failures: 0, Errors: 0, Skipped: 0   (Failsafe)
+  BUILD SUCCESS
 
 == no conflict markers remain ==
 grep -c -E '^(<<<<<<<|=======|>>>>>>>)' README.md  ->  0
