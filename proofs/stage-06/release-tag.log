@@ -1,0 +1,104 @@
+Stage 6 - release tagging evidence
+Captured: 2026-10-05T07:06:39Z
+
+== git tag -n99 ==
+v1.0.0          v1.0.0 - Student Attendance Management Portal MVP
+    
+    The frozen MVP from Stage 1, complete and release-ready.
+    
+    Capabilities
+      - Record attendance for one student, subject, session date and period,
+        with a database-level uniqueness constraint (BR-01)
+      - Paginated list, detail view with the full audit trail, and search
+        across five optional filters combined with AND
+      - Role-based review workflow DRAFT -> SUBMITTED -> APPROVED/REJECTED,
+        with every transition stamped with the acting user and the time
+      - Summary dashboard: counts per status, attendance percentage from
+        approved records only, per-subject breakdown and an at-risk list
+      - Student self-service restricted to their own approved records
+      - Authentication with BCrypt and CSRF, authorised at both the URL and
+        the service layer
+      - Public health endpoint, reachable only once seeding has completed
+    
+    Quality
+      - 80 tests: 73 unit and slice, 7 integration. All green.
+      - Three defects found by exercising the running application and fixed
+        before release: an edit form served for a locked record, a refused
+        POST answering 405 instead of 403, and the health endpoint reporting
+        UP before the fixtures existed.
+    
+    Not in this release
+      Jenkins pipeline (Stage 7-8), Selenium suite (Stage 9-10), container
+      image (Stage 11-12) and Ansible provisioning (Stage 13-14).
+
+== git show v1.0.0 (tag object) ==
+tag v1.0.0
+Tagger: Swaroop Naik <naikswaroop1910@gmail.com>
+Date:   Mon Oct 5 07:05:41 2026 +0000
+
+v1.0.0 - Student Attendance Management Portal MVP
+
+The frozen MVP from Stage 1, complete and release-ready.
+
+Capabilities
+  - Record attendance for one student, subject, session date and period,
+    with a database-level uniqueness constraint (BR-01)
+  - Paginated list, detail view with the full audit trail, and search
+    across five optional filters combined with AND
+  - Role-based review workflow DRAFT -> SUBMITTED -> APPROVED/REJECTED,
+    with every transition stamped with the acting user and the time
+  - Summary dashboard: counts per status, attendance percentage from
+    approved records only, per-subject breakdown and an at-risk list
+  - Student self-service restricted to their own approved records
+  - Authentication with BCrypt and CSRF, authorised at both the URL and
+    the service layer
+  - Public health endpoint, reachable only once seeding has completed
+
+Quality
+  - 80 tests: 73 unit and slice, 7 integration. All green.
+  - Three defects found by exercising the running application and fixed
+    before release: an edit form served for a locked record, a refused
+    POST answering 405 instead of 403, and the health endpoint reporting
+    UP before the fixtures existed.
+
+Not in this release
+  Jenkins pipeline (Stage 7-8), Selenium suite (Stage 9-10), container
+  image (Stage 11-12) and Ansible provisioning (Stage 13-14).
+
+commit 6611adae7dd26245f2b29ff3beb0a2bbb2006a52
+Merge: e7e970e b72033a
+Author: Swaroop Naik <naikswaroop1910@gmail.com>
+Date:   Mon Oct 5 07:05:41 2026 +0000
+
+    Merge branch 'develop' for release v1.0.0
+    
+    The frozen MVP is complete: every functional requirement FR-01 to FR-29
+    has an implementation and a passing test, and the whole flow has been
+    exercised end to end against a running instance.
+    
+    Stages 1 to 6 of the project plan.
+
+== commit the tag points at ==
+6611adae7dd26245f2b29ff3beb0a2bbb2006a52
+
+== git describe ==
+v1.0.0
+
+== NOTE: pushing the tag to origin ==
+The annotated tag v1.0.0 exists locally and is shown above. Pushing it to
+origin is refused by this session's GitHub credentials:
+
+  $ git push origin refs/tags/v1.0.0
+  error: RPC failed; HTTP 403 curl 22 The requested URL returned error: 403
+  send-pack: unexpected disconnect while reading sideband packet
+  fatal: the remote end hung up unexpectedly
+
+Branch pushes from the same credentials succeed (main, develop and three
+feature branches are all on origin), so this is specific to refs/tags/*
+and is an environment restriction, not a repository or history problem.
+
+To publish the tag from a clone with normal credentials:
+
+  git fetch origin main
+  git tag -a v1.0.0 <commit> -m "..."      # or: git pull --tags from this clone
+  git push origin v1.0.0
