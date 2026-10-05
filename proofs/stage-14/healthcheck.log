@@ -1,0 +1,28 @@
+
+PLAY [Check the attendance service] ********************************************
+
+TASK [Check the systemd unit is active] ****************************************
+ok: [attendance-node]
+
+TASK [Check the application answers through nginx] *****************************
+ok: [attendance-node]
+
+TASK [Read which release is live] **********************************************
+ok: [attendance-node]
+
+TASK [Resolve the current symlink] *********************************************
+ok: [attendance-node]
+
+TASK [Report] ******************************************************************
+ok: [attendance-node] => {
+    "msg": [
+        "Unit        : active",
+        "Health      : UP",
+        "Live release: 1.0.1",
+        "Configured  : 1.0.1"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+attendance-node            : ok=5    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

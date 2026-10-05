@@ -1,0 +1,23 @@
+---
+# The Java runtime the application needs.
+#
+# A JRE, not a JDK: the artefact arrives pre-built from the pipeline, so a
+# compiler on the application server is unnecessary weight and extra
+# attack surface.
+
+- name: Ensure the Java runtime is installed
+  ansible.builtin.apt:
+    name: "{{ java_package }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Record the installed Java version
+  ansible.builtin.command: java -version
+  register: java_version_result
+  changed_when: false
+  failed_when: java_version_result.rc != 0
+
+- name: Report the Java runtime in use
+  ansible.builtin.debug:
+    msg: "{{ java_version_result.stderr_lines[0] }}"

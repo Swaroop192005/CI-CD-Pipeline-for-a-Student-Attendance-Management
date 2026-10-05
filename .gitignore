@@ -75,3 +75,12 @@ application-local.properties
 chromedriver
 geckodriver
 node_modules/
+
+# ---- Ansible local state -----------------------------------------------
+# The target-node SSH key is generated per environment by
+# ansible/targetnode/build-node.sh and must never be committed.
+ansible/targetnode/id_node
+ansible/targetnode/id_node.pub
+ansible/targetnode/authorized_keys
+ansible/targetnode/certs/*.crt
+ansible/*.retry

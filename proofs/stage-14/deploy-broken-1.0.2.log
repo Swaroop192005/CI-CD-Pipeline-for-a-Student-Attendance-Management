@@ -1,0 +1,136 @@
+
+PLAY [Provision the attendance application server] *****************************
+
+TASK [Gathering Facts] *********************************************************
+ok: [attendance-node]
+
+TASK [Report what is about to be provisioned] **********************************
+ok: [attendance-node] => {
+    "msg": "Provisioning attendance-node (Ubuntu 22.04) with attendance 1.0.2 as 'production'"
+}
+
+TASK [Ensure apt can reach its mirrors through the lab proxy] ******************
+ok: [attendance-node]
+
+TASK [Refresh the apt cache] ***************************************************
+ok: [attendance-node]
+
+TASK [common : Ensure the service group exists] ********************************
+ok: [attendance-node]
+
+TASK [common : Ensure the service account exists] ******************************
+ok: [attendance-node]
+
+TASK [common : Ensure the directory layout exists] *****************************
+ok: [attendance-node] => (item=/opt/attendance)
+ok: [attendance-node] => (item=/opt/attendance/releases)
+ok: [attendance-node] => (item=/var/lib/attendance)
+ok: [attendance-node] => (item=/var/log/attendance)
+ok: [attendance-node] => (item=/etc/attendance)
+
+TASK [common : Ensure the operator utilities are installed] ********************
+ok: [attendance-node]
+
+TASK [common : Ensure log rotation is configured] ******************************
+ok: [attendance-node]
+
+TASK [java : Ensure the Java runtime is installed] *****************************
+ok: [attendance-node]
+
+TASK [java : Record the installed Java version] ********************************
+ok: [attendance-node]
+
+TASK [java : Report the Java runtime in use] ***********************************
+ok: [attendance-node] => {
+    "msg": "openjdk version \"21.0.12.1\" 2026-08-18"
+}
+
+TASK [attendance_app : Check whether this release is already present] **********
+ok: [attendance-node]
+
+TASK [attendance_app : Create the release directory] ***************************
+changed: [attendance-node]
+
+TASK [attendance_app : Copy the application artefact into the release directory] ***
+changed: [attendance-node]
+
+TASK [attendance_app : Write the service environment file] *********************
+changed: [attendance-node]
+
+TASK [attendance_app : Install the systemd unit] *******************************
+ok: [attendance-node]
+
+TASK [attendance_app : Point `current` at this release] ************************
+changed: [attendance-node]
+
+TASK [attendance_app : Enable and start the service] ***************************
+ok: [attendance-node]
+
+TASK [attendance_app : Prune old releases] *************************************
+ok: [attendance-node]
+
+TASK [nginx : Ensure nginx is installed] ***************************************
+ok: [attendance-node]
+
+TASK [nginx : Remove the distribution's default site] **************************
+ok: [attendance-node]
+
+TASK [nginx : Install the attendance site configuration] ***********************
+ok: [attendance-node]
+
+TASK [nginx : Enable the attendance site] **************************************
+ok: [attendance-node]
+
+TASK [nginx : Validate the nginx configuration] ********************************
+ok: [attendance-node]
+
+TASK [nginx : Enable and start nginx] ******************************************
+ok: [attendance-node]
+
+RUNNING HANDLER [attendance_app : restart attendance] **************************
+changed: [attendance-node]
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (30 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (29 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (28 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (27 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (26 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (25 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (24 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (23 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (22 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (21 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (20 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (19 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (18 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (17 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (16 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (15 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (14 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (13 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (12 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (11 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (10 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (9 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (8 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (7 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (6 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (5 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (4 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (3 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (2 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the application to answer its health endpoint (1 retries left).
+
+TASK [Wait for the application to answer its health endpoint] ******************
+[ERROR]: Task failed: Module failed: Status code was 502 and not [200]: HTTP Error 502: Bad Gateway
+Origin: /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/ansible/site.yml:68:7
+
+66
+67   post_tasks:
+68     - name: Wait for the application to answer its health endpoint
+         ^ column 7
+
+fatal: [attendance-node]: FAILED! => {"attempts": 30, "changed": false, "connection": "close", "content": "<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx/1.18.0 (Ubuntu)</center>\r\n</body>\r\n</html>\r\n", "content_length": "166", "content_type": "text/html", "date": "Mon, 05 Oct 2026 08:42:45 GMT", "elapsed": 0, "msg": "Status code was 502 and not [200]: HTTP Error 502: Bad Gateway", "redirected": false, "server": "nginx/1.18.0 (Ubuntu)", "status": 502, "url": "http://127.0.0.1:80/attendance/actuator/health"}
+
+PLAY RECAP *********************************************************************
+attendance-node            : ok=27   changed=5    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+

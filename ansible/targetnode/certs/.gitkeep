@@ -1,0 +1,3 @@
+Extra CA certificates for the target node image are dropped here by
+ansible/targetnode/build-node.sh and removed afterwards. Empty in version
+control on purpose: a CA certificate is environment-specific.
