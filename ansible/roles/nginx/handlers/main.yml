@@ -1,0 +1,7 @@
+---
+- name: reload nginx
+  # Reload, not restart: an in-flight request should not be dropped for a
+  # configuration change.
+  ansible.builtin.systemd:
+    name: nginx
+    state: reloaded

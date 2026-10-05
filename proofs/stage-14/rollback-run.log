@@ -1,0 +1,72 @@
+
+PLAY [Roll back the attendance service to a previous release] ******************
+
+TASK [Find the release currently live] *****************************************
+ok: [attendance-node]
+
+TASK [List the releases available on the node] *********************************
+ok: [attendance-node]
+
+TASK [Order the releases, newest first] ****************************************
+ok: [attendance-node]
+
+TASK [Report what is available] ************************************************
+ok: [attendance-node] => {
+    "msg": [
+        "Live now  : 1.0.2",
+        "Available : 1.0.2, 1.0.1, 1.0.0"
+    ]
+}
+
+TASK [Choose the rollback target] **********************************************
+ok: [attendance-node]
+
+TASK [Refuse when there is nothing to roll back to] ****************************
+ok: [attendance-node] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [Refuse when the chosen release is not on the node] ***********************
+ok: [attendance-node] => {
+    "changed": false,
+    "msg": "All assertions passed"
+}
+
+TASK [Verify the target release still holds its artefact] **********************
+ok: [attendance-node]
+
+TASK [Roll back] ***************************************************************
+ok: [attendance-node] => {
+    "msg": "Rolling back from 1.0.2 to 1.0.1"
+}
+
+TASK [Rewrite the environment file for the target release] *********************
+changed: [attendance-node]
+
+TASK [Point `current` at the target release] ***********************************
+changed: [attendance-node]
+
+TASK [Restart the service] *****************************************************
+changed: [attendance-node]
+FAILED - RETRYING: [attendance-node]: Wait for the rolled-back release to become healthy (30 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the rolled-back release to become healthy (29 retries left).
+FAILED - RETRYING: [attendance-node]: Wait for the rolled-back release to become healthy (28 retries left).
+
+TASK [Wait for the rolled-back release to become healthy] **********************
+ok: [attendance-node]
+
+TASK [Confirm the rollback landed on the intended release] *********************
+ok: [attendance-node]
+
+TASK [Report] ******************************************************************
+ok: [attendance-node] => {
+    "msg": [
+        "Rolled back : 1.0.2 -> 1.0.1",
+        "Health      : UP"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+attendance-node            : ok=15   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+

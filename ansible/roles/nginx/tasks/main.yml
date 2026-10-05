@@ -1,0 +1,53 @@
+---
+# Nginx as the edge, in front of the application.
+#
+# The application listens on 8080 and is reached through nginx on 80. That
+# is worth doing even in a lab: it is where TLS termination, rate limiting
+# and a maintenance page belong, and retro-fitting a proxy to a system that
+# never had one is more disruptive than having it from the start.
+
+- name: Ensure nginx is installed
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Remove the distribution's default site
+  # Left in place it answers on port 80 ahead of ours, depending on which
+  # server block matches first.
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+
+- name: Install the attendance site configuration
+  ansible.builtin.template:
+    src: attendance.conf.j2
+    dest: /etc/nginx/sites-available/attendance.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: reload nginx
+
+- name: Enable the attendance site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/attendance.conf
+    dest: /etc/nginx/sites-enabled/attendance.conf
+    state: link
+  notify: reload nginx
+
+- name: Validate the nginx configuration
+  # Before enabling the service, not after. An invalid configuration that
+  # is already enabled takes the edge down on the next restart, which may
+  # be hours later and look unrelated.
+  ansible.builtin.command: nginx -t
+  register: nginx_test
+  changed_when: false
+  failed_when: nginx_test.rc != 0
+
+- name: Enable and start nginx
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: true
+    state: started

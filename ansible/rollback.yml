@@ -1,0 +1,130 @@
+---
+# Rolls back to a previously deployed release.
+#
+#   ansible-playbook rollback.yml                        # previous release
+#   ansible-playbook rollback.yml -e rollback_to=1.0.1   # a named one
+#
+# Rollback is repointing the `current` symlink and restarting, because the
+# release directories are kept. That matters: a rollback that needs to
+# re-fetch an artefact depends on the registry, the network and the build
+# that produced it still existing - exactly the things that may be broken
+# at the moment a rollback is needed.
+
+- name: Roll back the attendance service to a previous release
+  hosts: attendance_servers
+  become: true
+  gather_facts: false
+
+  vars:
+    rollback_to: ""
+
+  tasks:
+    - name: Find the release currently live
+      ansible.builtin.command: readlink -f {{ app_current_link }}
+      register: current_target
+      changed_when: false
+
+    - name: List the releases available on the node
+      ansible.builtin.find:
+        paths: "{{ app_releases_dir }}"
+        file_type: directory
+      register: releases
+
+    - name: Order the releases, newest first
+      ansible.builtin.set_fact:
+        available_releases: >-
+          {{ releases.files | sort(attribute='mtime', reverse=true)
+                            | map(attribute='path') | map('basename') | list }}
+        live_release: "{{ current_target.stdout | basename }}"
+
+    - name: Report what is available
+      ansible.builtin.debug:
+        msg:
+          - "Live now  : {{ live_release }}"
+          - "Available : {{ available_releases | join(', ') }}"
+
+    - name: Choose the rollback target
+      # An explicit -e rollback_to wins; otherwise the most recent release
+      # that is not the live one.
+      ansible.builtin.set_fact:
+        target_release: >-
+          {{ rollback_to if (rollback_to | length > 0)
+             else (available_releases | reject('equalto', live_release) | list | first | default('')) }}
+
+    - name: Refuse when there is nothing to roll back to
+      ansible.builtin.assert:
+        that:
+          - target_release | length > 0
+        fail_msg: >-
+          No previous release to roll back to. Releases on the node:
+          {{ available_releases | join(', ') }}
+
+    - name: Refuse when the chosen release is not on the node
+      # Checked before anything is changed, so a mistyped version leaves
+      # the service exactly as it was.
+      ansible.builtin.assert:
+        that:
+          - target_release in available_releases
+        fail_msg: >-
+          Release '{{ target_release }}' is not on this node. Available:
+          {{ available_releases | join(', ') }}
+
+    - name: Verify the target release still holds its artefact
+      ansible.builtin.stat:
+        path: "{{ app_releases_dir }}/{{ target_release }}/attendance.war"
+      register: target_artifact
+      failed_when: not target_artifact.stat.exists
+
+    - name: Roll back
+      ansible.builtin.debug:
+        msg: "Rolling back from {{ live_release }} to {{ target_release }}"
+
+    - name: Rewrite the environment file for the target release
+      ansible.builtin.template:
+        # Relative to the playbook directory. A '../' prefix is resolved
+        # against ansible/templates/ rather than against the playbook, so
+        # it looks right and is not found.
+        src: roles/attendance_app/templates/attendance.env.j2
+        dest: "{{ app_config_dir }}/attendance.env"
+        owner: root
+        group: "{{ app_group }}"
+        mode: "0640"
+      vars:
+        app_version: "{{ target_release }}"
+
+    - name: Point `current` at the target release
+      ansible.builtin.file:
+        src: "{{ app_releases_dir }}/{{ target_release }}"
+        dest: "{{ app_current_link }}"
+        state: link
+        owner: "{{ app_user }}"
+        group: "{{ app_group }}"
+        force: true
+
+    - name: Restart the service
+      ansible.builtin.systemd:
+        name: attendance
+        state: restarted
+
+    - name: Wait for the rolled-back release to become healthy
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ nginx_port }}{{ health_path }}"
+        status_code: 200
+        return_content: true
+      register: health
+      retries: "{{ health_retries }}"
+      delay: "{{ health_delay }}"
+      until: health.status is defined and health.status == 200
+      changed_when: false
+
+    - name: Confirm the rollback landed on the intended release
+      ansible.builtin.command: readlink -f {{ app_current_link }}
+      register: after
+      changed_when: false
+      failed_when: (after.stdout | basename) != target_release
+
+    - name: Report
+      ansible.builtin.debug:
+        msg:
+          - "Rolled back : {{ live_release }} -> {{ target_release }}"
+          - "Health      : {{ health.json.status }}"
