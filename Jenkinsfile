@@ -48,7 +48,6 @@ pipeline {
         // problem and is really a proxy one.
         MAVEN_OPTS = '-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=40387 -Dhttp.nonProxyHosts=localhost|127.0.0.1 -Djavax.net.ssl.trustStore=/var/jenkins_conf/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit'
 
-        TOMCAT_CONTAINER = 'attendance-tomcat'
         TOMCAT_IMAGE     = 'tomcat:10.1-jdk21-temurin'
         APP_CONTEXT      = '/attendance'
         WAR_PATH         = 'app/target/attendance.war'
@@ -60,14 +59,24 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    env.GIT_SHA   = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
+                    env.GIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
                     env.GIT_BRANCH_NAME = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+
                     // Semantic version for the artefact and, from Stage 12,
                     // the image tag: the build number makes it unique, the
                     // commit makes it traceable.
                     env.APP_VERSION = "1.0.${env.BUILD_NUMBER}-${env.GIT_SHA}"
+
+                    // One deployment target per environment, so deploying
+                    // staging does not silently replace production. A single
+                    // fixed container name lets the two environments
+                    // overwrite each other, which would make the parameter
+                    // look effective while actually being destructive.
+                    env.TOMCAT_CONTAINER = "attendance-tomcat-${params.DEPLOY_ENVIRONMENT}"
+
+                    echo "Building ${env.APP_VERSION} from ${env.GIT_BRANCH_NAME} (${env.GIT_SHA})"
+                    echo "Deployment target container: ${env.TOMCAT_CONTAINER}"
                 }
-                echo "Building ${env.APP_VERSION} from ${env.GIT_BRANCH_NAME} (${env.GIT_SHA})"
             }
         }
 
