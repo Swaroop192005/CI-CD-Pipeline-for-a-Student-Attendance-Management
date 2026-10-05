@@ -93,22 +93,47 @@ and browser-binary paths rather than relying on auto-resolution. This
 directly serves NFR-14 and removes the most common cause of browser-test
 flakiness.
 
-### 3.4 Ansible not installed
+### 3.4 Neither Ansible nor Puppet installed
 
-Neither Ansible nor Puppet was present. Puppet's package repository
-(`apt.puppet.com`) is blocked by the same egress policy that blocks the
-Jenkins download site, whereas PyPI is reachable. Ansible is also the
-better fit for a single-node lab because it is agentless — there is no
-master or agent to install on the target.
+Stage 13 permits either tool. **Both were installed, and both are
+delivered.**
+
+**Ansible** was straightforward — PyPI is reachable, and it is agentless,
+so there is nothing to install on the target node:
 
 ```bash
 pip install ansible-core      # ansible [core 2.19.13]
 ansible --version
 ```
 
-**Decision:** Stage 13/14 are delivered with Ansible (an explicitly
-permitted alternative to Puppet), using an inventory plus a YAML
-playbook with roles.
+**Puppet** needed a second attempt. Its package repository
+(`apt.puppet.com`) is blocked by the same egress policy that blocks the
+Jenkins download site, which is what stopped the first try. Two routes
+remained: the Ubuntu universe package (Puppet 5.5 — too old for EPP and
+modern data types) and the official Docker image. The image was used,
+extracting the self-contained `/opt/puppetlabs` tree — it ships its own
+Ruby 2.7.6, so it is portable onto the Ubuntu 22.04 target without
+touching the system Ruby:
+
+```bash
+docker create --name p puppet/puppet-agent:latest
+docker export p | tar -x -C /tmp opt/puppetlabs    # -> puppet 7.20.0
+```
+
+One limitation remains and is not fixable: `forgeapi.puppet.com` is
+unreachable, and Puppet's bundled Ruby ignores both `SSL_CERT_FILE` and
+`--ssl_trust_store`, so `puppet module install` cannot verify the Forge
+certificate whatever the trust store holds. The module therefore carries
+**no Forge dependencies**; the two `stdlib` features it needed
+(`Stdlib_absolutepath` and `assert_private()`) are reimplemented locally
+in about twenty lines. See `docs/stage-13-configuration-management.md` §7.2.
+
+**Decision:** Stage 13/14 are delivered with Ansible as the primary
+implementation (inventory plus a YAML playbook with roles) **and** a
+Puppet module implementing the same specification, applied masterless
+with `puppet apply`. Both are executed against their own bare node and
+verified; the two end states are compared in §7.6 of the Stage 13
+document.
 
 ## 4. Pinned versions used throughout the project
 
@@ -134,7 +159,7 @@ into the Stage 15 troubleshooting guide with its workaround.
 | # | Limitation | Workaround in use |
 |---|---|---|
 | L1 | `get.jenkins.io` blocked by egress policy | Jenkins installed from its official Docker image |
-| L2 | `apt.puppet.com` blocked by egress policy | Ansible used (permitted alternative) |
+| L2 | `apt.puppet.com` and `forgeapi.puppet.com` blocked by egress policy | Puppet 7.20.0 extracted from the official Docker image instead; the module carries no Forge dependencies, reimplementing the two `stdlib` features it needed locally |
 | L3 | No managed container registry available | Local `registry:2` on port 5000 |
 | L4 | Single node — no separate CI and target hosts | Target node provisioned as a container; Ansible connects over the Docker connection plugin |
 | L5 | Pre-installed ChromeDriver mismatched the browser | Version-matched driver installed to `/usr/local/bin` |

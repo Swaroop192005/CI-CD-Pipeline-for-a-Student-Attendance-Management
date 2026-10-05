@@ -1,0 +1,23 @@
+### Rendered-file comparison: Ansible (Jinja2) vs Puppet (EPP) ###
+
+Both nodes carry the same release and the same variable values, so the
+only legitimate difference left is the managed-by banner each tool
+stamps into the file it owns. Comments and blank lines are stripped
+before diffing; nothing else is normalised.
+
+--------------------------------------------------------------------
+FILE: attendance.env
+  IDENTICAL -- 8 significant lines match byte for byte
+--------------------------------------------------------------------
+FILE: attendance.service
+  IDENTICAL -- 26 significant lines match byte for byte
+--------------------------------------------------------------------
+FILE: attendance.conf
+  IDENTICAL -- 30 significant lines match byte for byte
+--------------------------------------------------------------------
+FILE: attendance
+  IDENTICAL -- 10 significant lines match byte for byte
+--------------------------------------------------------------------
+
+RESULT: 4 of 4 managed files are byte-identical once each
+tool's own banner comment is removed.

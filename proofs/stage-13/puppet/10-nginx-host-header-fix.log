@@ -1,0 +1,47 @@
+### Defect found and fixed while validating the Puppet implementation ###
+
+SYMPTOM
+  Driving the portal through the nginx reverse proxy with a real browser,
+  rather than curl against the health endpoint, broke at the first
+  redirect. Submitting the login form landed on
+      http://127.0.0.1/attendance/login?error    <- the port is missing
+  and the browser reported ERR_CONNECTION_REFUSED.
+
+CAUSE
+  Both the Ansible and the Puppet nginx template carried
+      proxy_set_header Host $host;
+  nginx's $host is the normalised host WITHOUT the port. Spring Security
+  builds its redirect Location headers from the Host header it receives,
+  so every 302 the application issued pointed at port 80. The health
+  endpoint never redirects, which is why every curl check in Stages 13
+  and 14 passed and the defect survived undetected.
+
+FIX
+      proxy_set_header Host $http_host;
+  $http_host is the client's Host header verbatim, port included.
+  Applied to BOTH implementations, since both shared the defect:
+      ansible/roles/nginx/templates/attendance.conf.j2
+      puppet/modules/attendance/templates/nginx-attendance.conf.epp
+
+VERIFICATION 1 -- an unauthenticated GET /dashboard must redirect to
+/login on the SAME port the request arrived on:
+  Ansible node (:8200) -> Location: http://127.0.0.1:8200/attendance/login
+  Puppet  node (:8300) -> Location: http://127.0.0.1:8300/attendance/login
+
+VERIFICATION 2 -- the full login flow through the proxy, both nodes.
+The script asserts it reaches /dashboard, so it fails loudly if the
+regression ever returns (puppet/lab/browse-node.sh):
+  Ansible node (:8200)
+    /login       -> http://127.0.0.1:8200/attendance/login             rows=5    Sign in · Attendance Portal
+    login submit -> http://127.0.0.1:8200/attendance/dashboard
+    /attendance  -> http://127.0.0.1:8200/attendance/attendance        rows=10   Attendance records · Attendance Portal
+    /students    -> http://127.0.0.1:8200/attendance/students          rows=10   Student roll · Attendance Portal
+    /review      -> http://127.0.0.1:8200/attendance/review            rows=30   Review queue · Attendance Portal
+  Puppet node (:8300)
+    /login       -> http://127.0.0.1:8300/attendance/login             rows=5    Sign in · Attendance Portal
+    login submit -> http://127.0.0.1:8300/attendance/dashboard
+    /attendance  -> http://127.0.0.1:8300/attendance/attendance        rows=10   Attendance records · Attendance Portal
+    /students    -> http://127.0.0.1:8300/attendance/students          rows=10   Student roll · Attendance Portal
+    /review      -> http://127.0.0.1:8300/attendance/review            rows=30   Review queue · Attendance Portal
+
+Both reach /dashboard on the correct port and render live seeded data.

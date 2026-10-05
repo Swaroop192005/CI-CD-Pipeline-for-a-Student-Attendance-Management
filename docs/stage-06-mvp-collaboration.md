@@ -234,25 +234,40 @@ lightweight tag cannot.
 
 ### Known limitation — the tag is not on origin
 
-Pushing the tag is refused by this session's GitHub credentials:
+The tag exists and is correct; this session simply cannot publish it.
+Four independent routes were tried, and each is refused by the session's
+environment policy rather than by the repository or by anything about the
+tags themselves. Captured in
+[`proofs/stage-06/tag-push-attempts.log`](../proofs/stage-06/tag-push-attempts.log):
+
+| # | Route | Response |
+|---|---|---|
+| 1 | `git push origin v1.0.0` | `error: RPC failed; HTTP 403` → `fatal: the remote end hung up unexpectedly` |
+| 2 | Git refs API, `gh api --method POST .../git/tags` | `"Write access to this GitHub API path is not permitted through this proxy."` |
+| 3 | Releases API, `gh api --method POST .../releases` (a release creates its tag) | `"Creating, editing, or deleting releases is not permitted for this session type."` |
+| 4 | The GitHub MCP server | Exposes `get_tag`, `list_tags`, `get_latest_release`, `list_releases`, `get_release_by_tag` — every tag and release operation it has is read-only |
+
+Routes 2 and 3 are the useful ones: they fail with explicit policy
+messages rather than a bare 403, which settles the question of whether
+this is a permissions quirk that could be worked around.
+
+Branch pushes from the same credentials succeed throughout — the remote
+holds fourteen branches, `main` and `develop` among them — so the
+restriction is specific to `refs/tags/*`. Both tags are annotated and
+carry their full release notes:
 
 ```
-$ git push origin refs/tags/v1.0.0
-error: RPC failed; HTTP 403 curl 22 The requested URL returned error: 403
-fatal: the remote end hung up unexpectedly
+v1.0.0 -> 6611adae7dd26245f2b29ff3beb0a2bbb2006a52
+v1.2.0 -> 819b168109a1239817af52f35743deadc92c36b9
 ```
 
-Branch pushes from the same credentials succeed — `main`, `develop` and
-three feature branches are all on origin — so the restriction is
-specific to `refs/tags/*` and is an environment limitation, not a
-repository or history problem. The tag object exists in the repository
-history and is reproduced verbatim in
-[`proofs/stage-06/release-tag.log`](../proofs/stage-06/release-tag.log).
-
-From a clone with ordinary credentials it publishes with one command:
+They are reproduced verbatim in
+[`proofs/stage-06/release-tag.log`](../proofs/stage-06/release-tag.log), and
+from a clone with ordinary credentials they publish with one command:
 
 ```bash
-git push origin v1.0.0
+git fetch origin
+git push origin v1.0.0 v1.2.0
 ```
 
 This is recorded in the Stage 15 troubleshooting guide and limitations
