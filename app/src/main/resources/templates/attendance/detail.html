@@ -80,8 +80,54 @@
     </dl>
   </div>
 
+  <!-- Workflow actions. Each is also re-checked server side in
+       WorkflowService: hiding a button is a convenience, never the
+       authorisation (NFR-05). -->
+  <div class="card" th:if="${mayEdit or maySubmit or mayReview}">
+    <h2>Actions</h2>
+
+    <p class="subtitle" th:if="${maySubmit}">
+      Submitting locks the record for correction and sends it to the Head
+      of Department for a decision.
+    </p>
+
+    <div class="actions">
+      <a th:if="${mayEdit}" class="btn btn-secondary"
+         th:href="@{/attendance/{id}/edit(id=${record.id})}" data-testid="edit-record">Correct record</a>
+
+      <form th:if="${maySubmit}" th:action="@{/attendance/{id}/submit(id=${record.id})}"
+            method="post" style="display:inline">
+        <button class="btn btn-primary" type="submit" data-testid="submit-record">
+          Submit for review</button>
+      </form>
+    </div>
+
+    <div th:if="${mayReview}" style="margin-top:18px">
+      <form th:action="@{/attendance/{id}/approve(id=${record.id})}" method="post"
+            data-testid="approve-form" style="margin-bottom:16px">
+        <label for="comment">Approval comment (optional)</label>
+        <input type="text" id="comment" name="comment" data-testid="approve-comment"
+               placeholder="For example: cross-checked against the register"/>
+        <div class="actions">
+          <button class="btn btn-approve" type="submit" data-testid="approve-record">Approve</button>
+        </div>
+      </form>
+
+      <form th:action="@{/attendance/{id}/reject(id=${record.id})}" method="post"
+            data-testid="reject-form">
+        <label for="reason">Rejection reason (required)</label>
+        <input type="text" id="reason" name="reason" data-testid="reject-reason"
+               placeholder="Say what the faculty member should correct"/>
+        <div class="actions">
+          <button class="btn btn-reject" type="submit" data-testid="reject-record">Reject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <div class="actions">
     <a class="btn btn-secondary" th:href="@{/attendance}" data-testid="back-to-list">Back to list</a>
+    <a class="btn btn-secondary" th:href="@{/dashboard}" data-testid="back-to-dashboard">Dashboard</a>
   </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

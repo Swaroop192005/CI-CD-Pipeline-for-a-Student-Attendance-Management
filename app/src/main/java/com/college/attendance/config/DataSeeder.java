@@ -5,17 +5,19 @@ import com.college.attendance.domain.AttendanceRecord;
 import com.college.attendance.domain.AttendanceStatus;
 import com.college.attendance.domain.Role;
 import com.college.attendance.domain.Student;
+import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.repository.AppUserRepository;
 import com.college.attendance.repository.AttendanceRecordRepository;
 import com.college.attendance.repository.StudentRepository;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +38,18 @@ import java.util.Random;
  *
  * <p>Seeding is skipped entirely once any user exists, so restarting a
  * container with a mounted volume never duplicates or overwrites data.
+ *
+ * <p>This runs during context refresh rather than as an
+ * {@code ApplicationRunner}. An ApplicationRunner fires <em>after</em> the
+ * servlet container has bound its port, so there is a window in which
+ * {@code /actuator/health} answers UP while the accounts do not yet
+ * exist - a sign-in in that window fails. Because the pipeline and the
+ * Ansible playbook both gate on that health check, the window would have
+ * shown up as an intermittent deployment failure rather than as an
+ * obvious bug.
  */
 @Component
-public class DataSeeder implements ApplicationRunner {
+public class DataSeeder {
 
     private static final Logger log = LoggerFactory.getLogger(DataSeeder.class);
 
@@ -52,35 +63,48 @@ public class DataSeeder implements ApplicationRunner {
     private final AttendanceRecordRepository records;
     private final PasswordEncoder passwordEncoder;
     private final AttendanceProperties properties;
+    private final TransactionTemplate transactions;
 
     public DataSeeder(AppUserRepository users, StudentRepository students,
                       AttendanceRecordRepository records, PasswordEncoder passwordEncoder,
-                      AttendanceProperties properties) {
+                      AttendanceProperties properties, TransactionTemplate transactions) {
         this.users = users;
         this.students = students;
         this.records = records;
         this.passwordEncoder = passwordEncoder;
         this.properties = properties;
+        this.transactions = transactions;
     }
 
-    @Override
-    @Transactional
-    public void run(ApplicationArguments args) {
+    /**
+     * Seeds during bean initialisation, so the port is not open until the
+     * fixtures exist.
+     *
+     * <p>A {@code TransactionTemplate} rather than {@code @Transactional}:
+     * the annotation is applied by a proxy that is not yet in place while
+     * this bean is still being initialised, so the annotation would
+     * silently do nothing here.
+     */
+    @PostConstruct
+    void seed() {
         if (!properties.seedData()) {
             log.info("Seeding disabled (attendance.seed-data=false)");
             return;
         }
-        if (users.count() > 0) {
-            log.info("Datastore already populated ({} users); skipping seed", users.count());
-            return;
-        }
 
-        seedUsers();
-        List<Student> roll = seedStudents();
-        seedAttendance(roll);
+        transactions.executeWithoutResult(status -> {
+            if (users.count() > 0) {
+                log.info("Datastore already populated ({} users); skipping seed", users.count());
+                return;
+            }
 
-        log.info("Seeded {} users, {} students, {} attendance records",
-                users.count(), students.count(), records.count());
+            seedUsers();
+            List<Student> roll = seedStudents();
+            seedAttendance(roll);
+
+            log.info("Seeded {} users, {} students, {} attendance records",
+                    users.count(), students.count(), records.count());
+        });
     }
 
     private void seedUsers() {
@@ -117,9 +141,25 @@ public class DataSeeder implements ApplicationRunner {
     }
 
     /**
-     * Ten sessions per subject over the preceding fortnight. Student 1 is
-     * given a deliberately poor record for CS503 so that the at-risk list
-     * on the dashboard has something real to show.
+     * Ten sessions per subject over the preceding three weeks, in a mix of
+     * workflow states that mirrors a real department mid-semester.
+     *
+     * <p>The state assignment is by session age, which is what makes the
+     * fixtures useful rather than merely present:
+     *
+     * <ul>
+     *   <li>Older sessions are {@code APPROVED}, so the dashboard has real
+     *       percentages instead of showing 0% on a full datastore.</li>
+     *   <li>The most recent session is {@code SUBMITTED}, so the review
+     *       queue is not empty the first time a HOD signs in.</li>
+     *   <li>One session is {@code REJECTED} with a reason, so the
+     *       correct-and-re-submit path is reachable without first
+     *       engineering a rejection by hand.</li>
+     *   <li>The newest sessions stay {@code DRAFT}.</li>
+     * </ul>
+     *
+     * <p>Student 1 is given a deliberately poor CS503 record so the
+     * at-risk list has a genuine case to show.
      */
     private void seedAttendance(List<Student> roll) {
         Random random = new Random(RANDOM_SEED);
@@ -138,10 +178,27 @@ public class DataSeeder implements ApplicationRunner {
                     AttendanceStatus status = pickStatus(random, student, subject, session);
                     AttendanceRecord record = new AttendanceRecord(
                             student, subject, date, period, status, null, "faculty1");
+                    applySeedWorkflowState(record, session);
                     records.save(record);
                 }
             }
         }
+    }
+
+    private void applySeedWorkflowState(AttendanceRecord record, int session) {
+        if (session <= 6) {
+            record.setWorkflowStatus(WorkflowStatus.APPROVED);
+            record.setReviewedBy("hod1");
+            record.setReviewedAt(Instant.now().minus(Duration.ofDays(2)));
+        } else if (session == 7) {
+            record.setWorkflowStatus(WorkflowStatus.REJECTED);
+            record.setReviewedBy("hod1");
+            record.setReviewedAt(Instant.now().minus(Duration.ofDays(1)));
+            record.setReviewComment("Period number does not match the timetable; please re-check.");
+        } else if (session == 8) {
+            record.setWorkflowStatus(WorkflowStatus.SUBMITTED);
+        }
+        // session 9 stays DRAFT
     }
 
     private AttendanceStatus pickStatus(Random random, Student student, String subject, int session) {

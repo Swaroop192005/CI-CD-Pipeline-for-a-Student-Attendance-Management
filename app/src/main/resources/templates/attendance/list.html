@@ -11,7 +11,8 @@
     <div>
       <h1 data-testid="page-title">Attendance records</h1>
       <p class="subtitle">
-        <span data-testid="result-count" th:text="${records.totalElements}">0</span> record(s),
+        <span data-testid="result-count" th:text="${records.totalElements}">0</span> record(s)
+        <span th:if="${filtersActive}" data-testid="filters-active">matching the current filters</span>,
         most recent session first.
       </p>
     </div>
@@ -19,10 +20,62 @@
        th:href="@{/attendance/new}" data-testid="new-record-button">Record attendance</a>
   </div>
 
+  <!-- Search (FR-13). Filters are echoed into the pagination links below so
+       that they survive paging (FR-14). -->
+  <div class="card">
+    <h2>Search</h2>
+    <form th:action="@{/attendance}" th:object="${search}" method="get" data-testid="search-form">
+      <div class="form-grid">
+        <div>
+          <label for="rollNumber">Roll number</label>
+          <input type="text" id="rollNumber" th:field="*{rollNumber}"
+                 placeholder="1CS21CS001" data-testid="filter-roll"/>
+        </div>
+        <div>
+          <label for="subjectCode">Subject</label>
+          <select id="subjectCode" th:field="*{subjectCode}" data-testid="filter-subject">
+            <option value="">All subjects</option>
+            <option th:each="c : ${subjectCodes}" th:value="${c}" th:text="${c}">CS501</option>
+          </select>
+        </div>
+        <div>
+          <label for="from">Session date from</label>
+          <input type="date" id="from" th:field="*{from}" data-testid="filter-from"/>
+        </div>
+        <div>
+          <label for="to">Session date to</label>
+          <input type="date" id="to" th:field="*{to}" data-testid="filter-to"/>
+        </div>
+        <div>
+          <label for="attendanceStatus">Attendance</label>
+          <select id="attendanceStatus" th:field="*{attendanceStatus}"
+                  data-testid="filter-attendance-status">
+            <option value="">Any</option>
+            <option th:each="s : ${attendanceStatuses}" th:value="${s}" th:text="${s.label}">Present</option>
+          </select>
+        </div>
+        <div>
+          <label for="workflowStatus">Workflow</label>
+          <select id="workflowStatus" th:field="*{workflowStatus}"
+                  data-testid="filter-workflow-status">
+            <option value="">Any</option>
+            <option th:each="s : ${workflowStatuses}" th:value="${s}" th:text="${s.label}">Draft</option>
+          </select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit" data-testid="apply-filters">Apply filters</button>
+        <a class="btn btn-secondary" th:href="@{/attendance}" data-testid="clear-filters">Clear</a>
+      </div>
+    </form>
+  </div>
+
   <div class="card">
     <div th:if="${records.isEmpty()}" class="empty-state" data-testid="empty-state">
-      <strong>No attendance records yet</strong>
-      Once a class session is recorded it will appear here.
+      <strong th:if="${filtersActive}">No records match these filters</strong>
+      <strong th:unless="${filtersActive}">No attendance records yet</strong>
+      <span th:if="${filtersActive}">Try widening the date range or clearing a filter.</span>
+      <span th:unless="${filtersActive}">Once a class session is recorded it will appear here.</span>
     </div>
 
     <div th:unless="${records.isEmpty()}" class="table-wrap">
@@ -74,11 +127,19 @@
       </span>
       <a class="btn btn-secondary btn-sm"
          th:if="${records.hasPrevious()}"
-         th:href="@{/attendance(page=${records.number - 1})}"
+         th:href="@{/attendance(page=${records.number - 1},
+                                rollNumber=${search.rollNumber}, subjectCode=${search.subjectCode},
+                                from=${search.from}, to=${search.to},
+                                attendanceStatus=${search.attendanceStatus},
+                                workflowStatus=${search.workflowStatus})}"
          data-testid="page-previous">Previous</a>
       <a class="btn btn-secondary btn-sm"
          th:if="${records.hasNext()}"
-         th:href="@{/attendance(page=${records.number + 1})}"
+         th:href="@{/attendance(page=${records.number + 1},
+                                rollNumber=${search.rollNumber}, subjectCode=${search.subjectCode},
+                                from=${search.from}, to=${search.to},
+                                attendanceStatus=${search.attendanceStatus},
+                                workflowStatus=${search.workflowStatus})}"
          data-testid="page-next">Next</a>
     </div>
   </div>
