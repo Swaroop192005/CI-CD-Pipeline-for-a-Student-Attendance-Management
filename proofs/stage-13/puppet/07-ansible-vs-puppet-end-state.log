@@ -1,0 +1,43 @@
+### End-state comparison: Ansible node vs Puppet node ###
+
+Both implement the same Stage 13 specification.
+ansible/group_vars/attendance_servers.yml and puppet/data/common.yaml
+hold deliberately identical values, and both nodes deploy the very
+same artefact file (/artifacts/attendance-1.0.0.war).
+
+ANSIBLE (attendance-node)                                      | PUPPET (attendance-node-puppet)                               
+---------------------------------------------------------------+---------------------------------------------------------------
+user:    attendance:1501:1501:/usr/sbin/nologin                | user:    attendance:1501:1501:/usr/sbin/nologin                =
+group:   attendance:1501                                       | group:   attendance:1501                                       =
+dir:     755 attendance:attendance /opt/attendance             | dir:     755 attendance:attendance /opt/attendance             =
+dir:     755 attendance:attendance /opt/attendance/releases    | dir:     755 attendance:attendance /opt/attendance/releases    =
+dir:     750 attendance:attendance /var/lib/attendance         | dir:     750 attendance:attendance /var/lib/attendance         =
+dir:     750 attendance:attendance /var/log/attendance         | dir:     750 attendance:attendance /var/log/attendance         =
+dir:     750 root:attendance /etc/attendance                   | dir:     750 root:attendance /etc/attendance                   =
+envfile: 640 root:attendance sha=d7d80cc6d09a6e22              | envfile: 640 root:attendance sha=7810418268a72b91              *
+unit:    644 root:root sha=dcd920cdc6eaebff                    | unit:    644 root:root sha=3e8a38ffdce298da                    *
+nginx:   sha=371140b8a236caf3                                  | nginx:   sha=dc4271beaf5e25d0                                  *
+symlink: /opt/attendance/current -> /opt/attendance/releases/1.0.0 | symlink: /opt/attendance/current -> /opt/attendance/releases/1.0.0 =
+war:     attendance:attendance 63815182 sha=4bee7d6f0598b1b5   | war:     attendance:attendance 63815182 sha=4bee7d6f0598b1b5   =
+svc:     attendance=active/enabled nginx=active/enabled        | svc:     attendance=active/enabled nginx=active/enabled        =
+runas:   attendance                                            | runas:   attendance                                            =
+health:  {"status":"UP"}                                       | health:  {"status":"UP"}                                       =
+info:    {"app":{"name":"Student Attendance Management Portal","environment":"production"}} | info:    {"app":{"name":"Student Attendance Management Portal","environment":"production"}} =
+logrot:  sha=dae2d0d5483f8190                                  | logrot:  sha=670b566e5c22b4e2                                  *
+
+  '=' identical   '*' differs        13 of 17 attributes identical
+
+### Mechanical diff ###
+- Ansible / + Puppet:
+-envfile: 640 root:attendance sha=d7d80cc6d09a6e22
+-unit:    644 root:root sha=dcd920cdc6eaebff
+-nginx:   sha=371140b8a236caf3
++envfile: 640 root:attendance sha=7810418268a72b91
++unit:    644 root:root sha=3e8a38ffdce298da
++nginx:   sha=dc4271beaf5e25d0
+-logrot:  sha=dae2d0d5483f8190
++logrot:  sha=670b566e5c22b4e2
+
+Remaining differences are file digests. Each tool stamps its own
+'managed by' banner into the files it owns; the content diff is in
+08-rendered-templates-comparison.log.

@@ -253,7 +253,7 @@ Each choice is justified against the Stage 1 constraints.
 | Pipeline definition | Declarative `Jenkinsfile` | — | Pipeline-as-code lives with the application it builds | C3 |
 | Containerisation | Docker Engine | 29.x | Image + local registry; lighter than VMs on the lab machine | C6, C7 |
 | Registry | Local Docker registry | `registry:2` | No managed cloud registry available in the lab | C7 |
-| Configuration management | Ansible | core 2.19 | Agentless — no Puppet master needed on a single lab node; YAML playbook and inventory satisfy the mandated option | C5, C6 |
+| Configuration management | Ansible **and** Puppet | core 2.19 / 7.20.0 | The stage permits either; both are implemented against the same specification. Ansible is agentless and was primary; Puppet is applied masterless with `puppet apply`. Comparing the two is what proves the specification is tool-neutral | C5, C6 |
 | Monitoring | Spring Boot Actuator | Boot-managed | `/actuator/health` is the probe used by both the pipeline and the playbook | NFR-09 |
 
 ### 3.1 Rejected alternatives
@@ -264,7 +264,7 @@ Each choice is justified against the Stage 1 constraints.
 | MySQL/PostgreSQL server | Another service to install, secure and provision on a 4 vCPU machine; H2 keeps the pipeline self-contained and is swappable by configuration |
 | Gradle | Equally acceptable under C1, but Maven's fixed lifecycle maps more directly onto discrete Jenkins stages |
 | JAR with embedded Tomcat only | Would not satisfy C2's "deploy to Tomcat" requirement; the executable WAR satisfies both |
-| Puppet | Needs an agent or a master to be meaningful; Ansible is agentless and fits a single-node lab |
+| Puppet *as the only tool* | Ansible is agentless and fits a single-node lab better, so it was primary. Puppet was **not** rejected — a second implementation is delivered in `puppet/`, applied masterless so no agent or master is needed either |
 | Kubernetes | Far beyond a single lab node; recorded as a future enhancement |
 
 ---

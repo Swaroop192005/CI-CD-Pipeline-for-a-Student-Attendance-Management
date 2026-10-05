@@ -1,0 +1,15 @@
+<%- | String $app_log_dir,
+      String $app_user,
+      String $app_group,
+| -%>
+# Managed by Puppet - changes here are overwritten on the next run.
+<%= $app_log_dir %>/*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    create 0640 <%= $app_user %> <%= $app_group %>
+}

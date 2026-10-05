@@ -1,0 +1,29 @@
+v1.0.0 - Student Attendance Management Portal MVP
+
+The frozen MVP from Stage 1, complete and release-ready.
+
+Capabilities
+  - Record attendance for one student, subject, session date and period,
+    with a database-level uniqueness constraint (BR-01)
+  - Paginated list, detail view with the full audit trail, and search
+    across five optional filters combined with AND
+  - Role-based review workflow DRAFT -> SUBMITTED -> APPROVED/REJECTED,
+    with every transition stamped with the acting user and the time
+  - Summary dashboard: counts per status, attendance percentage from
+    approved records only, per-subject breakdown and an at-risk list
+  - Student self-service restricted to their own approved records
+  - Authentication with BCrypt and CSRF, authorised at both the URL and
+    the service layer
+  - Public health endpoint, reachable only once seeding has completed
+
+Quality
+  - 80 tests: 73 unit and slice, 7 integration. All green.
+  - Three defects found by exercising the running application and fixed
+    before release: an edit form served for a locked record, a refused
+    POST answering 405 instead of 403, and the health endpoint reporting
+    UP before the fixtures existed.
+
+Not in this release
+  Jenkins pipeline (Stage 7-8), Selenium suite (Stage 9-10), container
+  image (Stage 11-12) and Ansible provisioning (Stage 13-14).
+

@@ -1,0 +1,10 @@
+### puppet apply -- RUN 2: idempotency, nothing should change ###
+started 2026-10-05T16:51:34Z
+Notice: Compiled catalog for a2ed425e20bf in environment production in 0.42 seconds
+Notice: Applied catalog in 3.81 seconds
+detailed-exitcode=0
+
+# --detailed-exitcodes: 0 = no changes and no failures, 2 = changes
+#   applied, 4 = failures, 6 = both. A second run of an idempotent
+#   manifest must therefore exit 0.
+RESULT: IDEMPOTENT (exit 0, zero changes)

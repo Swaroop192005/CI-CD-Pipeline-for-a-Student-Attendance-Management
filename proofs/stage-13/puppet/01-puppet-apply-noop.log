@@ -1,0 +1,46 @@
+### Bare node, before anything is applied ###
+user attendance : id: 'attendance': no such user
+service         : inactive
+/opt/attendance : ls: cannot access '/opt/attendance': No such file or directory
+nginx           : inactive
+java            : bash: line 6: java: command not found
+apt indices     : 0
+
+### puppet apply --noop -- report every change, make none ###
+Notice: Compiled catalog for a2ed425e20bf in environment production in 0.41 seconds
+Notice: /Stage[main]/Attendance::Install/Exec[attendance apt-get update]/returns: current_value 'notrun', should be ['0'] (noop)
+Notice: /Stage[main]/Attendance::Install/Package[openjdk-21-jre-headless]/ensure: current_value 'purged', should be 'present' (noop)
+Notice: /Stage[main]/Attendance::Install/Package[unzip]/ensure: current_value 'purged', should be 'present' (noop)
+Notice: /Stage[main]/Attendance::Install/Group[attendance]/ensure: current_value 'absent', should be 'present' (noop)
+Notice: /Stage[main]/Attendance::Install/User[attendance]/ensure: current_value 'absent', should be 'present' (noop)
+Notice: /Stage[main]/Attendance::Install/File[/opt/attendance]/ensure: current_value 'absent', should be 'directory' (noop)
+Notice: /Stage[main]/Attendance::Install/File[/opt/attendance/releases]/ensure: current_value 'absent', should be 'directory' (noop)
+Notice: /Stage[main]/Attendance::Install/File[/var/lib/attendance]/ensure: current_value 'absent', should be 'directory' (noop)
+Notice: /Stage[main]/Attendance::Install/File[/var/log/attendance]/ensure: current_value 'absent', should be 'directory' (noop)
+Notice: /Stage[main]/Attendance::Install/File[/etc/attendance]/ensure: current_value 'absent', should be 'directory' (noop)
+Notice: Class[Attendance::Install]: Would have triggered 'refresh' from 10 events
+Notice: /Stage[main]/Attendance::Config/File[/etc/attendance/attendance.env]/ensure: current_value 'absent', should be 'file' (noop)
+Notice: /Stage[main]/Attendance::Config/File[/etc/systemd/system/attendance.service]/ensure: current_value 'absent', should be 'file' (noop)
+Notice: /Stage[main]/Attendance::Config/Exec[attendance systemd daemon-reload]: Would have triggered 'refresh' from 1 event
+Notice: /Stage[main]/Attendance::Config/File[/etc/logrotate.d/attendance]/ensure: current_value 'absent', should be 'file' (noop)
+Notice: /Stage[main]/Attendance::Config/Package[nginx]/ensure: current_value 'purged', should be 'present' (noop)
+Notice: /Stage[main]/Attendance::Config/File[/etc/nginx/sites-available/attendance.conf]/ensure: current_value 'absent', should be 'file' (noop)
+Notice: /Stage[main]/Attendance::Config/File[/etc/nginx/sites-enabled/attendance.conf]/ensure: current_value 'absent', should be 'link' (noop)
+Notice: /Stage[main]/Attendance::Config/Exec[attendance nginx config test]: Would have triggered 'refresh' from 2 events
+Notice: /Stage[main]/Attendance::Config/Service[nginx]/ensure: current_value 'stopped', should be 'running' (noop)
+Notice: Class[Attendance::Config]: Would have triggered 'refresh' from 9 events
+Notice: /Stage[main]/Attendance::Deploy/File[/opt/attendance/releases/1.0.0]/ensure: current_value 'absent', should be 'directory' (noop)
+Notice: /Stage[main]/Attendance::Deploy/File[/opt/attendance/releases/1.0.0/attendance.war]/ensure: current_value 'absent', should be 'file' (noop)
+Notice: /Stage[main]/Attendance::Deploy/File[/opt/attendance/current]/ensure: current_value 'absent', should be 'link' (noop)
+Notice: Class[Attendance::Deploy]: Would have triggered 'refresh' from 3 events
+Notice: Class[Attendance::Service]: Would have triggered 'refresh' from 1 event
+Notice: /Stage[main]/Attendance::Service/Service[attendance]/ensure: current_value 'stopped', should be 'running' (noop)
+Notice: Class[Attendance::Service]: Would have triggered 'refresh' from 1 event
+Notice: Class[Attendance]: Would have triggered 'refresh' from 4 events
+Notice: Stage[main]: Would have triggered 'refresh' from 5 events
+Notice: Applied catalog in 0.58 seconds
+exit=0
+
+### the node is still untouched ###
+ls: cannot access '/opt/attendance': No such file or directory
+id: 'attendance': no such user

@@ -157,7 +157,7 @@ attendance devices. Each is recorded in the future-enhancement plan
 | C2 | Deployment target must be Tomcat or Nginx | WAR packaging, deployable to Tomcat 10.1 *and* runnable standalone |
 | C3 | CI server must be Jenkins | Jenkins LTS, pipeline-as-code via `Jenkinsfile` |
 | C4 | UI tests must be Selenium WebDriver | Server-rendered Thymeleaf UI with stable `data-testid` hooks |
-| C5 | Config management must be Puppet or Ansible | Ansible (agentless; no master node needed in the lab) |
+| C5 | Config management must be Puppet or Ansible | Both. Ansible primary (agentless; no master node needed in the lab); a Puppet module implementing the same specification is delivered alongside it |
 | C6 | Single lab machine, 4 vCPU / 16 GB | Containers, not VMs; H2 instead of a separate RDBMS server |
 | C7 | No managed cloud services available | Local Docker registry instead of a hosted one |
 | C8 | Restricted outbound network in the lab | Dependencies from Maven Central and Docker Hub only; Jenkins run from its official image |

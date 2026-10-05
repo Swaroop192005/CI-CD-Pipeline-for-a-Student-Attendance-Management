@@ -1,0 +1,48 @@
+<%- | String $app_user,
+      String $app_group,
+      String $app_config_dir,
+      String $app_data_dir,
+      String $app_log_dir,
+      String $current_link,
+| -%>
+# Managed by Puppet - changes here are overwritten on the next run.
+[Unit]
+Description=Student Attendance Management Portal
+Documentation=https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=<%= $app_user %>
+Group=<%= $app_group %>
+EnvironmentFile=<%= $app_config_dir %>/attendance.env
+
+# Runs from the `current` symlink rather than a version directory, so a
+# rollback is a symlink change plus a restart and never a unit rewrite.
+WorkingDirectory=<%= $app_data_dir %>
+ExecStart=/usr/bin/java $JAVA_OPTS -jar <%= $current_link %>/attendance.war
+
+# 143 is 128 + SIGTERM: the JVM ran its shutdown hooks and exited cleanly.
+# Without this systemd would record every normal stop as a failure.
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+
+# Time to shut down cleanly before systemd escalates to SIGKILL. A forced
+# kill mid-write is how an H2 file gets corrupted.
+TimeoutStopSec=30
+KillSignal=SIGTERM
+
+StandardOutput=append:<%= $app_log_dir %>/attendance.log
+StandardError=append:<%= $app_log_dir %>/attendance.log
+
+# The service writes to its data and log directories and nowhere else.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=<%= $app_data_dir %> <%= $app_log_dir %>
+
+[Install]
+WantedBy=multi-user.target

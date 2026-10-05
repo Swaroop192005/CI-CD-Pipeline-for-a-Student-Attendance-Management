@@ -1,0 +1,14 @@
+---
+# Hiera keeps the data out of the manifests, so changing a port or a path
+# is a one-line edit in YAML rather than a change to logic.
+version: 5
+
+defaults:
+  datadir: data
+  data_hash: yaml_data
+
+hierarchy:
+  - name: "Per-node overrides"
+    path: "nodes/%{trusted.certname}.yaml"
+  - name: "Common defaults"
+    path: "common.yaml"
