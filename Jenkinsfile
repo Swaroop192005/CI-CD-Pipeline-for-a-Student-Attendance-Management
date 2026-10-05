@@ -165,14 +165,24 @@ pipeline {
                         # The gate instance runs the WAR in its executable
                         # form rather than deploying it to Tomcat. It is the
                         # same artefact either way, and this mode honours
-                        # SERVER_PORT, so the gate can take a port of its own
+                        # SERVER_PORT, so the gate takes a port of its own
                         # without colliding with a deployed environment.
-                        docker run -d --name ${GATE_CONTAINER} --network host \\
+                        #
+                        # create -> cp -> start, not a bind mount. The Docker
+                        # CLI here talks to the *host* daemon over a mounted
+                        # socket, so a -v path would be resolved against the
+                        # host filesystem, where the controller's workspace
+                        # does not exist: Docker would silently create an
+                        # empty directory and the container would start with
+                        # no artefact. docker cp streams the file from this
+                        # container's own filesystem, which is where it is.
+                        docker create --name ${GATE_CONTAINER} --network host \\
                             -e SERVER_PORT=${GATE_PORT} \\
                             -e ATTENDANCE_ENVIRONMENT=quality-gate \\
-                            -v "\$(pwd)/${WAR_PATH}:/app/attendance.war:ro" \\
                             ${RUNTIME_IMAGE} \\
-                            java -jar /app/attendance.war >/dev/null
+                            java -jar /attendance.war >/dev/null
+                        docker cp ${WAR_PATH} ${GATE_CONTAINER}:/attendance.war
+                        docker start ${GATE_CONTAINER} >/dev/null
 
                         docker run -d --name ${SELENIUM_CONTAINER} --network host \\
                             --shm-size=2g \\
@@ -184,12 +194,22 @@ pipeline {
                           curl -sf http://localhost:${GATE_PORT}${APP_CONTEXT}/actuator/health >/dev/null && break
                           sleep 3
                         done
+                        if ! curl -sf http://localhost:${GATE_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
+                          echo "The application under test never became healthy. Container log:"
+                          docker logs --tail 40 ${GATE_CONTAINER}
+                          exit 1
+                        fi
 
                         echo "Waiting for the Selenium node..."
                         for i in \$(seq 1 60); do
-                          curl -sf http://localhost:${SELENIUM_PORT}/status | grep -q '"ready": *true' && break
+                          curl -sf http://localhost:${SELENIUM_PORT}/status 2>/dev/null | grep -q '"ready": *true' && break
                           sleep 3
                         done
+                        if ! curl -sf http://localhost:${SELENIUM_PORT}/status 2>/dev/null | grep -q '"ready": *true'; then
+                          echo "The Selenium node never became ready. Container log:"
+                          docker logs --tail 40 ${SELENIUM_CONTAINER}
+                          exit 1
+                        fi
 
                         curl -sf http://localhost:${GATE_PORT}${APP_CONTEXT}/actuator/health
                         echo
