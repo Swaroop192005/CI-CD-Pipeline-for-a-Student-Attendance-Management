@@ -1,0 +1,32 @@
+### DRIFT CORRECTION ###
+Puppet does not replay a script; it compiles a catalogue and compares
+it against live state. Introduce drift by hand, then re-apply.
+
+--- introducing drift ---
+deleted   /etc/attendance/attendance.env
+corrupted /etc/nginx/sites-available/attendance.conf
+stopped   attendance.service
+chowned   /var/log/attendance to root:root
+
+--- state after drift ---
+env file : MISSING
+service  : inactive
+log dir  : root:root
+
+--- puppet apply ---
+Notice: Compiled catalog for a2ed425e20bf in environment production in 0.49 seconds
+Notice: /Stage[main]/Attendance::Install/File[/var/log/attendance]/owner: owner changed 'root' to 'attendance'
+Notice: /Stage[main]/Attendance::Install/File[/var/log/attendance]/group: group changed 'root' to 'attendance'
+Notice: /Stage[main]/Attendance::Config/File[/etc/attendance/attendance.env]/ensure: defined content as '{sha256}7810418268a72b91ae91469a3448b4d966ef4dd731c5cc5b215a3ab4bc67db60'
+Notice: /Stage[main]/Attendance::Config/File[/etc/nginx/sites-available/attendance.conf]/content: content changed '{sha256}feba015548503854ea3b0c4fe1fe4289613cc90f4ef91f2cab7c5904bc496db1' to '{sha256}dc4271beaf5e25d047fa8dcf4d8be75eb6c7dbdc74c07f116c344da35ed8731b'
+Notice: /Stage[main]/Attendance::Config/Exec[attendance nginx config test]: Triggered 'refresh' from 1 event
+Notice: /Stage[main]/Attendance::Config/Service[nginx]: Triggered 'refresh' from 1 event
+Notice: /Stage[main]/Attendance::Service/Service[attendance]/ensure: ensure changed 'stopped' to 'running'
+Notice: Applied catalog in 3.04 seconds
+detailed-exitcode=2
+
+--- state after correction ---
+env file : present
+service  : active
+log dir  : attendance:attendance
+health   : {"status":"UP"}

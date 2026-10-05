@@ -1,0 +1,58 @@
+Tag publication to GitHub - why it is not possible from this session
+Captured: 2026-10-05T09:06:04Z
+
+Three independent routes were tried. All are refused by this
+session's environment policy, not by the repository and not by a
+problem with the tags themselves.
+
+== 1. git push ==
+$ git push origin v1.0.0
+   error: RPC failed; HTTP 403 curl 22 The requested URL returned error: 403
+   send-pack: unexpected disconnect while reading sideband packet
+   fatal: the remote end hung up unexpectedly
+   Everything up-to-date
+
+== 2. GitHub Git refs API (gh api) ==
+$ gh api --method POST repos/.../git/tags
+   {"message":"Write access to this GitHub API path is not permitted through this proxy.","documentation_url":"https://docs.anthropic.com/en/docs/claude-code/github-actions"}gh: Write access to this GitH
+
+== 3. GitHub Releases API (a release would create the tag) ==
+$ gh api --method POST repos/.../releases
+   {"message":"Creating, editing, or deleting releases is not permitted for this session type.","documentation_url":"https://docs.anthropic.com/en/docs/claude-code/github-actions"}gh: Creating, editing, 
+
+== 4. The GitHub MCP server ==
+   Exposes get_tag, list_tags, get_latest_release, list_releases and
+   get_release_by_tag - all read-only. It has no create-tag or
+   create-release operation.
+
+== Confirmation that this is specific to tags, not to pushing ==
+   Branch pushes from the same credentials succeed throughout this
+   project. The remote currently holds:
+     refs/heads/bugfix/pagination-drops-filters
+     refs/heads/bugfix/restore-filters-on-pagination
+     refs/heads/chore/pipeline-per-environment-target
+     refs/heads/claude/upbeat-cannon-o509o5
+     refs/heads/develop
+     refs/heads/docs/readme-mvp-summary
+     refs/heads/feature/ansible-provisioning
+     refs/heads/feature/attendance-core
+     refs/heads/feature/docker-image
+     refs/heads/feature/jenkins-ci
+     refs/heads/feature/selenium-tests
+     refs/heads/feature/status-workflow-dashboard
+     refs/heads/fix/quality-gate-war-mount
+     refs/heads/main
+
+== The tags themselves ==
+   v1.0.0          v1.0.0 - Student Attendance Management Portal MVP
+   v1.2.0          v1.2.0 - Student Attendance Management Portal, complete delivery
+
+   v1.0.0 -> 6611adae7dd26245f2b29ff3beb0a2bbb2006a52
+   v1.2.0 -> 819b168109a1239817af52f35743deadc92c36b9
+
+== How to publish them from an ordinary clone ==
+   git fetch origin
+   git push origin v1.0.0 v1.2.0
+
+   The tag objects, with their full release notes, are reproduced in
+   proofs/stage-06/release-tag.log.

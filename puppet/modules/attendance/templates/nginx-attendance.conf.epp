@@ -1,23 +1,27 @@
-# Managed by Ansible - changes here are overwritten on the next run.
+<%- | Integer $nginx_port,
+      String  $nginx_server_name,
+      Integer $app_port,
+      String  $app_context_path,
+      String  $health_path,
+| -%>
+# Managed by Puppet - changes here are overwritten on the next run.
 
 upstream attendance_backend {
-    server 127.0.0.1:{{ app_port }};
+    server 127.0.0.1:<%= $app_port %>;
     keepalive 16;
 }
 
 server {
-    listen {{ nginx_port }};
-    server_name {{ nginx_server_name }};
+    listen <%= $nginx_port %>;
+    server_name <%= $nginx_server_name %>;
 
     access_log /var/log/nginx/attendance-access.log;
     error_log  /var/log/nginx/attendance-error.log;
 
-    # The WAR is 60 MB but nothing is uploaded; a small body limit costs
-    # nothing and removes a trivial denial-of-service.
+    # Nothing is uploaded, so a small body limit costs nothing and removes
+    # a trivial denial-of-service.
     client_max_body_size 2m;
 
-    # Headers the application needs to build correct absolute URLs and to
-    # log the real client address rather than 127.0.0.1.
     # $http_host preserves the client's Host header verbatim, including a
     # non-default port. $host strips the port, so Spring Boot would build
     # its redirect Location headers without it and every redirect -- the
@@ -30,17 +34,17 @@ server {
     proxy_set_header Connection "";
 
     location / {
-        return 302 {{ app_context_path }}/;
+        return 302 <%= $app_context_path %>/;
     }
 
-    location {{ app_context_path }}/ {
+    location <%= $app_context_path %>/ {
         proxy_pass http://attendance_backend;
         proxy_connect_timeout 5s;
         proxy_read_timeout 60s;
     }
 
-    # Kept separate so a probe never waits behind a slow page request.
-    location = {{ health_path }} {
+    # Kept separate so a probe never queues behind a slow page request.
+    location = <%= $health_path %> {
         proxy_pass http://attendance_backend;
         access_log off;
         proxy_read_timeout 5s;

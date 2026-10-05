@@ -1,0 +1,37 @@
+### Data-driven convergence: change one Hiera value ###
+
+The manifest is not edited at all here. Only puppet/data/common.yaml
+changes -- the examination-eligibility threshold, 75 -> 80. A convergence
+tool should therefore change exactly the resources that depend on that
+value, and nothing else.
+
+--- before ---
+ATTENDANCE_ELIGIBILITY_THRESHOLD=75
+{"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+
+--- changing the Hiera value ---
+  attendance::app_eligibility_threshold: 80
+
+--- puppet apply ---
+Notice: Compiled catalog for a2ed425e20bf in environment production in 0.40 seconds
+Notice: /Stage[main]/Attendance::Config/File[/etc/attendance/attendance.env]/content: content changed '{sha256}7810418268a72b91ae91469a3448b4d966ef4dd731c5cc5b215a3ab4bc67db60' to '{sha256}fdb2b1cf753b3d7b7ad5c3e52eb47b79cc9cd4859c099d261ed694f19b20603e'
+Notice: /Stage[main]/Attendance::Service/Service[attendance]: Triggered 'refresh' from 1 event
+Notice: Applied catalog in 2.84 seconds
+detailed-exitcode=2
+
+--- after ---
+ATTENDANCE_ELIGIBILITY_THRESHOLD=80
+{"status":"UP"}
+
+--- reverting the Hiera value to 75 and re-applying ---
+Notice: Compiled catalog for a2ed425e20bf in environment production in 0.40 seconds
+Notice: /Stage[main]/Attendance::Config/File[/etc/attendance/attendance.env]/content: content changed '{sha256}fdb2b1cf753b3d7b7ad5c3e52eb47b79cc9cd4859c099d261ed694f19b20603e' to '{sha256}7810418268a72b91ae91469a3448b4d966ef4dd731c5cc5b215a3ab4bc67db60'
+Notice: /Stage[main]/Attendance::Service/Service[attendance]: Triggered 'refresh' from 1 event
+Notice: Applied catalog in 3.29 seconds
+detailed-exitcode=2
+
+ATTENDANCE_ELIGIBILITY_THRESHOLD=75
+health: {"status":"UP"}
+
+The value is data, not code: the same manifest produces either state
+depending only on puppet/data/common.yaml, and converges back again.

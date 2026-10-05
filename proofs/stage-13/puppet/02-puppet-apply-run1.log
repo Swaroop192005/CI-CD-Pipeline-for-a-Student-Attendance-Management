@@ -1,0 +1,30 @@
+### puppet apply -- RUN 1: converge a bare node ###
+started  2026-10-05T16:50:46Z
+Notice: Compiled catalog for a2ed425e20bf in environment production in 0.39 seconds
+Notice: /Stage[main]/Attendance::Install/Exec[attendance apt-get update]/returns: executed successfully
+Notice: /Stage[main]/Attendance::Install/Package[openjdk-21-jre-headless]/ensure: created
+Notice: /Stage[main]/Attendance::Install/Package[unzip]/ensure: created
+Notice: /Stage[main]/Attendance::Install/Group[attendance]/ensure: created
+Notice: /Stage[main]/Attendance::Install/User[attendance]/ensure: created
+Notice: /Stage[main]/Attendance::Install/File[/opt/attendance]/ensure: created
+Notice: /Stage[main]/Attendance::Install/File[/opt/attendance/releases]/ensure: created
+Notice: /Stage[main]/Attendance::Install/File[/var/lib/attendance]/ensure: created
+Notice: /Stage[main]/Attendance::Install/File[/var/log/attendance]/ensure: created
+Notice: /Stage[main]/Attendance::Install/File[/etc/attendance]/ensure: created
+Notice: /Stage[main]/Attendance::Config/File[/etc/attendance/attendance.env]/ensure: defined content as '{sha256}7810418268a72b91ae91469a3448b4d966ef4dd731c5cc5b215a3ab4bc67db60'
+Notice: /Stage[main]/Attendance::Config/File[/etc/systemd/system/attendance.service]/ensure: defined content as '{sha256}3e8a38ffdce298da30009a13ecd50bc5e74915cb3635793358645f31127d10bc'
+Notice: /Stage[main]/Attendance::Config/Exec[attendance systemd daemon-reload]: Triggered 'refresh' from 1 event
+Notice: /Stage[main]/Attendance::Config/File[/etc/logrotate.d/attendance]/ensure: defined content as '{sha256}670b566e5c22b4e2fa76c5955f04a9d27eab53f8181bf151bbfe7133b7e2587f'
+Notice: /Stage[main]/Attendance::Config/Package[nginx]/ensure: created
+Notice: /Stage[main]/Attendance::Config/File[/etc/nginx/sites-enabled/default]/ensure: removed
+Notice: /Stage[main]/Attendance::Config/File[/etc/nginx/sites-available/attendance.conf]/ensure: defined content as '{sha256}dc4271beaf5e25d047fa8dcf4d8be75eb6c7dbdc74c07f116c344da35ed8731b'
+Notice: /Stage[main]/Attendance::Config/File[/etc/nginx/sites-enabled/attendance.conf]/ensure: created
+Notice: /Stage[main]/Attendance::Config/Exec[attendance nginx config test]: Triggered 'refresh' from 2 events
+Notice: /Stage[main]/Attendance::Config/Service[nginx]/ensure: ensure changed 'stopped' to 'running'
+Notice: /Stage[main]/Attendance::Deploy/File[/opt/attendance/releases/1.0.0]/ensure: created
+Notice: /Stage[main]/Attendance::Deploy/File[/opt/attendance/releases/1.0.0/attendance.war]/ensure: defined content as '{sha256}4bee7d6f0598b1b5857cf229ab5b3088ad473eb236446def268d09bbaf4ab793'
+Notice: /Stage[main]/Attendance::Deploy/File[/opt/attendance/current]/ensure: created
+Notice: /Stage[main]/Attendance::Service/Service[attendance]/ensure: ensure changed 'stopped' to 'running'
+Notice: Applied catalog in 36.08 seconds
+detailed-exitcode=2
+finished 2026-10-05T16:51:24Z

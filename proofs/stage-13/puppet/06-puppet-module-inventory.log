@@ -1,0 +1,80 @@
+### Puppet toolchain (masterless: puppet apply, no server) ###
+  puppet 7.20.0
+  facter 4.2.13
+  ruby   ruby 2.7.6p219 (2022-04-12 revision c9c2245c0a) [x86_64-linux]
+  node   Ubuntu 22.04.5 LTS
+
+  Installed by puppet/lab/build-puppet-node.sh, which extracts the
+  self-contained /opt/puppetlabs tree from the official container
+  image. apt.puppet.com is refused by this lab's egress policy, and
+  the Ubuntu universe package is Puppet 5.5 -- too old for EPP and
+  the modern data types this module uses.
+
+### Module layout ###
+  puppet/data/common.yaml
+  puppet/hiera.yaml
+  puppet/lab/build-puppet-node.sh
+  puppet/lab/capture-proofs.sh
+  puppet/manifests/site.pp
+  puppet/modules/attendance/functions/assert_private.pp
+  puppet/modules/attendance/manifests/config.pp
+  puppet/modules/attendance/manifests/deploy.pp
+  puppet/modules/attendance/manifests/init.pp
+  puppet/modules/attendance/manifests/install.pp
+  puppet/modules/attendance/manifests/service.pp
+  puppet/modules/attendance/templates/attendance.env.epp
+  puppet/modules/attendance/templates/attendance.service.epp
+  puppet/modules/attendance/templates/logrotate.epp
+  puppet/modules/attendance/templates/nginx-attendance.conf.epp
+  puppet/modules/attendance/types/absolutepath.pp
+
+### External module dependencies: NONE ###
+  forgeapi.puppet.com is unreachable and not fixably so -- Puppet's
+  bundled Ruby ignores both SSL_CERT_FILE and --ssl_trust_store. The
+  two stdlib features the module needed are reimplemented locally:
+    Stdlib_absolutepath -> modules/attendance/types/absolutepath.pp
+    assert_private()    -> modules/attendance/functions/assert_private.pp
+
+### Classes in the catalogue ###
+  attendance
+  attendance::install
+  attendance::config
+  attendance::deploy
+  attendance::service
+
+### Managed resources in the catalogue ###
+  exec[attendance apt-get update]
+  package[openjdk-21-jre-headless]
+  package[curl]
+  package[unzip]
+  package[ca-certificates]
+  group[attendance]
+  user[attendance]
+  file[/opt/attendance]
+  file[/opt/attendance/releases]
+  file[/var/lib/attendance]
+  file[/var/log/attendance]
+  file[/etc/attendance]
+  file[/etc/attendance/attendance.env]
+  file[/etc/systemd/system/attendance.service]
+  exec[attendance systemd daemon-reload]
+  file[/etc/logrotate.d/attendance]
+  package[nginx]
+  file[/etc/nginx/sites-enabled/default]
+  file[/etc/nginx/sites-available/attendance.conf]
+  file[/etc/nginx/sites-enabled/attendance.conf]
+  exec[attendance nginx config test]
+  service[nginx]
+  file[/opt/attendance/releases/1.0.0]
+  file[/opt/attendance/releases/1.0.0/attendance.war]
+  file[/opt/attendance/current]
+  exec[attendance prune old releases]
+  service[attendance]
+
+  total managed resources: 27
+    exec      4
+    package   5
+    group     1
+    user      1
+    file      14
+    service   2

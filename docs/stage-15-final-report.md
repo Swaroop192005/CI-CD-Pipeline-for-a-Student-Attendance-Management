@@ -161,6 +161,9 @@ have.
 | apt on a fresh node → certificate not trusted, even with the CA appended | GnuTLS validates against the system store as a whole | Bootstrap with a *complete* bundle, then `update-ca-certificates` |
 | Ansible → "Failed to update apt cache" with an empty error | The node cannot reach the proxy: its `127.0.0.1` is itself | Relay the loopback proxy to the bridge gateway (`ansible/lab/proxy-relay.py`) |
 | `No package matching 'unzip' is available` | Empty apt cache, skipped by `cache_valid_time` | Refresh the cache explicitly in `pre_tasks` |
+| `puppet module install` → `Unable to verify the SSL certificate` | Puppet's bundled Ruby ignores `SSL_CERT_FILE` **and** `--ssl_trust_store`, so the Forge is unreachable whatever the trust store holds | Carry no Forge dependencies; reimplement the two `stdlib` features needed (`Stdlib_absolutepath`, `assert_private()`) inside the module |
+| `attendance::assert_private` → both module names empty | The modern Puppet function API exposes the scope the function was *defined* in, not the caller's; stdlib uses the Ruby 3.x API where `self` **is** the caller | Pass `$name` and `$caller_module_name` in explicitly — both are in scope in any class body |
+| Puppet `onlyif` guard never fires, so `E: Unable to locate package` on a bare node | Puppet runs `onlyif` **without a shell**, so `$(...)` and `$((...))` go to `test` as literal arguments; the guard also watched `pkgcache.bin`, apt's binary cache, which any apt call regenerates | Wrap the guard in `/bin/sh -c`, and test `/var/lib/apt/lists` — measuring staleness from the **directory** mtime, since apt preserves the server's `Last-Modified` on the index files themselves |
 
 ### 4.2 Build and application
 
@@ -168,6 +171,7 @@ have.
 |---|---|---|
 | H2 → `Feature not supported: "AUTO_SERVER=TRUE && DB_CLOSE_ON_EXIT=FALSE"` | H2 2.3 refuses that combination | Drop `AUTO_SERVER`; nothing needs multi-process access |
 | Every page 500s with `EL1025E: The collection has '0' elements` | A principal can have no authorities; an indexed expression in the shared layout then fails on **every** page | Resolve the role in a `ControllerAdvice` with an empty fallback |
+| Login through nginx redirects to port 80 → `ERR_CONNECTION_REFUSED` | `proxy_set_header Host $host` — nginx's `$host` strips the port, and Spring Security builds its redirect `Location` from the Host header. **Every curl health check still passed**, because the health endpoint never redirects | `proxy_set_header Host $http_host`, which is the client's Host header verbatim. Fixed in both the Ansible and the Puppet template |
 | Tests fail with a unique-constraint violation in `@BeforeEach` | Hibernate orders queued inserts **ahead of** queued deletes in one transaction | `deleteAllInBatch()`, which issues the DELETE immediately |
 | `*IT` tests compile but never run | Failsafe needs explicit executions | Declare `integration-test` and `verify` goals |
 | Sign-in fails only on a fresh start | Seeding ran as an `ApplicationRunner`, which fires **after** the port is bound, so health reported `UP` before the accounts existed | Seed during context refresh, via a `TransactionTemplate` |
@@ -217,7 +221,7 @@ criticism of the design it was traded against.
 | I3 | The target node is a container | Nothing in the playbook depends on it — it manages packages, users, files, ports and systemd units — but a VM would exercise the boot path too |
 | I4 | Secrets are environment variables with development defaults | A real deployment needs a secret store; Jenkins credentials or Ansible Vault |
 | I5 | No TLS anywhere | Everything is HTTP on a lab network |
-| I6 | The git tag `v1.0.0` exists locally but is not on `origin` | This session's credentials refuse `refs/tags/*` with HTTP 403 while branch pushes succeed. The tag object is reproduced in `proofs/stage-06/release-tag.log`, and `git push origin v1.0.0` from an ordinary clone publishes it |
+| I6 | The annotated tags `v1.0.0` and `v1.2.0` exist locally but are not on `origin` | Not a repository problem, and not fixable from here: four routes were tried and all are refused by session policy — `git push` (HTTP 403), the Git refs API (*"Write access to this GitHub API path is not permitted through this proxy"*), the Releases API (*"Creating, editing, or deleting releases is not permitted for this session type"*), and the GitHub MCP server, whose tag and release operations are all read-only. Branch pushes from the same credentials succeed throughout, so the restriction is specific to `refs/tags/*`. Evidence in `proofs/stage-06/tag-push-attempts.log`; the tag objects with their release notes in `proofs/stage-06/release-tag.log`. The tag objects live only in the build container, so a fresh clone has none to push; `scripts/publish-release-tags.sh` rebuilds both from the recorded commits and annotations and pushes them, and has been verified against a fresh clone |
 
 ### 5.3 Process
 
@@ -368,9 +372,36 @@ data in a staging datastore.
 ### Configuration management
 
 **Q. Why Ansible rather than Puppet?**
-Agentless, so a single node needs no master or agent existing to justify
-itself. And `apt.puppet.com` is refused by the lab's egress policy, so
-Puppet could not have been installed here at all.
+Both, in the end. The stage asked for either. Ansible was primary because
+it is agentless — a single node needs no master or agent existing to
+justify itself — and because `apt.puppet.com` is refused by the lab's
+egress policy, which blocked the first Puppet attempt. That turned out to
+be a statement about one installation route rather than about Puppet:
+7.20.0 was installed by extracting the official Docker image, and
+`puppet/` now implements the same specification, applied masterless.
+
+**Q. What did building it a second time actually buy you?**
+Two things. It proves the Stage 13 specification is tool-neutral rather
+than a transcript of whatever the playbook happened to do — the two tools
+converge all four managed files to byte-identical content once each one's
+"managed by" banner is stripped. And provisioning the node a second way
+meant exercising it a second way, which is what found the reverse-proxy
+defect: both templates set `proxy_set_header Host $host`, which drops the
+port, so every Spring Security redirect pointed at port 80. Every curl
+health check in Stages 13 and 14 passed regardless, because the health
+endpoint never redirects. A browser on a non-default port found it in
+seconds.
+
+**Q. Puppet's drift correction — what does it show that Ansible doesn't?**
+Ansible proves idempotency: run it twice, the second run reports
+`changed=0`. Puppet proves convergence, which is a stronger claim about a
+*divergent* node. Four changes were made by hand on a converged node — a
+config file deleted, another overwritten with garbage, the service
+stopped, a directory chowned to root — and the manifest re-applied. It
+repaired those four and only those four, re-validated the nginx config,
+and reloaded it through the notify chain. That is the model difference
+between pushing tasks and compiling a catalogue to compare against live
+state.
 
 **Q. Why does `changed=0` matter so much?**
 A playbook that reports changes every run gives an operator no way to tell

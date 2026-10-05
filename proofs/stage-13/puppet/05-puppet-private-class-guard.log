@@ -1,0 +1,12 @@
+### PRIVATE CLASS GUARD -- negative test ###
+attendance::install, ::config, ::deploy and ::service are
+implementation detail. Declaring one directly must fail compilation.
+
+--- attempt: include attendance::install from a bare manifest ---
+Error: Evaluation Error: Error while evaluating a Function Call, Class attendance::install is private to the attendance module and may not be declared directly; declare the `attendance` class instead. (file: /puppet/modules/attendance/functions/assert_private.pp, line: 32, column: 5) on node a2ed425e20bf
+exit=1
+
+--- control: the public class still compiles ---
+Notice: Compiled catalog for a2ed425e20bf in environment production in 0.43 seconds
+Notice: Applied catalog in 3.08 seconds
+exit=0

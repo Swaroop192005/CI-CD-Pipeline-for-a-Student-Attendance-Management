@@ -92,6 +92,7 @@ Each choice is justified against a project constraint in
 ├── docker/                 Compose files and local registry helper
 ├── jenkins/                Job configuration and controller setup
 ├── ansible/                Inventory, playbooks and roles (Stage 13)
+├── puppet/                 Hiera data and module — the same spec in Puppet (Stage 13)
 ├── docs/                   Stage documentation, 1 through 15
 └── proofs/                 Captured evidence per stage
 ```
