@@ -1,0 +1,77 @@
+Stage 6 - merge conflict: creation, inspection and resolution
+Captured: 2026-10-05T07:03:19Z
+
+== How the conflict arose ==
+  develop                     <- PR #13 restructured the README feature table
+                                 (added a Requirement column, status 'Done')
+  feature/status-workflow-... <- rewrote the same rows with a prose status
+                                 describing what was actually built
+  Both edited the same contiguous block of README.md, so git cannot
+  choose between them.
+
+== git merge origin/develop ==
+Auto-merging README.md
+CONFLICT (content): Merge conflict in README.md
+Automatic merge failed; fix conflicts and then commit the result.
+
+== git status ==
+UU README.md
+?? proofs/stage-06/merge-conflict.log
+
+== conflicted files ==
+README.md
+
+== conflict as git left it ==
+
+The frozen MVP scope (Stage 1 §8). Status is kept current as the 15
+project tasks complete.
+
+<<<<<<< HEAD
+| # | Capability | Roles | Status |
+|---|---|---|---|
+| F1 | Record attendance for a (student, subject, date, period) | Faculty, Admin | Delivered — one record per student, subject, session date and period, enforced by a database constraint |
+| F2 | View records — paginated list and detail view | All | Delivered — 10 rows per page, most recent session first, full audit trail on the detail view |
+| F3 | Update a record while it is still editable | Faculty (author), Admin | Delivered — draft and rejected records only; the original author is preserved on correction |
+| F4 | Search and filter by roll number, subject, date range and status | Faculty, HOD, Admin | Delivered — five optional filters combined with AND, surviving pagination |
+| F5 | Role-based status workflow `DRAFT → SUBMITTED → APPROVED / REJECTED` | Faculty submits, HOD decides | Delivered — one code path for every transition, each stamped with actor and time |
+| F6 | Summary dashboard with attendance percentage and at-risk list | Faculty, HOD, Admin, Student (own) | Delivered — approved records only, with a per-subject breakdown and an at-risk list |
+| F7 | Authentication and role-based authorisation | All | Delivered — BCrypt, CSRF, and rules enforced at both the URL and the service layer |
+| F8 | Student roll view | Admin | Delivered |
+| F9 | Health endpoint for automated probes | Operators | Delivered — public, and reached only after seeding completes |
+=======
+| # | Capability | Roles | Requirement | Status |
+|---|---|---|---|---|
+| F1 | Record attendance for a (student, subject, date, period) | Faculty, Admin | FR-03 … FR-07 | Done |
+| F2 | View records — paginated list and detail view | All | FR-08, FR-09 | Done |
+| F3 | Update a record while it is still editable | Faculty (author), Admin | FR-10 … FR-12 | Done |
+| F4 | Search and filter by roll number, subject, date range and status | Faculty, HOD, Admin | FR-13 … FR-15 | Done |
+| F5 | Role-based status workflow `DRAFT → SUBMITTED → APPROVED / REJECTED` | Faculty submits, HOD decides | FR-16 … FR-22 | Done |
+| F6 | Summary dashboard with attendance percentage and at-risk list | Faculty, HOD, Admin, Student (own) | FR-23, FR-24 | Done |
+| F7 | Authentication and role-based authorisation | All | FR-01, FR-02, FR-25, FR-26 | Done |
+| F8 | Student roll view | Admin | FR-28 | Done |
+| F9 | Health endpoint for automated probes | Operators | FR-27 | Done |
+>>>>>>> origin/develop
+
+---
+
+== Resolution ==
+  Neither side was discarded. The two edits were not in opposition:
+  one added traceability (which FR specifies this feature), the other
+  added substance (what was actually built). Taking either alone would
+  have thrown away information a reader needs.
+
+  Resolved to the union: the Requirement column from develop, with the
+  prose status from the feature branch.
+
+== git add README.md && git commit ==
+fca7dc5e56730c9c0c56c949fb5812e93e4a0b73
+merge: resolve README feature-table conflict with develop
+
+== verification of the merge result ==
+mvn -B clean verify on the merge result:
+  Tests run: 73, Failures: 0, Errors: 0, Skipped: 0   (Surefire)
+  Tests run:  7, Failures: 0, Errors: 0, Skipped: 0   (Failsafe)
+  BUILD SUCCESS
+
+== no conflict markers remain ==
+grep -c -E '^(<<<<<<<|=======|>>>>>>>)' README.md  ->  0

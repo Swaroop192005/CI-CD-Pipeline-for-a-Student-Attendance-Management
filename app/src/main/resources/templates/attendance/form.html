@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Record attendance')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('new')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title"
+          th:text="${form.id == null} ? 'Record attendance' : 'Correct attendance record'">
+        Record attendance
+      </h1>
+      <p class="subtitle">
+        One record covers a single student, subject, session date and period.
+        It is saved as a draft until you submit it for review.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <form th:action="${form.id == null} ? @{/attendance} : @{/attendance/{id}(id=${form.id})}"
+          th:object="${form}" method="post" data-testid="attendance-form">
+
+      <div class="form-grid">
+        <div>
+          <label for="rollNumber">Student</label>
+          <select id="rollNumber" th:field="*{rollNumber}" data-testid="field-student"
+                  th:classappend="${#fields.hasErrors('rollNumber')} ? 'invalid'">
+            <option value="">-- select a student --</option>
+            <option th:each="s : ${students}"
+                    th:value="${s.rollNumber}"
+                    th:text="${s.displayName}">1CS21CS001 - Aditya Rao</option>
+          </select>
+          <div class="field-error" th:if="${#fields.hasErrors('rollNumber')}"
+               th:errors="*{rollNumber}" data-testid="error-student"></div>
+        </div>
+
+        <div>
+          <label for="subjectCode">Subject code</label>
+          <input type="text" id="subjectCode" th:field="*{subjectCode}" placeholder="CS501"
+                 data-testid="field-subject"
+                 th:classappend="${#fields.hasErrors('subjectCode')} ? 'invalid'"/>
+          <div class="field-error" th:if="${#fields.hasErrors('subjectCode')}"
+               th:errors="*{subjectCode}" data-testid="error-subject"></div>
+        </div>
+
+        <div>
+          <label for="sessionDate">Session date</label>
+          <input type="date" id="sessionDate" th:field="*{sessionDate}"
+                 data-testid="field-date"
+                 th:classappend="${#fields.hasErrors('sessionDate')} ? 'invalid'"/>
+          <div class="field-error" th:if="${#fields.hasErrors('sessionDate')}"
+               th:errors="*{sessionDate}" data-testid="error-date"></div>
+        </div>
+
+        <div>
+          <label for="periodNumber">Period</label>
+          <input type="number" id="periodNumber" th:field="*{periodNumber}" min="1" max="8"
+                 data-testid="field-period"
+                 th:classappend="${#fields.hasErrors('periodNumber')} ? 'invalid'"/>
+          <div class="field-error" th:if="${#fields.hasErrors('periodNumber')}"
+               th:errors="*{periodNumber}" data-testid="error-period"></div>
+        </div>
+
+        <div>
+          <label for="attendanceStatus">Attendance status</label>
+          <select id="attendanceStatus" th:field="*{attendanceStatus}"
+                  data-testid="field-attendance-status"
+                  th:classappend="${#fields.hasErrors('attendanceStatus')} ? 'invalid'">
+            <option value="">-- select --</option>
+            <option th:each="s : ${attendanceStatuses}"
+                    th:value="${s}" th:text="${s.label}">Present</option>
+          </select>
+          <div class="field-error" th:if="${#fields.hasErrors('attendanceStatus')}"
+               th:errors="*{attendanceStatus}" data-testid="error-attendance-status"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:14px">
+        <label for="remarks">Remarks (optional)</label>
+        <textarea id="remarks" th:field="*{remarks}" data-testid="field-remarks"
+                  placeholder="For example: medical certificate submitted"></textarea>
+        <div class="field-error" th:if="${#fields.hasErrors('remarks')}"
+             th:errors="*{remarks}"></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="submit" data-testid="save-record">
+          <span th:text="${form.id == null} ? 'Save as draft' : 'Save correction'">Save as draft</span>
+        </button>
+        <a class="btn btn-secondary" th:href="@{/attendance}" data-testid="cancel">Cancel</a>
+      </div>
+    </form>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

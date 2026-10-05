@@ -4,17 +4,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Serves the skeleton landing page.
- *
- * <p>Once the dashboard feature lands (US-08), this becomes a redirect to
- * {@code /dashboard}; keeping a real rendered page here for the skeleton
- * means the initial commit is independently verifiable.
+ * Entry point after sign-in: every role lands on the dashboard, which
+ * scopes itself to what that role may see.
  */
 @Controller
 public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "home";
+        return "redirect:/dashboard";
     }
 }

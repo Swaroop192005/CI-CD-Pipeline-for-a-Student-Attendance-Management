@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Review queue')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('review')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Review queue</h1>
+      <p class="subtitle">
+        <span data-testid="queue-count" th:text="${pending.size()}">0</span>
+        record(s) submitted and awaiting a decision.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div th:if="${pending.isEmpty()}" class="empty-state" data-testid="queue-empty">
+      <strong>Nothing awaiting review</strong>
+      Submitted records appear here for approval or rejection.
+    </div>
+
+    <div th:unless="${pending.isEmpty()}" class="table-wrap">
+      <table data-testid="queue-table">
+        <thead>
+        <tr>
+          <th>Roll number</th>
+          <th>Student</th>
+          <th>Subject</th>
+          <th>Session date</th>
+          <th class="num">Period</th>
+          <th>Attendance</th>
+          <th>Submitted by</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${pending}" th:attr="data-record-id=${r.id}" data-testid="queue-row">
+          <td data-testid="queue-roll" th:text="${r.student.rollNumber}">1CS21CS001</td>
+          <td th:text="${r.student.fullName}">Aditya Rao</td>
+          <td th:text="${r.subjectCode}">CS501</td>
+          <td th:text="${#temporals.format(r.sessionDate,'dd MMM yyyy')}">01 Jan 2026</td>
+          <td class="num" th:text="${r.periodNumber}">1</td>
+          <td>
+            <span class="badge" th:classappend="'badge-' + ${r.attendanceStatus}"
+                  th:text="${r.attendanceStatus.label}">Present</span>
+          </td>
+          <td th:text="${r.markedBy}">faculty1</td>
+          <td>
+            <a class="btn btn-primary btn-sm" th:href="@{/attendance/{id}(id=${r.id})}"
+               data-testid="queue-review">Review</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

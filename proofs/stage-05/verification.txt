@@ -1,0 +1,35 @@
+Stage 5 - local verification of feature 1
+Captured: 2026-10-05T06:44:33Z
+
+== mvn -B clean verify ==
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.617 s -- in com.college.attendance.repository.AttendanceRecordRepositoryTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.601 s -- in com.college.attendance.AttendancePortalApplicationTests
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.552 s -- in com.college.attendance.web.AttendanceSecurityTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.207 s -- in Correcting a record
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.172 s -- in Creating a record
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.433 s -- in com.college.attendance.service.AttendanceServiceTest
+[INFO] Tests run: 27, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.18 s -- in com.college.attendance.web.AttendanceWebFlowIT
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+[INFO] Total time:  32.495 s
+
+== unit tests (surefire) ==
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.601 s -- in com.college.attendance.AttendancePortalApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.617 s -- in com.college.attendance.repository.AttendanceRecordRepositoryTest
+-------------------------------------------------------------------------------
+Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.433 s -- in com.college.attendance.service.AttendanceServiceTest
+-------------------------------------------------------------------------------
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.552 s -- in com.college.attendance.web.AttendanceSecurityTest
+
+== integration tests (failsafe) ==
+-------------------------------------------------------------------------------
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.18 s -- in com.college.attendance.web.AttendanceWebFlowIT
+
+== seeded data on first start ==
+2026-10-05T06:43:03.113Z  INFO 4008 --- [attendance-portal] [           main] c.college.attendance.config.DataSeeder   : Seeded 5 users, 10 students, 300 attendance records
+
+== list page served to faculty1 ==
+HTTP 200, 300 records total, 10 rows per page, page 1 of 30
