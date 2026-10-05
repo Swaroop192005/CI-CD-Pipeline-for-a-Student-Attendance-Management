@@ -2408,13 +2408,22 @@ v1.2.0 -> 819b168109a1239817af52f35743deadc92c36b9
 ```
 
 They are reproduced verbatim in
-[`proofs/stage-06/release-tag.log`](proofs/stage-06/release-tag.log), and
-from a clone with ordinary credentials they publish with one command:
+[`proofs/stage-06/release-tag.log`](proofs/stage-06/release-tag.log).
+
+One practical wrinkle: the tag *objects* exist only in the container that
+built this project, so a fresh clone has no tags at all to push.
+[`scripts/publish-release-tags.sh`](../scripts/publish-release-tags.sh)
+rebuilds both from the recorded commits and annotation bodies
+([`v1.0.0-message.txt`](proofs/stage-06/v1.0.0-message.txt),
+[`v1.2.0-message.txt`](proofs/stage-06/v1.2.0-message.txt)) and pushes
+them, from an ordinary clone with ordinary credentials:
 
 ```bash
-git fetch origin
-git push origin v1.0.0 v1.2.0
+bash scripts/publish-release-tags.sh
 ```
+
+It has been verified against a fresh clone with `DRY_RUN=1`: both tags are
+recreated at the same commits, `6611adae` and `819b1681`.
 
 This is recorded in the Stage 15 troubleshooting guide and limitations
 list rather than quietly omitted.
@@ -4925,7 +4934,7 @@ criticism of the design it was traded against.
 | I3 | The target node is a container | Nothing in the playbook depends on it — it manages packages, users, files, ports and systemd units — but a VM would exercise the boot path too |
 | I4 | Secrets are environment variables with development defaults | A real deployment needs a secret store; Jenkins credentials or Ansible Vault |
 | I5 | No TLS anywhere | Everything is HTTP on a lab network |
-| I6 | The annotated tags `v1.0.0` and `v1.2.0` exist locally but are not on `origin` | Not a repository problem, and not fixable from here: four routes were tried and all are refused by session policy — `git push` (HTTP 403), the Git refs API (*"Write access to this GitHub API path is not permitted through this proxy"*), the Releases API (*"Creating, editing, or deleting releases is not permitted for this session type"*), and the GitHub MCP server, whose tag and release operations are all read-only. Branch pushes from the same credentials succeed throughout, so the restriction is specific to `refs/tags/*`. Evidence in `proofs/stage-06/tag-push-attempts.log`; the tag objects with their release notes in `proofs/stage-06/release-tag.log`. From an ordinary clone: `git push origin v1.0.0 v1.2.0` |
+| I6 | The annotated tags `v1.0.0` and `v1.2.0` exist locally but are not on `origin` | Not a repository problem, and not fixable from here: four routes were tried and all are refused by session policy — `git push` (HTTP 403), the Git refs API (*"Write access to this GitHub API path is not permitted through this proxy"*), the Releases API (*"Creating, editing, or deleting releases is not permitted for this session type"*), and the GitHub MCP server, whose tag and release operations are all read-only. Branch pushes from the same credentials succeed throughout, so the restriction is specific to `refs/tags/*`. Evidence in `proofs/stage-06/tag-push-attempts.log`; the tag objects with their release notes in `proofs/stage-06/release-tag.log`. The tag objects live only in the build container, so a fresh clone has none to push; `scripts/publish-release-tags.sh` rebuilds both from the recorded commits and annotations and pushes them, and has been verified against a fresh clone |
 
 #### 5.3 Process
 

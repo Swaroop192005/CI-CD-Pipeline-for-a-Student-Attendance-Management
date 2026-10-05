@@ -1,0 +1,37 @@
+v1.2.0 - Student Attendance Management Portal, complete delivery
+
+The fifteen-task project, complete.
+
+Application
+  Role-aware attendance system of record. Faculty record a class session,
+  a Head of Department reviews and approves it, and a student sees their
+  own approved attendance the same day - with every state change
+  attributed to a named user and a timestamp.
+
+Delivery pipeline
+  Git -> Jenkins -> unit and integration tests -> Selenium quality gate
+  -> versioned Docker image -> local registry -> container deployment
+  -> Tomcat deployment -> Ansible provisioning -> health check.
+  178 seconds, eleven stages, no manual step.
+
+Quality
+  100 tests in one report: 73 unit and slice, 7 integration, 20 Selenium
+  journeys across the five critical user paths. The gate has been shown
+  to fail correctly as well as to pass: a deliberate regression turned
+  the pipeline red with the deploy stages unexecuted.
+
+Operations
+  Idempotent provisioning (second run: changed=0), a three-part health
+  check that also catches a healthy service running the wrong release,
+  and rollback demonstrated against a release that genuinely failed -
+  recovered in three tasks and under a minute.
+
+Results
+  All thirteen Stage 1 success criteria met. Recording one session took
+  1-2 seconds against a 2 minute target; an approved record reached the
+  student in the same session, against a measured baseline of 9 to 14
+  days.
+
+Known limitations and the enhancement plan are in
+docs/stage-15-final-report.md sections 5 and 6.
+

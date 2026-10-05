@@ -262,13 +262,22 @@ v1.2.0 -> 819b168109a1239817af52f35743deadc92c36b9
 ```
 
 They are reproduced verbatim in
-[`proofs/stage-06/release-tag.log`](../proofs/stage-06/release-tag.log), and
-from a clone with ordinary credentials they publish with one command:
+[`proofs/stage-06/release-tag.log`](../proofs/stage-06/release-tag.log).
+
+One practical wrinkle: the tag *objects* exist only in the container that
+built this project, so a fresh clone has no tags at all to push.
+[`scripts/publish-release-tags.sh`](../scripts/publish-release-tags.sh)
+rebuilds both from the recorded commits and annotation bodies
+([`v1.0.0-message.txt`](../proofs/stage-06/v1.0.0-message.txt),
+[`v1.2.0-message.txt`](../proofs/stage-06/v1.2.0-message.txt)) and pushes
+them, from an ordinary clone with ordinary credentials:
 
 ```bash
-git fetch origin
-git push origin v1.0.0 v1.2.0
+bash scripts/publish-release-tags.sh
 ```
+
+It has been verified against a fresh clone with `DRY_RUN=1`: both tags are
+recreated at the same commits, `6611adae` and `819b1681`.
 
 This is recorded in the Stage 15 troubleshooting guide and limitations
 list rather than quietly omitted.
