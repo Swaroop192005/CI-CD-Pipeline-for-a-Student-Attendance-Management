@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Attendance record')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('attendance')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Attendance record</h1>
+      <p class="subtitle">
+        <span data-testid="detail-student" th:text="${record.student.displayName}">1CS21CS001 - Aditya Rao</span>
+        &middot; <span data-testid="detail-subject" th:text="${record.subjectCode}">CS501</span>
+      </p>
+    </div>
+    <span class="badge" th:classappend="'badge-' + ${record.workflowStatus}"
+          data-testid="detail-workflow-status"
+          th:text="${record.workflowStatus.label}">Draft</span>
+  </div>
+
+  <div class="card">
+    <h2>Session</h2>
+    <dl class="meta-list">
+      <div>
+        <dt>Session date</dt>
+        <dd data-testid="detail-date"
+            th:text="${#temporals.format(record.sessionDate,'dd MMMM yyyy')}">01 January 2026</dd>
+      </div>
+      <div>
+        <dt>Period</dt>
+        <dd data-testid="detail-period" th:text="${record.periodNumber}">1</dd>
+      </div>
+      <div>
+        <dt>Attendance</dt>
+        <dd>
+          <span class="badge" th:classappend="'badge-' + ${record.attendanceStatus}"
+                data-testid="detail-attendance-status"
+                th:text="${record.attendanceStatus.label}">Present</span>
+        </dd>
+      </div>
+      <div>
+        <dt>Remarks</dt>
+        <dd data-testid="detail-remarks" th:text="${record.remarks} ?: '-'">-</dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="card">
+    <h2>Audit trail</h2>
+    <p class="subtitle">
+      Every state change is attributed. This is what makes the record
+      defensible in a university audit.
+    </p>
+    <dl class="meta-list">
+      <div>
+        <dt>Entered by</dt>
+        <dd data-testid="detail-marked-by" th:text="${record.markedBy}">faculty1</dd>
+      </div>
+      <div>
+        <dt>Entered at</dt>
+        <dd data-testid="detail-created-at"
+            th:text="${#temporals.format(record.createdAt,'dd MMM yyyy HH:mm')}">01 Jan 2026 10:00</dd>
+      </div>
+      <div>
+        <dt>Last corrected</dt>
+        <dd data-testid="detail-updated-at"
+            th:text="${record.updatedAt != null}
+                     ? ${#temporals.format(record.updatedAt,'dd MMM yyyy HH:mm')} : 'Never'">Never</dd>
+      </div>
+      <div>
+        <dt>Reviewed by</dt>
+        <dd data-testid="detail-reviewed-by" th:text="${record.reviewedBy} ?: 'Not yet reviewed'">
+          Not yet reviewed</dd>
+      </div>
+      <div th:if="${record.reviewComment != null}">
+        <dt>Review comment</dt>
+        <dd data-testid="detail-review-comment" th:text="${record.reviewComment}"></dd>
+      </div>
+    </dl>
+  </div>
+
+  <div class="actions">
+    <a class="btn btn-secondary" th:href="@{/attendance}" data-testid="back-to-list">Back to list</a>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

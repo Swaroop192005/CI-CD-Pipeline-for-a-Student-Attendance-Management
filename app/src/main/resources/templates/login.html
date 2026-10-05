@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Sign in')}"></head>
+<body>
+<div class="login-wrap">
+  <h1>Student Attendance Management Portal</h1>
+  <p class="subtitle">Sign in to continue</p>
+
+  <div class="card">
+    <div th:if="${param.error}" class="alert alert-error" data-testid="login-error">
+      Wrong username or password.
+    </div>
+    <div th:if="${param.loggedOut}" class="alert alert-info" data-testid="login-logged-out">
+      You have been signed out.
+    </div>
+
+    <form th:action="@{/login}" method="post" data-testid="login-form">
+      <div style="margin-bottom:14px">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username"
+               autofocus required data-testid="login-username"/>
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password"
+               required data-testid="login-password"/>
+      </div>
+      <button class="btn btn-primary" type="submit" data-testid="login-submit">Sign in</button>
+    </form>
+
+    <div class="cred-hint">
+      Demonstration accounts seeded for this project. No real student data
+      is used anywhere in this system.
+      <table>
+        <tr><th>Role</th><th>Username</th><th>Password</th></tr>
+        <tr><td>Faculty</td><td>faculty1</td><td>Faculty@123</td></tr>
+        <tr><td>Head of Department</td><td>hod1</td><td>Hod@12345</td></tr>
+        <tr><td>Administrator</td><td>admin1</td><td>Admin@123</td></tr>
+        <tr><td>Student</td><td>student1</td><td>Student@123</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+</body>
+</html>
