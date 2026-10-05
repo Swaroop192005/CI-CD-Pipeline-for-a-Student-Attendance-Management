@@ -68,6 +68,11 @@ pipeline {
         SELENIUM_CONTAINER = 'attendance-selenium'
         SELENIUM_IMAGE     = 'selenium/standalone-chromium:latest'
         SELENIUM_PORT      = '4444'
+
+        // Local registry: no managed container registry is reachable from
+        // this lab (docs/00-environment-prerequisites.md, limitation L3).
+        REGISTRY      = 'localhost:5000'
+        IMAGE_NAME    = 'attendance-portal'
     }
 
     stages {
@@ -256,6 +261,107 @@ pipeline {
             }
         }
 
+        stage('Build and publish image') {
+            steps {
+                script {
+                    // Versioned, never only :latest. A tag that moves cannot
+                    // be rolled back to, and Stage 14's rollback is exactly
+                    // "run the previous version again" - which needs the
+                    // previous version to still have a name.
+                    env.IMAGE_TAG  = "${REGISTRY}/${IMAGE_NAME}:${env.APP_VERSION}"
+                    env.IMAGE_LATEST = "${REGISTRY}/${IMAGE_NAME}:latest"
+
+                    sh """
+                        set -e
+
+                        # The image packages the WAR that was just built and
+                        # tested rather than rebuilding it, so the binary that
+                        # ships is the binary the quality gate ran against.
+                        docker build \\
+                            --build-arg APP_VERSION=${env.APP_VERSION} \\
+                            --build-arg GIT_COMMIT=${env.GIT_SHA} \\
+                            --build-arg BUILD_TIME=\$(date -u +%Y-%m-%dT%H:%M:%SZ) \\
+                            -t ${env.IMAGE_TAG} \\
+                            -t ${env.IMAGE_LATEST} \\
+                            -f Dockerfile .
+
+                        docker push ${env.IMAGE_TAG}
+                        docker push ${env.IMAGE_LATEST}
+
+                        echo "Published:"
+                        echo "  ${env.IMAGE_TAG}"
+                        echo "  ${env.IMAGE_LATEST}"
+                    """
+
+                    // Read the tags back from the registry rather than
+                    // trusting that the push said so.
+                    sh """
+                        echo "Registry now holds:"
+                        curl -s http://${REGISTRY}/v2/${IMAGE_NAME}/tags/list
+                        echo
+                    """
+                }
+            }
+        }
+
+        stage('Deploy container') {
+            steps {
+                script {
+                    env.CONTAINER_NAME = "attendance-app-${params.DEPLOY_ENVIRONMENT}"
+                    env.CONTAINER_PORT = "${(params.APP_PORT as Integer) + 10}"
+
+                    sh """
+                        set -e
+
+                        echo "Deploying ${env.IMAGE_TAG} as ${env.CONTAINER_NAME} on port ${env.CONTAINER_PORT}"
+
+                        # Pull from the registry rather than using the local
+                        # build cache: this is the deployment path a separate
+                        # target node would take, and exercising a different
+                        # one here would prove nothing about it.
+                        docker pull ${env.IMAGE_TAG}
+
+                        docker rm -f ${env.CONTAINER_NAME} >/dev/null 2>&1 || true
+
+                        # The data volume is per environment and is NOT
+                        # removed: replacing a container must never destroy a
+                        # term's attendance records.
+                        docker volume create attendance-data-${params.DEPLOY_ENVIRONMENT} >/dev/null
+
+                        docker run -d --name ${env.CONTAINER_NAME} \\
+                            -p ${env.CONTAINER_PORT}:8080 \\
+                            -v attendance-data-${params.DEPLOY_ENVIRONMENT}:/app/data \\
+                            -e ATTENDANCE_ENVIRONMENT=${params.DEPLOY_ENVIRONMENT} \\
+                            --restart unless-stopped \\
+                            --label app.version=${env.APP_VERSION} \\
+                            --label app.commit=${env.GIT_SHA} \\
+                            ${env.IMAGE_TAG} >/dev/null
+
+                        for i in \$(seq 1 60); do
+                          if curl -sf http://localhost:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
+                            echo "Container healthy after \${i} attempt(s)"
+                            break
+                          fi
+                          sleep 3
+                        done
+
+                        if ! curl -sf http://localhost:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
+                          echo "Deployed container never became healthy:"
+                          docker logs --tail 40 ${env.CONTAINER_NAME}
+                          exit 1
+                        fi
+
+                        echo "Container deployment:"
+                        docker ps --filter name=${env.CONTAINER_NAME} \\
+                                  --format '  {{.Names}}  {{.Image}}  {{.Status}}  {{.Ports}}'
+                        curl -s http://localhost:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/info
+                        echo
+                        echo "Containerised application URL: http://localhost:${env.CONTAINER_PORT}${APP_CONTEXT}"
+                    """
+                }
+            }
+        }
+
         stage('Deploy to Tomcat') {
             steps {
                 script {
@@ -329,7 +435,10 @@ pipeline {
 
     post {
         success {
-            echo "Pipeline succeeded. ${env.APP_VERSION} is deployed at http://localhost:${params.APP_PORT}${env.APP_CONTEXT}"
+            echo """Pipeline succeeded for ${env.APP_VERSION}:
+  image     ${env.IMAGE_TAG}
+  Tomcat    http://localhost:${params.APP_PORT}${env.APP_CONTEXT}
+  container http://localhost:${env.CONTAINER_PORT}${env.APP_CONTEXT}"""
         }
         failure {
             echo "Pipeline failed at stage '${env.STAGE_NAME}'. The deploy stages after it did not run."

@@ -1,0 +1,328 @@
+===============================================================
+ CONTAINER LIFECYCLE - Student Attendance Management Portal
+ Image: attendance-portal:1.0.0   Container: attendance-app   Port: 8100
+ Captured: 2026-10-05T08:15:56Z
+===============================================================
+
+###############################################################
+# 1. BUILD - the image was built by docker/build-image.sh
+###############################################################
+
+---------------------------------------------------------------
+$ docker images attendance-portal:1.0.0 --format 'table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}'
+---------------------------------------------------------------
+REPOSITORY          TAG       IMAGE ID       SIZE
+attendance-portal   1.0.0     00505b427f6d   525MB
+
+---------------------------------------------------------------
+$ docker inspect attendance-portal:1.0.0 --format 'Digest: {{index .RepoDigests 0}}'
+---------------------------------------------------------------
+Digest: attendance-portal@sha256:00505b427f6dfa08ed6fbbe9e373c535f866b971d0b9ac30637cdafa4c10b560
+
+---------------------------------------------------------------
+$ docker inspect attendance-portal:1.0.0 --format '{{json .Config.Labels}}'   (OCI labels)
+---------------------------------------------------------------
+{
+    "org.opencontainers.image.created": "2026-10-05T08:14:08Z",
+    "org.opencontainers.image.description": "Role-aware attendance system of record",
+    "org.opencontainers.image.licenses": "academic-project",
+    "org.opencontainers.image.revision": "2b5c3f3",
+    "org.opencontainers.image.source": "https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management",
+    "org.opencontainers.image.title": "Student Attendance Management Portal",
+    "org.opencontainers.image.version": "1.0.0"
+}
+
+---------------------------------------------------------------
+$ docker inspect attendance-portal:1.0.0  (user and exposed ports)
+---------------------------------------------------------------
+User: attendance
+{"8080/tcp":{}}
+
+---------------------------------------------------------------
+$ docker inspect attendance-portal:1.0.0 --format 'Healthcheck: {{.Config.Healthcheck.Test}}  interval={{.Config.Healthcheck.Interval}} start_period={{.Config.Healthcheck.StartPeriod}}'
+---------------------------------------------------------------
+Healthcheck: [CMD-SHELL wget --quiet --tries=1 --spider         "http://localhost:${SERVER_PORT}${SERVER_SERVLET_CONTEXT_PATH}/actuator/health" || exit 1]  interval=15s start_period=1m0s
+
+---------------------------------------------------------------
+$ docker history attendance-portal:1.0.0   (layer sizes)
+---------------------------------------------------------------
+SIZE      CREATED BY
+0B        ENTRYPOINT ["sh" "-c" "exec java $JAVA_OPTS …
+0B        HEALTHCHECK {Test:[CMD-SHELL wget --quiet --…
+0B        VOLUME [/app/data]
+0B        EXPOSE [8080/tcp]
+0B        ENV SERVER_PORT=8080 SERVER_SERVLET_CONTEXT_…
+0B        USER attendance
+63.8MB    COPY --chown=attendance:attendance app/targe…
+4.1kB     WORKDIR /app
+406kB     RUN |3 APP_VERSION=1.0.0 GIT_COMMIT=2b5c3f3 …
+0B        LABEL org.opencontainers.image.title=Student…
+0B        ARG BUILD_TIME=2026-10-05T08:14:08Z
+
+###############################################################
+# 2. TAG - the same image under a second tag
+###############################################################
+
+---------------------------------------------------------------
+$ docker tag attendance-portal:1.0.0 attendance-portal:latest
+---------------------------------------------------------------
+
+---------------------------------------------------------------
+$ docker images attendance-portal --format 'table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.Size}}'
+---------------------------------------------------------------
+REPOSITORY          TAG       IMAGE ID       SIZE
+attendance-portal   1.0.0     00505b427f6d   525MB
+attendance-portal   latest    00505b427f6d   525MB
+
+Note: identical image IDs - a tag is a label on an image, not a copy.
+
+###############################################################
+# 3. RUN - start a container with a port mapping and a volume
+###############################################################
+
+---------------------------------------------------------------
+$ docker volume create attendance-data
+---------------------------------------------------------------
+attendance-data
+
+---------------------------------------------------------------
+$ docker run -d --name attendance-app -p 8100:8080 -v attendance-data:/app/data -e ATTENDANCE_ENVIRONMENT=container-demo attendance-portal:1.0.0
+---------------------------------------------------------------
+23743d64aecab8326ecc91a5439b1fbdb5ca2b6e4e551f9d551906d001c185b0
+
+---------------------------------------------------------------
+$ docker ps --filter name=attendance-app --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}'
+---------------------------------------------------------------
+NAMES            IMAGE                     STATUS                                     PORTS
+attendance-app   attendance-portal:1.0.0   Up Less than a second (health: starting)   0.0.0.0:8100->8080/tcp
+
+Waiting for the application to become healthy...
+  healthy after 10s
+
+###############################################################
+# 4. INSPECT - what the running container actually is
+###############################################################
+
+---------------------------------------------------------------
+$ docker inspect attendance-app --format 'State: {{.State.Status}}   Health: {{if .State.Health}}{{.State.Health.Status}}{{else}}(starting){{end}}   PID: {{.State.Pid}}'
+---------------------------------------------------------------
+State: running   Health: starting   PID: 314
+
+---------------------------------------------------------------
+$ docker inspect attendance-app --format 'Running as user: {{.Config.User}}'
+---------------------------------------------------------------
+Running as user: attendance
+
+---------------------------------------------------------------
+$ docker port attendance-app   (port mapping)
+---------------------------------------------------------------
+8080/tcp -> 0.0.0.0:8100
+
+---------------------------------------------------------------
+$ docker inspect attendance-app --format '{{json .Mounts}}'   (volume)
+---------------------------------------------------------------
+[
+    {
+        "Type": "volume",
+        "Name": "attendance-data",
+        "Source": "/var/lib/docker/volumes/attendance-data/_data",
+        "Destination": "/app/data",
+        "Driver": "local",
+        "Mode": "z",
+        "RW": true,
+        "Propagation": ""
+    }
+]
+
+---------------------------------------------------------------
+$ docker exec attendance-app id
+---------------------------------------------------------------
+uid=1001(attendance) gid=1001(attendance) groups=1001(attendance)
+
+---------------------------------------------------------------
+$ docker stats --no-stream --format 'table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}' attendance-app
+---------------------------------------------------------------
+NAME             CPU %     MEM USAGE / LIMIT
+attendance-app   5.56%     349.9MiB / 15.72GiB
+
+###############################################################
+# 5. VERIFY - the application answers
+###############################################################
+
+---------------------------------------------------------------
+$ curl -s http://localhost:8100/attendance/actuator/health
+---------------------------------------------------------------
+{"status":"UP"}
+
+---------------------------------------------------------------
+$ curl -s http://localhost:8100/attendance/actuator/info
+---------------------------------------------------------------
+{"app":{"name":"Student Attendance Management Portal","environment":"container-demo"}}
+
+---------------------------------------------------------------
+$ curl -s -o /dev/null -w 'GET /login -> HTTP %{http_code}\n' http://localhost:8100/attendance/login
+---------------------------------------------------------------
+GET /login -> HTTP 200
+
+###############################################################
+# 6. LOGS
+###############################################################
+
+---------------------------------------------------------------
+$ docker logs attendance-app --tail 6
+---------------------------------------------------------------
+2026-10-05T08:16:06.034Z  INFO 1 --- [attendance-portal] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+2026-10-05T08:16:06.653Z  INFO 1 --- [attendance-portal] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/attendance'
+2026-10-05T08:16:06.670Z  INFO 1 --- [attendance-portal] [           main] c.c.a.AttendancePortalApplication        : Started AttendancePortalApplication in 8.563 seconds (process running for 9.161)
+2026-10-05T08:16:06.766Z  INFO 1 --- [attendance-portal] [nio-8080-exec-1] o.a.c.c.C.[.[localhost].[/attendance]    : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-05T08:16:06.767Z  INFO 1 --- [attendance-portal] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-10-05T08:16:06.769Z  INFO 1 --- [attendance-portal] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+
+---------------------------------------------------------------
+$ docker logs attendance-app 2>&1 | grep -E 'Seeded|Tomcat started|Started AttendancePortal'
+---------------------------------------------------------------
+2026-10-05T08:16:05.413Z  INFO 1 --- [attendance-portal] [           main] c.college.attendance.config.DataSeeder   : Seeded 5 users, 10 students, 300 attendance records
+2026-10-05T08:16:06.653Z  INFO 1 --- [attendance-portal] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/attendance'
+2026-10-05T08:16:06.670Z  INFO 1 --- [attendance-portal] [           main] c.c.a.AttendancePortalApplication        : Started AttendancePortalApplication in 8.563 seconds (process running for 9.161)
+
+###############################################################
+# 7. STOP - and confirm it stopped cleanly, not by being killed
+###############################################################
+
+---------------------------------------------------------------
+$ docker stop attendance-app
+---------------------------------------------------------------
+attendance-app
+
+  docker stop took 0 s. The default kill timeout is 10 s,
+  so a clean shutdown is anything well under it - which is what the
+  exec form of ENTRYPOINT buys: the JVM is PID 1 and gets SIGTERM.
+
+---------------------------------------------------------------
+$ docker ps -a --filter name=attendance-app --format 'table {{.Names}}\t{{.Status}}'
+---------------------------------------------------------------
+NAMES            STATUS
+attendance-app   Exited (143) Less than a second ago
+
+---------------------------------------------------------------
+$ docker inspect attendance-app --format 'ExitCode: {{.State.ExitCode}}   OOMKilled: {{.State.OOMKilled}}'
+---------------------------------------------------------------
+ExitCode: 143   OOMKilled: false
+
+###############################################################
+# 8. START - restart the stopped container, data intact
+###############################################################
+
+---------------------------------------------------------------
+$ docker start attendance-app
+---------------------------------------------------------------
+attendance-app
+  healthy again after 9s
+
+---------------------------------------------------------------
+$ docker ps --filter name=attendance-app --format 'table {{.Names}}\t{{.Status}}'
+---------------------------------------------------------------
+NAMES            STATUS
+attendance-app   Up 8 seconds (health: starting)
+
+  Seeding is skipped on restart because the volume already holds the
+  data - the fixtures are not duplicated:
+
+---------------------------------------------------------------
+$ docker logs attendance-app 2>&1 | grep -E 'Seeded|skipping seed' | tail -2
+---------------------------------------------------------------
+2026-10-05T08:16:05.413Z  INFO 1 --- [attendance-portal] [           main] c.college.attendance.config.DataSeeder   : Seeded 5 users, 10 students, 300 attendance records
+2026-10-05T08:16:15.735Z  INFO 1 --- [attendance-portal] [           main] c.college.attendance.config.DataSeeder   : Datastore already populated (5 users); skipping seed
+
+###############################################################
+# 9. RESTART
+###############################################################
+
+---------------------------------------------------------------
+$ docker restart attendance-app
+---------------------------------------------------------------
+attendance-app
+  healthy after restart in 9s
+
+---------------------------------------------------------------
+$ curl -s http://localhost:8100/attendance/actuator/health
+---------------------------------------------------------------
+{"status":"UP"}
+
+###############################################################
+# 10. RM - remove the container, keep the volume
+###############################################################
+
+---------------------------------------------------------------
+$ docker stop attendance-app
+---------------------------------------------------------------
+attendance-app
+
+---------------------------------------------------------------
+$ docker rm attendance-app
+---------------------------------------------------------------
+attendance-app
+
+---------------------------------------------------------------
+$ docker ps -a --filter name=attendance-app --format 'table {{.Names}}\t{{.Status}}'
+---------------------------------------------------------------
+NAMES     STATUS
+  (no rows: the container is gone)
+
+---------------------------------------------------------------
+$ docker volume ls --filter name=attendance-data --format 'table {{.Name}}\t{{.Driver}}'
+---------------------------------------------------------------
+VOLUME NAME       DRIVER
+attendance-data   local
+
+  The volume outlived the container. That is the point: removing a
+  container must not destroy a term's attendance records.
+
+###############################################################
+# 11. PROVE IT - a brand new container on the same volume
+###############################################################
+
+---------------------------------------------------------------
+$ docker run -d --name attendance-app -p 8100:8080 -v attendance-data:/app/data attendance-portal:1.0.0
+---------------------------------------------------------------
+f8f24e5ba1b7495e6c7c79c14ddef6ca0a58ef5176262ec623ea863d83f67cf1
+  healthy after 9s
+
+---------------------------------------------------------------
+$ docker logs attendance-app 2>&1 | grep -E 'Seeded|skipping seed'
+---------------------------------------------------------------
+2026-10-05T08:16:33.936Z  INFO 1 --- [attendance-portal] [           main] c.college.attendance.config.DataSeeder   : Datastore already populated (5 users); skipping seed
+
+  'skipping seed' means the new container found the previous
+  container's data and left it alone.
+
+###############################################################
+# 12. CLEAN UP
+###############################################################
+
+---------------------------------------------------------------
+$ docker rm -f attendance-app
+---------------------------------------------------------------
+attendance-app
+
+---------------------------------------------------------------
+$ docker volume rm attendance-data
+---------------------------------------------------------------
+attendance-data
+
+---------------------------------------------------------------
+$ docker rmi attendance-portal:latest
+---------------------------------------------------------------
+Untagged: attendance-portal:latest
+
+  Only the extra tag was removed; attendance-portal:1.0.0 remains:
+
+---------------------------------------------------------------
+$ docker images attendance-portal --format 'table {{.Repository}}\t{{.Tag}}\t{{.Size}}'
+---------------------------------------------------------------
+REPOSITORY          TAG       SIZE
+attendance-portal   1.0.0     525MB
+
+===============================================================
+ LIFECYCLE COMPLETE
+===============================================================
