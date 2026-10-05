@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.college.attendance</groupId>
+    <artifactId>attendance-portal-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>attendance-selenium-tests</artifactId>
+  <name>Attendance Portal :: Selenium suite</name>
+  <description>
+    Browser-level regression suite for the five critical user journeys.
+    Run by Failsafe in the verify phase, so the quality gate is a build
+    phase rather than a script somebody remembers to run.
+  </description>
+
+  <properties>
+    <!--
+      Defaults for a local run against an application started by hand.
+      The pipeline overrides app.base.url and the driver paths.
+    -->
+    <app.base.url>http://localhost:8080/attendance</app.base.url>
+    <selenium.headless>true</selenium.headless>
+    <webdriver.chrome.driver>/usr/local/bin/chromedriver</webdriver.chrome.driver>
+    <selenium.browser.binary></selenium.browser.binary>
+
+    <!-- Empty means "drive a local browser". The pipeline sets this to a
+         Selenium container's URL, because the Jenkins controller has no
+         browser and no graphics libraries of its own. -->
+    <selenium.remote.url></selenium.remote.url>
+
+    <!-- Skipped unless the suite is explicitly asked for, so that a plain
+         `mvn verify` at the repository root does not require a running
+         application and a browser. -->
+    <skipSeleniumTests>true</skipSeleniumTests>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.seleniumhq.selenium</groupId>
+      <artifactId>selenium-java</artifactId>
+      <version>${selenium.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <skipITs>${skipSeleniumTests}</skipITs>
+          <includes>
+            <include>**/*IT.java</include>
+          </includes>
+          <!-- One journey per fork would be faster but makes failures
+               harder to read; the suite is small enough to run serially. -->
+          <systemPropertyVariables>
+            <app.base.url>${app.base.url}</app.base.url>
+            <selenium.headless>${selenium.headless}</selenium.headless>
+            <webdriver.chrome.driver>${webdriver.chrome.driver}</webdriver.chrome.driver>
+            <selenium.browser.binary>${selenium.browser.binary}</selenium.browser.binary>
+            <selenium.remote.url>${selenium.remote.url}</selenium.remote.url>
+            <selenium.screenshot.dir>${project.build.directory}/screenshots</selenium.screenshot.dir>
+          </systemPropertyVariables>
+        </configuration>
+        <executions>
+          <execution>
+            <id>selenium-journeys</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- No unit tests in this module; everything here drives a browser. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

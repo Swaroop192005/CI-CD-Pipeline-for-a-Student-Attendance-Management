@@ -1,0 +1,181 @@
+Journey : ScreenshotMechanismDemoIT
+Test    : deliberate failure, to demonstrate the capture mechanism
+URL     : http://localhost:8080/attendance/dashboard
+Title   : Dashboard · Attendance Portal
+Failure : org.opentest4j.AssertionFailedError: [deliberately wrong, so the mechanism has something to capture] 
+expected: "PRINCIPAL"
+ but was: "HOD"
+
+---- page source ----
+<html><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard · Attendance Portal</title>
+  <link rel="stylesheet" href="/attendance/css/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/attendance/dashboard" data-testid="brand">Attendance Portal</a>
+  <span class="env-badge env-local" data-testid="env-badge">local</span>
+  <nav>
+    <a href="/attendance/dashboard" data-testid="nav-dashboard" class="active">Dashboard</a>
+    <a href="/attendance/attendance" data-testid="nav-attendance">Attendance</a>
+    
+    <a href="/attendance/review" data-testid="nav-review">Review queue</a>
+    
+  </nav>
+  <span class="whoami">
+    <span data-testid="current-user">hod1</span>
+    <span class="role" data-testid="current-role">HOD</span>
+    <form action="/attendance/logout" method="post" style="display:inline"><input type="hidden" name="_csrf" value="3AaMATQSXZZNVQo4C53sD1nPJ7NHG4lON0aAJBE99PZ3kuIG6DK4NgB0OKJgbTlcaLDYN2muCtIjLe1jDnS5RnJZwcdBoNVg">
+      <button class="btn btn-secondary btn-sm" type="submit" data-testid="logout">Sign out</button>
+    </form>
+  </span>
+</header>
+<main>
+  <div>
+  
+  
+  
+</div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Attendance summary</h1>
+      <p class="subtitle">
+        Department-wide. Percentages count approved records only, so a draft
+        is never published as a fact about a student.
+      </p>
+      
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat approved">
+      <div class="label">Overall attendance</div>
+      <div class="value" data-testid="stat-percentage">86.1%</div>
+      <div class="hint">
+        <span data-testid="stat-attended">173</span>
+        of <span data-testid="stat-counted">201</span>
+        counted sessions
+      </div>
+    </div>
+    <div class="stat draft">
+      <div class="label">Draft</div>
+      <div class="value" data-testid="stat-draft">32</div>
+      <div class="hint">Not yet submitted</div>
+    </div>
+    <div class="stat submitted">
+      <div class="label">Awaiting review</div>
+      <div class="value" data-testid="stat-submitted">32</div>
+      <div class="hint">With the Head of Department</div>
+    </div>
+    <div class="stat approved">
+      <div class="label">Approved</div>
+      <div class="value" data-testid="stat-approved">212</div>
+      <div class="hint">Official</div>
+    </div>
+    <div class="stat rejected">
+      <div class="label">Rejected</div>
+      <div class="value" data-testid="stat-rejected">30</div>
+      <div class="hint">Sent back for correction</div>
+    </div>
+  </div>
+
+  
+
+  <div class="card">
+    <h2>By subject</h2>
+    
+    <div class="table-wrap">
+      <table data-testid="subject-table">
+        <thead>
+        <tr>
+          <th>Subject</th>
+          <th class="num">Sessions counted</th>
+          <th class="num">Attended</th>
+          <th class="num">Percentage</th>
+          <th style="width:160px">Standing</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr data-testid="subject-row">
+          <td data-testid="subject-code">CS501</td>
+          <td class="num">70</td>
+          <td class="num">63</td>
+          <td class="num" data-testid="subject-percent">90.0%</td>
+          <td>
+            <div class="bar">
+              <span style="width:90.0%"></span>
+            </div>
+          </td>
+        </tr>
+        <tr data-testid="subject-row">
+          <td data-testid="subject-code">CS502</td>
+          <td class="num">67</td>
+          <td class="num">58</td>
+          <td class="num" data-testid="subject-percent">86.6%</td>
+          <td>
+            <div class="bar">
+              <span style="width:86.6%"></span>
+            </div>
+          </td>
+        </tr>
+        <tr data-testid="subject-row">
+          <td data-testid="subject-code">CS503</td>
+          <td class="num">64</td>
+          <td class="num">52</td>
+          <td class="num" data-testid="subject-percent">81.3%</td>
+          <td>
+            <div class="bar">
+              <span style="width:81.3%"></span>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>At risk — below <span>75%</span></h2>
+    <p class="subtitle">
+      Surfaced while there is still time to act, which is the whole point:
+      under the paper process these students found out when the hall ticket
+      was withheld.
+    </p>
+    
+    <div class="table-wrap">
+      <table data-testid="at-risk-table">
+        <thead>
+        <tr>
+          <th>Roll number</th>
+          <th>Student</th>
+          <th class="num">Counted</th>
+          <th class="num">Attended</th>
+          <th class="num">Percentage</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr data-testid="at-risk-row">
+          <td data-testid="at-risk-roll">1CS21CS001</td>
+          <td>Aditya Rao</td>
+          <td class="num">22</td>
+          <td class="num">16</td>
+          <td class="num">
+            <span class="badge badge-risk" data-testid="at-risk-percent">72.7%</span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<footer class="app-footer">
+  Student Attendance Management Portal ·
+  environment <span>local</span> ·
+  eligibility threshold <span>75%</span>
+</footer>
+
+
+</body></html>

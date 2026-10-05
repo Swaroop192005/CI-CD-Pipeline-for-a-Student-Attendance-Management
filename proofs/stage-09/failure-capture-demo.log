@@ -1,0 +1,83 @@
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=40387 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------< com.college.attendance:attendance-selenium-tests >----------
+[INFO] Building Attendance Portal :: Selenium suite 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ attendance-selenium-tests ---
+[INFO] skip non existing resourceDirectory /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/selenium-tests/src/main/resources
+[INFO] skip non existing resourceDirectory /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/selenium-tests/src/main/resources
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ attendance-selenium-tests ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ attendance-selenium-tests ---
+[INFO] Copying 0 resource from src/test/resources to target/test-classes
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ attendance-selenium-tests ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 16 source files with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] --- surefire:3.5.6:test (default-test) @ attendance-selenium-tests ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ attendance-selenium-tests ---
+[WARNING] JAR will be empty - no content was marked for inclusion!
+[INFO] 
+[INFO] --- failsafe:3.5.6:integration-test (default) @ attendance-selenium-tests ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[WARNING] System property [app.base.url], [webdriver.chrome.driver], [selenium.browser.binary], [selenium.headless] overwritten by user properties from Maven session
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+Picked up JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStoreType=JKS -Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=40387 -Dhttp.nonProxyHosts=localhost|127.0.0.1|::1|127.*|0.*|::|169.254.*|api.anthropic.com|api-staging.anthropic.com|api-pr-preview.anthropic.com|mcp-proxy.anthropic.com|mcp-proxy-staging.anthropic.com|registry.npmjs.org|jsr.io|npm.jsr.io|pypi.org|files.pythonhosted.org|index.crates.io|proxy.golang.org|host.docker.internal|10.*|172.16.*|172.17.*|172.18.*|172.19.*|172.20.*|172.21.*|172.22.*|172.23.*|172.24.*|172.25.*|172.26.*|172.27.*|172.28.*|172.29.*|172.30.*|172.31.*|192.168.*|100.64.0.0/10|*.svc.cluster.local|*.svc.cluster.local -Djdk.http.auth.tunneling.disabledSchemes= -Djdk.http.auth.proxying.disabledSchemes=
+[INFO] Running com.college.attendance.e2e.ScreenshotMechanismDemoIT
+Oct 05, 2026 7:48:11 AM org.openqa.selenium.devtools.CdpVersionFinder findNearestMatch
+WARNING: Unable to find CDP implementation matching 141
+[selenium] failure captured: /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/selenium-tests/target/screenshots/ScreenshotMechanismDemoIT.deliberateFailure-20261005-074812-479.png
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 1.890 s <<< FAILURE! -- in com.college.attendance.e2e.ScreenshotMechanismDemoIT
+[ERROR] com.college.attendance.e2e.ScreenshotMechanismDemoIT.deliberateFailure -- Time elapsed: 1.864 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: 
+[deliberately wrong, so the mechanism has something to capture] 
+expected: "PRINCIPAL"
+ but was: "HOD"
+	at com.college.attendance.e2e.ScreenshotMechanismDemoIT.deliberateFailure(ScreenshotMechanismDemoIT.java:21)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+[INFO] 
+[INFO] Results:
+[INFO] 
+[ERROR] Failures: 
+[ERROR]   ScreenshotMechanismDemoIT.deliberateFailure:21 [deliberately wrong, so the mechanism has something to capture] 
+expected: "PRINCIPAL"
+ but was: "HOD"
+[INFO] 
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- failsafe:3.5.6:integration-test (selenium-journeys) @ attendance-selenium-tests ---
+[INFO] Skipping execution of surefire because it has already been run for this configuration
+[INFO] 
+[INFO] --- failsafe:3.5.6:verify (default) @ attendance-selenium-tests ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.071 s
+[INFO] Finished at: 2026-10-05T07:48:12Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-failsafe-plugin:3.5.6:verify (default) on project attendance-selenium-tests: There are test failures.
+[ERROR] 
+[ERROR] See /home/user/CI-CD-Pipeline-for-a-Student-Attendance-Management/selenium-tests/target/failsafe-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
