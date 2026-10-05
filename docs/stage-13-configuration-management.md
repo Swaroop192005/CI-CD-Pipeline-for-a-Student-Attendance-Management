@@ -546,6 +546,7 @@ way meant exercising it a second way, and that is what found it.
 |---|---|
 | [`puppet/`](../puppet/) | Hiera data, site manifest, module: 5 classes, 1 function, 1 type, 4 EPP templates |
 | [`puppet/lab/`](../puppet/lab/) | `build-puppet-node.sh` (bare node + Puppet 7), `capture-proofs.sh` (the whole evidence sequence), `browse-node.sh` (browser check) |
+| [`puppet/README.md`](../puppet/README.md) | What is deliverable and what is lab scaffolding, and how to run it |
 | `01-puppet-apply-noop.log` | `--noop` dry run: 20 resources reported, none changed |
 | `02-puppet-apply-run1.log` | First apply — 21 changes, 0 failures, exit code 2 |
 | `03-puppet-apply-run2-idempotent.log` | Second apply — **0 changes, exit code 0** |
