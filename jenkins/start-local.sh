@@ -32,14 +32,24 @@ if [ "$REBUILD" = yes ] || ! docker image inspect attendance-jenkins:1.0 >/dev/n
   echo "  building (5-10 min: ~40 plugins, docker client, Maven)..."
   # Through build-controller.sh, so a machine behind an egress proxy gets
   # the build args it needs. On an ordinary machine it adds none.
-  if ! bash "$HERE/build-controller.sh" >/tmp/jenkins-build.log 2>&1; then
-    bad "build failed; last lines of /tmp/jenkins-build.log:"
-    tail -20 /tmp/jenkins-build.log | sed 's/^/      /'; exit 1
+  bash "$HERE/build-controller.sh" >/tmp/jenkins-build.log 2>&1
+  # Same trap as the node image: a buildx builder on the docker-container
+  # driver reports success while leaving its output in the build cache, so
+  # the build passes and the image is nowhere the daemon can see it.
+  if ! docker image inspect attendance-jenkins:1.0 >/dev/null 2>&1; then
+    echo "  the build reported success but the image is not in the local store;"
+    echo "  rebuilding with --load"
+    docker build --load -t attendance-jenkins:1.0 "$HERE" >>/tmp/jenkins-build.log 2>&1
   fi
 fi
 docker image inspect attendance-jenkins:1.0 >/dev/null 2>&1 \
   && ok "attendance-jenkins:1.0 ($(docker image inspect attendance-jenkins:1.0 --format '{{.Architecture}}'))" \
-  || { bad "image missing after build"; exit 1; }
+  || { bad "image missing after build; last lines of /tmp/jenkins-build.log:"
+       tail -25 /tmp/jenkins-build.log | sed 's/^/      /'
+       echo
+       echo "      If that mentions buildx or 'failed to solve', try:"
+       echo "          docker buildx use default"
+       exit 1; }
 
 step "Starting the controller"
 docker compose -f "$HERE/docker-compose.local.yml" up -d >/dev/null 2>&1
