@@ -78,8 +78,18 @@ if command -v docker >/dev/null && docker info >/dev/null 2>&1; then
   if docker ps --format '{{.Names}}' | grep -qx attendance-jenkins; then
     builds=$(docker exec attendance-jenkins sh -c 'ls -d /var/jenkins_home/jobs/*/builds/[0-9]* 2>/dev/null | wc -l' 2>/dev/null | tr -d ' ')
     printf "  %s  %s recorded builds\n" "$(g "running")" "${builds:-?}"
+  elif docker ps -aq -f name=^attendance-jenkins$ 2>/dev/null | grep -q .; then
+    printf "  %s  start it with: docker start attendance-jenkins\n" "$(y "stopped")"
   else
-    printf "  %s\n" "$(y "not running")"
+    # Deliberately not presented live, and not a failure. A controller built
+    # here would start with no build history, and the history is the whole
+    # point: build #10 went red at the Selenium gate with the deploy stages
+    # skipped. One green build on a fresh controller proves less than that
+    # log does.
+    printf "  %s  presented from evidence, by choice\n" "$(y "n/a ")"
+    printf "        proofs/stage-10/failed-pipeline.log   the gate blocking a deploy\n"
+    printf "        proofs/stage-10/01-failed-build.png   the same, in the UI\n"
+    printf "        proofs/stage-15/pipeline-build-17.log a full green run, 11 stages\n"
   fi
 fi
 
