@@ -99,6 +99,20 @@ Each choice is justified against a project constraint in
 
 ---
 
+## Presenting this project
+
+If you are demonstrating or assessing this work, start with
+**[docs/VIVA-DEMO-GUIDE.md](docs/VIVA-DEMO-GUIDE.md)** — it covers what to
+run, in what order, the evidence to show for the parts that cannot be run
+live, and an honest assessment of where the project is weak.
+
+```bash
+bash scripts/start-demo.sh      # the portal on :8080
+bash scripts/demo-status.sh     # one-screen status of every component
+```
+
+---
+
 ## Quick start
 
 ### Prerequisites
