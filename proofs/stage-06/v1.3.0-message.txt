@@ -1,0 +1,33 @@
+v1.3.0 - everything running locally
+
+A known-good restore point. Every component of the project verified
+running on an ordinary developer machine, not only in the container this
+was built in.
+
+Live, all seven
+  portal                 :8080   java -jar, the executable WAR
+  staging container      :8100   from the local registry
+  production container   :8101   the same image, different configuration
+  tomcat staging         :8090   the same WAR on a standalone Tomcat
+  tomcat production      :8091
+  node (Ansible)         :8200   bare Ubuntu, provisioned, changed=0 on re-run
+  node (Puppet)          :8300   same specification, second tool, exit 0 on re-run
+  Jenkins                :8081   controller with both CasC jobs defined
+
+Repository
+  Both release tags published. The Puppet module complete -- its Hiera
+  data had been silently excluded by a .gitignore rule and is now tracked
+  and verified from a clean clone. 110 evidence files across 14 stages.
+  100 tests: 73 unit, 7 integration, 20 Selenium.
+
+Tooling added for running it
+  scripts/start-demo.sh      portal, registry, containers, Tomcat
+  scripts/start-nodes.sh     the provisioned nodes, Ansible and Puppet
+  scripts/demo-status.sh     every component on one screen
+  jenkins/start-local.sh     the controller, without the lab's assumptions
+  docs/VIVA-DEMO-GUIDE.md    what to present, and where the project is weak
+
+Return to this state with:
+  git checkout v1.3.0
+or, to move a branch back onto it:
+  git reset --hard v1.3.0
