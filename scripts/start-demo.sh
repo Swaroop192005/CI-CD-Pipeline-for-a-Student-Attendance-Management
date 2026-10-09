@@ -154,8 +154,10 @@ if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
     curl -fsS --noproxy '*' --max-time 3 "http://127.0.0.1:$1/v2/" >/dev/null 2>&1
   }
   published_port() {    # the host port the container actually publishes, if any
-    docker inspect attendance-registry \
-      --format '{{range $p, $c := .NetworkSettings.Ports}}{{range $c}}{{.HostPort}}{{end}}{{end}}' 2>/dev/null
+    # `docker port`, not a Go template over .NetworkSettings.Ports: Docker
+    # Desktop publishes a port on both IPv4 and IPv6, so ranging over that map
+    # concatenates the two values and yields "50015001" rather than "5001".
+    docker port attendance-registry 5000/tcp 2>/dev/null | head -1 | awk -F: '{print $NF}'
   }
 
   # Already serving? Adopt whatever port it is on and leave it alone.
