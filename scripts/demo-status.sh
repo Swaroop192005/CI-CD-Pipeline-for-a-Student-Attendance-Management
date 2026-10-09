@@ -21,15 +21,22 @@ printf "%s\n" "$(date '+%Y-%m-%d %H:%M:%S')"
 printf "\n\033[1mApplication endpoints\033[0m\n"
 printf "  %-24s %-28s %-6s %s\n" "WHAT" "URL" "STATE" "ENV"
 for row in \
-  "portal (java -jar)|http://127.0.0.1:8080/attendance" \
-  "staging container|http://127.0.0.1:8100/attendance" \
-  "production container|http://127.0.0.1:8101/attendance" \
-  "tomcat staging|http://127.0.0.1:8090/attendance" \
-  "tomcat production|http://127.0.0.1:8091/attendance" \
-  "node (Ansible)|http://127.0.0.1:8200/attendance" \
-  "node (Puppet)|http://127.0.0.1:8300/attendance" ; do
-  lbl=${row%%|*}; url=${row##*|}
+  "portal (java -jar)|http://127.0.0.1:8080/attendance|" \
+  "staging container|http://127.0.0.1:8100/attendance|" \
+  "production container|http://127.0.0.1:8101/attendance|" \
+  "tomcat staging|http://127.0.0.1:8090/attendance|" \
+  "tomcat production|http://127.0.0.1:8091/attendance|" \
+  "node (Ansible)|http://127.0.0.1:8200/attendance|attendance-node" \
+  "node (Puppet)|http://127.0.0.1:8300/attendance|attendance-node-puppet" ; do
+  lbl=${row%%|*}; rest=${row#*|}; url=${rest%|*}; needs=${rest##*|}
   printf "  %-24s %-28s " "$lbl" "${url#http://127.0.0.1}"
+  # A provisioned node that was never built on this machine is not a
+  # failure, and showing it red next to real failures teaches you to ignore
+  # red. Say what it is instead.
+  if [ -n "$needs" ] && ! docker ps -aq -f "name=^${needs}$" 2>/dev/null | grep -q .; then
+    printf "%s   %s\n" "$(y "n/a ")" "not built here - see proofs/stage-13, stage-14"
+    continue
+  fi
   probe "$url/actuator/health"
   printf "   %s\n" "$(env_of "$url/actuator/info")"
 done

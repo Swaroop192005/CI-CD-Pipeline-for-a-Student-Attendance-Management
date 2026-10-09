@@ -258,6 +258,42 @@ if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
         && echo "      Something already holds :$port -- check with: lsof -i :$port"
     fi
   done
+
+  step "Tomcat: the same WAR on an external container"
+  # The artefact is an executable WAR: `java -jar` runs it, and the identical
+  # file also deploys to a standalone Tomcat. Showing both from one build is
+  # the point of the packaging decision, so the demo can make it live rather
+  # than only in the documentation.
+  for pair in "staging:8090" "production:8091"; do
+    envn=${pair%%:*}; port=${pair##*:}
+    name="attendance-tomcat-$envn"
+    if curl -fsS --noproxy '*' --max-time 3 "http://127.0.0.1:$port/attendance/actuator/health" >/dev/null 2>&1; then
+      ok "$name already serving on :$port"
+      continue
+    fi
+    docker rm -f "$name" >/dev/null 2>&1
+    ERR=$(docker run -d --name "$name" -p "$port:8080" \
+            -e ATTENDANCE_ENVIRONMENT="$envn" \
+            -e ATTENDANCE_ELIGIBILITY_THRESHOLD=75 \
+            -e "SPRING_DATASOURCE_URL=jdbc:h2:file:/usr/local/tomcat/data/attendance;DB_CLOSE_ON_EXIT=FALSE" \
+            tomcat:10.1-jdk21-temurin 2>&1 >/dev/null)
+    if [ -n "$ERR" ]; then
+      bad "$name did not start"; echo "$ERR" | sed 's/^/      /'; continue
+    fi
+    docker cp "$WAR" "$name:/usr/local/tomcat/webapps/attendance.war" >/dev/null 2>&1
+    printf "  deploying to %s " "$name"
+    for _ in $(seq 1 40); do
+      curl -fsS --noproxy '*' --max-time 3 "http://127.0.0.1:$port/attendance/actuator/health" >/dev/null 2>&1 && break
+      printf "."; sleep 2
+    done
+    echo
+    if curl -fsS --noproxy '*' --max-time 3 "http://127.0.0.1:$port/attendance/actuator/health" >/dev/null 2>&1; then
+      ok "$name serving on :$port"
+    else
+      bad "$name deployed but did not answer; docker logs $name"
+    fi
+  done
+
 fi
 
 # ----------------------------------------------------------- full tier ----
@@ -279,6 +315,8 @@ printf "\n  %-34s %s\n" "PORTAL (run this one)" "http://localhost:$APP_PORT$CTX/
 if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
   printf "  %-34s %s\n" "staging container"    "http://localhost:8100/attendance/login"
   printf "  %-34s %s\n" "production container" "http://localhost:8101/attendance/login"
+  printf "  %-34s %s\n" "tomcat staging"       "http://localhost:8090/attendance/login"
+  printf "  %-34s %s\n" "tomcat production"    "http://localhost:8091/attendance/login"
   [ "$REGISTRY_UP" = yes ] && printf "  %-34s %s\n" "registry tags" \
       "http://localhost:$REGISTRY_PORT/v2/attendance-portal/tags/list"
 fi

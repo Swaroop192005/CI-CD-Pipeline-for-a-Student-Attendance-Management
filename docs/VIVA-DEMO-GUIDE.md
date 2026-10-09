@@ -302,11 +302,13 @@ costs you almost nothing; visibly panicking costs you a lot.
 ```bash
 cd ~/Desktop/CI-CD-Pipeline-for-a-Student-Attendance-Management
 
-bash scripts/start-demo.sh               # portal on :8080          ~2 min
-bash scripts/start-demo.sh --tier docker # + registry, 2 containers ~6 min
-bash scripts/start-demo.sh --tier full   # + Jenkins (Linux only)  ~12 min
+bash scripts/start-demo.sh               # portal on :8080               ~2 min
+bash scripts/start-demo.sh --tier docker # + registry, containers, Tomcat ~8 min
+bash scripts/start-nodes.sh              # + Ansible-provisioned node    ~12 min
+bash scripts/start-demo.sh --tier full   # + Jenkins (Linux only)        ~12 min
 bash scripts/demo-status.sh              # one-screen status
 bash scripts/start-demo.sh --stop        # stop everything
+bash scripts/start-nodes.sh --stop       # stop the node
 
 mvn -pl app verify                       # 73 unit + 7 integration tests
 ```
