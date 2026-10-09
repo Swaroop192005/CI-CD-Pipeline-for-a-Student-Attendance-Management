@@ -171,6 +171,24 @@ if [ "$WANT_PUPPET" = yes ]; then
   # than pre-judging it from `uname -m`.
   if bash puppet/lab/build-puppet-node.sh; then
     echo
+    # Check Hiera can see its data before applying. Without it the catalogue
+    # fails with twenty "expects a value for parameter" lines, which says
+    # nothing about the cause -- the data not being found. `lookup --explain`
+    # prints every path Hiera tried and why each one missed.
+    if ! docker exec attendance-node-puppet bash -c \
+         'export PATH=/opt/puppetlabs/bin:$PATH; cd /puppet && puppet lookup attendance::app_user \
+            --hiera_config=hiera.yaml --modulepath=modules' >/dev/null 2>&1; then
+      bad "Hiera cannot resolve the class data; the apply would fail with"
+      bad "twenty unresolved parameters. What Hiera actually tried:"
+      docker exec attendance-node-puppet bash -c \
+        'export PATH=/opt/puppetlabs/bin:$PATH; cd /puppet && puppet lookup attendance::app_user \
+           --hiera_config=hiera.yaml --modulepath=modules --explain 2>&1' | sed 's/^/      /' | head -30
+      echo
+      echo "      On the node:"
+      docker exec attendance-node-puppet ls -la /puppet /puppet/data 2>&1 | sed 's/^/      /' | head -20
+      exit 1
+    fi
+    ok "Hiera resolves the class data"
     docker exec attendance-node-puppet bash -c \
       'export PATH=/opt/puppetlabs/bin:$PATH; cd /puppet && puppet apply \
          --modulepath=modules --hiera_config=hiera.yaml --detailed-exitcodes manifests/site.pp'
