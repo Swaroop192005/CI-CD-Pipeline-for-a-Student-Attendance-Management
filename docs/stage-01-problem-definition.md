@@ -179,6 +179,22 @@ attendance devices. Each is recorded in the future-enhancement plan
 3. Timetable management is handled outside this system.
 4. The institution accepts an application-level audit trail (actor +
    timestamp on the record) rather than a separate immutable ledger.
+5. **Every session is reviewed before it counts.** This is the heaviest
+   assumption in the document and it is a deliberate simplification rather
+   than observed practice. In most institutions a faculty mark is
+   immediately official, and sign-off attaches instead to *corrections
+   made after the register locks*, or to the consolidated statement issued
+   before examinations. A per-session queue would not survive contact with
+   a 600-student department.
+
+   It was chosen because the workflow is what gives the system genuine
+   role separation — three roles with different authority over the same
+   record — and that is what the Stage 9 browser journeys exercise. The
+   alternative design is recorded as limitation A7 and enhancement F15:
+   marking becomes immediate, and the review queue holds only post-lock
+   corrections. BR-04, that only approved records count toward a
+   percentage, survives either way; whatever triggers the review, a
+   mistaken entry should not become a fact about a student's eligibility.
 
 ---
 

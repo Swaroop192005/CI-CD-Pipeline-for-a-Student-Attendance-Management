@@ -204,6 +204,7 @@ quietly fixed. Examiners notice this.
 
 | # | Weakness | Honest answer |
 |---|---|---|
+| 0 | **The domain model is not how attendance really works** — a Head of Department approving every class session | The one most likely to be raised by an examiner who knows colleges, and the one to concede fastest. "In practice a faculty mark is official on save; sign-off attaches to post-lock corrections or to the consolidated pre-exam statement. I chose a per-session workflow because I needed three roles with genuinely different authority over one record for the Selenium journeys to assert anything across roles. It's limitation A7, and F15 is the realistic design." Then defend BR-04, which survives either way: a mistaken record should never become a fact about a student's eligibility |
 | 1 | **`ddl-auto: update`, no migrations** | "The schema is managed by Hibernate, which is fine for a single-node demo and wrong for production. Flyway or Liquibase with versioned migrations is the correct answer, and it is the first thing I would add." Do not defend this one. |
 | 2 | **Coverage measured but not enforced** | JaCoCo has `prepare-agent` only — no `check` goal, no threshold. "Coverage is reported but not gated. The gate is the Selenium suite. A coverage minimum in the `check` goal would make it a real quality gate too." |
 | 3 | **No HTTPS anywhere** | "Everything is plain HTTP. nginx terminating TLS with a real certificate is the production answer; in the lab there is no certificate authority to issue one." |
@@ -216,7 +217,10 @@ quietly fixed. Examiners notice this.
 | 10 | **No monitoring** | A health endpoint is not observability. Prometheus and alerting would be the next layer. |
 
 Naming two or three of these yourself, before you are asked, reads as
-judgement. Waiting to be caught on them reads as not knowing.
+judgement. Waiting to be caught on them reads as not knowing. If you only
+raise one, raise **#0** — it is the one a domain-aware examiner will reach
+for, and conceding it immediately turns the weakest part of the project
+into evidence that you understood the trade-off you were making.
 
 ### Likely mark
 
