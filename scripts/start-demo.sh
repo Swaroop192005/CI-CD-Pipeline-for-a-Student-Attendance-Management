@@ -89,8 +89,22 @@ elif lsof -ti ":$APP_PORT" >/dev/null 2>&1; then
   echo "    Free it and run this again:"
   echo "        kill \$(lsof -ti :$APP_PORT)"
   echo
+  # A process suspended with Ctrl+Z is in state T. SIGTERM is queued for it
+  # but not acted on until it resumes, so a plain kill looks like it did
+  # nothing and the same pid is still holding the port on the next run.
+  # SIGKILL cannot be blocked or deferred.
+  for _p in $(lsof -ti ":$APP_PORT" 2>/dev/null); do
+    if [ "$(ps -o stat= -p "$_p" 2>/dev/null | cut -c1)" = "T" ]; then
+      printf "    \033[33mNote:\033[0m pid %s is *stopped* (state T), almost certainly suspended\n" "$_p"
+      echo "    with Ctrl+Z. A plain kill will not reach it -- use:"
+      echo "        kill -9 \$(lsof -ti :$APP_PORT)"
+      echo
+    fi
+  done
   echo "    If you suspended an earlier run with Ctrl+Z, that is almost"
-  echo "    certainly what this is. 'jobs' lists it; 'kill %1' ends it."
+  echo "    certainly what this is. 'jobs' lists it; 'kill -9 %1' ends it."
+  echo "    Use Ctrl+C, not Ctrl+Z, to stop a script: Ctrl+Z only suspends it"
+  echo "    and leaves the application holding the port."
   exit 1
 else
   # JAVA_TOOL_OPTIONS is cleared for the app's own JVM. Some build and CI
@@ -123,12 +137,39 @@ fi
 # --------------------------------------------------------- docker tier ----
 if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
   step "Registry"
-  if docker ps --format '{{.Names}}' | grep -qx attendance-registry; then ok "already running"
+  REGISTRY_UP=no
+  if docker ps --format '{{.Names}}' | grep -qx attendance-registry; then
+    ok "already running"; REGISTRY_UP=yes
   else
-    docker start attendance-registry >/dev/null 2>&1 \
-      || docker run -d --name attendance-registry -p 5000:5000 \
-           -v docker_registry_data:/var/lib/registry registry:2 >/dev/null
-    sleep 2; ok "registry on :5000"
+    # Start the existing container if there is one, otherwise create it.
+    # Deciding by existence rather than falling back on a failed `docker
+    # start` matters: a start that fails for a real reason (a port clash)
+    # used to fall through to `docker run`, which then failed again with a
+    # confusing "name already in use" and hid the actual cause.
+    if docker ps -a --format '{{.Names}}' | grep -qx attendance-registry; then
+      ERR=$(docker start attendance-registry 2>&1 >/dev/null)
+    else
+      ERR=$(docker run -d --name attendance-registry -p 5000:5000 \
+              -v docker_registry_data:/var/lib/registry registry:2 2>&1 >/dev/null)
+    fi
+    sleep 2
+    if docker ps --format '{{.Names}}' | grep -qx attendance-registry; then
+      ok "registry on :5000"; REGISTRY_UP=yes
+    else
+      bad "registry did not start"
+      [ -n "$ERR" ] && echo "$ERR" | sed 's/^/      /'
+      if echo "$ERR" | grep -qiE "port is already allocated|address already in use|bind"; then
+        echo
+        echo "      Port 5000 is taken. On macOS that is usually AirPlay Receiver:"
+        echo "        System Settings -> General -> AirDrop & Handoff"
+        echo "        -> turn off AirPlay Receiver, then run this again."
+        echo "      Check what holds it with:  lsof -i :5000"
+      fi
+      echo
+      echo "      Carrying on without the registry -- the portal on :$APP_PORT is"
+      echo "      unaffected, and the registry only matters for the image-tag"
+      echo "      part of the demo. proofs/stage-12/ covers that from evidence."
+    fi
   fi
 
   step "Image"
@@ -137,23 +178,50 @@ if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
   else
     docker build -q -t attendance-portal:1.0.0 . >/dev/null && ok "built attendance-portal:1.0.0"
   fi
-  docker tag attendance-portal:1.0.0 localhost:5000/attendance-portal:1.0.0 2>/dev/null
-  docker push -q localhost:5000/attendance-portal:1.0.0 >/dev/null 2>&1 && ok "pushed to the local registry"
+  if [ "$REGISTRY_UP" = yes ]; then
+    docker tag attendance-portal:1.0.0 localhost:5000/attendance-portal:1.0.0 2>/dev/null
+    if docker push -q localhost:5000/attendance-portal:1.0.0 >/dev/null 2>&1; then
+      ok "pushed to the local registry"
+    else
+      bad "push to the local registry failed (the image itself is fine)"
+    fi
+  else
+    printf "  \033[33m-\033[0m skipped the push: no registry\n"
+  fi
 
   step "Containers: staging and production"
+  # Pull from the registry when it is up, so the demo shows the real path:
+  # built image -> registry -> deployed container. With no registry, run the
+  # same image from the local daemon rather than failing -- the point of the
+  # two containers is one image serving two environments, which holds either
+  # way, and the registry hop is evidenced in proofs/stage-12/.
+  if [ "$REGISTRY_UP" = yes ]; then IMG=localhost:5000/attendance-portal:1.0.0
+  else IMG=attendance-portal:1.0.0; fi
   for pair in "staging:8100" "production:8101"; do
     envn=${pair%%:*}; port=${pair##*:}
     name="attendance-app-$envn"
-    if docker ps --format '{{.Names}}' | grep -qx "$name"; then ok "$name already running"
-    elif docker start "$name" >/dev/null 2>&1; then ok "$name restarted on :$port"
+    if docker ps --format '{{.Names}}' | grep -qx "$name"; then
+      ok "$name already running"
+      continue
+    fi
+    if docker ps -a --format '{{.Names}}' | grep -qx "$name"; then
+      ERR=$(docker start "$name" 2>&1 >/dev/null)
     else
-      docker run -d --name "$name" -p "$port:8080" \
+      ERR=$(docker run -d --name "$name" -p "$port:8080" \
         -e ATTENDANCE_ENVIRONMENT="$envn" \
         -e SERVER_SERVLET_CONTEXT_PATH=/attendance \
         -e ATTENDANCE_ELIGIBILITY_THRESHOLD=75 \
         -e "SPRING_DATASOURCE_URL=jdbc:h2:file:/app/data/attendance;DB_CLOSE_ON_EXIT=FALSE" \
         -v "attendance-data-$envn:/app/data" \
-        localhost:5000/attendance-portal:1.0.0 >/dev/null && ok "$name started on :$port"
+        "$IMG" 2>&1 >/dev/null)
+    fi
+    if docker ps --format '{{.Names}}' | grep -qx "$name"; then
+      ok "$name on :$port"
+    else
+      bad "$name did not start"
+      [ -n "$ERR" ] && echo "$ERR" | sed 's/^/      /'
+      echo "$ERR" | grep -qiE "port is already allocated|address already in use" \
+        && echo "      Something already holds :$port -- check with: lsof -i :$port"
     fi
   done
 fi
