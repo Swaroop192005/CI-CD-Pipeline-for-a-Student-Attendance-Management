@@ -11,9 +11,16 @@ r() { printf "\033[31m%s\033[0m" "$1"; }
 y() { printf "\033[33m%s\033[0m" "$1"; }
 
 probe() { # url -> UP / DOWN
-  if curl -fsS --noproxy '*' --max-time 4 "$1" >/dev/null 2>&1; then g "UP  "; else r "DOWN"; fi
+  # Two attempts, and a timeout generous enough for a cold one. Spring MVC
+  # initialises its DispatcherServlet on the *first* request, so the very
+  # first call to an otherwise healthy instance can take several seconds --
+  # long enough that a short timeout reports DOWN for an application that is
+  # running perfectly, and UP for the same one a moment later.
+  if curl -fsS --noproxy '*' --max-time 15 "$1" >/dev/null 2>&1; then g "UP  "; return; fi
+  if curl -fsS --noproxy '*' --max-time 15 "$1" >/dev/null 2>&1; then g "UP  "; return; fi
+  r "DOWN"
 }
-env_of() { curl -fsS --noproxy '*' --max-time 4 "$1" 2>/dev/null | sed -n 's/.*"environment":"\([^"]*\)".*/\1/p'; }
+env_of() { curl -fsS --noproxy '*' --max-time 15 "$1" 2>/dev/null | sed -n 's/.*"environment":"\([^"]*\)".*/\1/p'; }
 
 printf "\n\033[1mSTUDENT ATTENDANCE PORTAL — demo status\033[0m\n"
 printf "%s\n" "$(date '+%Y-%m-%d %H:%M:%S')"

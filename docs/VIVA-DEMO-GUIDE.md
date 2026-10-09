@@ -21,6 +21,7 @@ before you walk in:
 | | What you show | Cost | Risk |
 |---|---|---|---|
 | **A — Live app + evidence** | The portal running on your Mac, plus the committed logs and screenshots for the pipeline | ~5 min setup | Low. Recommended. |
+| **A+ — add containers and the node** | Also the registry, staging and production containers, Tomcat, and the Ansible-provisioned node | ~20 min, once | Low once it has worked a first time. `scripts/start-demo.sh --tier docker` and `scripts/start-nodes.sh`. |
 | **B — Rebuild the whole lab** | Everything live, including Jenkins | 1–2 hours, the night before | High. Jenkins uses `network_mode: host`, which Docker Desktop on macOS does not support. |
 
 **Take option A.** The evidence is strong, and the thing that most often
@@ -148,9 +149,33 @@ single `docker run` line in it. That is the Selenium container the gate
 itself starts, not a deployment. The deploy stages are named explicitly as
 skipped, which is the stronger evidence anyway.
 
-### 2.4 — Configuration management (2 min, from evidence)
+### 2.4 — Configuration management (2 min)
 
-Open `proofs/stage-13/puppet/03-puppet-apply-run2-idempotent.log`.
+**Live, if `scripts/start-nodes.sh` worked on your machine.** This is the
+better version of this section, because idempotency is a claim about what
+happens when you run something *again* — and running it again in front of
+someone is the whole argument.
+
+Have the node already provisioned before you start. Then run the playbook
+a second time, live:
+
+```bash
+cd ansible
+ansible-playbook -i inventory.ini site.yml -e proxy_url='' \
+    -e app_artifact_source=../app/target/attendance.war
+```
+
+> This node is already provisioned. Watch the recap: thirty-odd tasks, and
+> **changed=0**. Nothing moved, because the playbook describes a desired
+> state rather than a list of actions — which is what makes it safe to
+> re-run against a node in an unknown condition.
+
+Then show `http://localhost:8200/attendance/login` — the same portal, on a
+node that started as a bare Ubuntu container with no JRE, no service
+account and no configuration.
+
+**From evidence, if the node tier did not run.** Open
+`proofs/stage-13/puppet/03-puppet-apply-run2-idempotent.log`.
 
 > Stage 13 asked for Ansible *or* Puppet. I did both, against the same
 > written specification. Second run of the Puppet manifest: exit code 0,

@@ -2,12 +2,15 @@
 #
 # Brings up a bare node with Puppet 7 on it, ready for `puppet apply`.
 #
-# Puppet's apt repository (apt.puppet.com) is refused by this lab's egress
-# policy, and the Ubuntu universe package is Puppet 5.5 -- too old for EPP
-# and the modern data types this module uses. So Puppet is taken from the
-# official container image instead: /opt/puppetlabs there is self-contained
-# (it ships its own Ruby), which makes it portable onto the Ubuntu 22.04
-# target without touching the system Ruby.
+# Puppet is installed from apt.puppet.com where that is reachable, which is
+# both the normal way and the only one that gives a native build on arm64.
+# Where it is refused -- as it was on the network this project was built on
+# -- the script falls back to extracting /opt/puppetlabs from the official
+# container image, a self-contained tree that ships its own Ruby. That
+# image is published for linux/amd64 only, so the fallback is amd64-only.
+#
+# The Ubuntu universe package is not used either way: it is Puppet 5.5, too
+# old for EPP and the modern data types this module relies on.
 #
 # The node itself is the same deliberately-bare image the Ansible target
 # uses, built by ansible/targetnode/build-node.sh -- anything it arrives
@@ -69,17 +72,61 @@ echo "==> Pointing the node's apt at the relay ($GATEWAY:$RELAY_PORT)"
 docker exec "$NODE" sh -c \
   "printf 'Acquire::https::Proxy \"http://$GATEWAY:$RELAY_PORT\";\n' > /etc/apt/apt.conf.d/01proxy"
 
-echo "==> Extracting /opt/puppetlabs from $PUPPET_IMAGE"
-STAGE="$(mktemp -d)"
-trap 'rm -rf "$STAGE"' EXIT
-CID="$(docker create "$PUPPET_IMAGE")"
-docker export "$CID" | tar -x -C "$STAGE" opt/puppetlabs
-docker rm -f "$CID" >/dev/null
+echo "==> Installing Puppet"
+# Preferred route: the official apt repository, which publishes puppet-agent
+# for arm64 as well as amd64, so the node runs natively on Apple Silicon.
+# This is also simply the normal way to install Puppet.
+#
+# Fallback: extract /opt/puppetlabs from the official container image. That
+# tree is self-contained (it ships its own Ruby), but it is published only
+# for linux/amd64, so on an arm64 host it needs emulation. It exists here
+# because the network this project was built on refuses apt.puppet.com.
+PUPPET_INSTALLED=no
+if docker exec "$NODE" bash -c '
+      set -e
+      apt-get update -qq >/dev/null 2>&1 || true
+      apt-get install -y -qq curl ca-certificates >/dev/null 2>&1 || true
+      curl -fsS --max-time 60 -o /tmp/puppet-release.deb \
+        https://apt.puppet.com/puppet7-release-jammy.deb
+      dpkg -i /tmp/puppet-release.deb >/dev/null
+      apt-get update -qq
+      DEBIAN_FRONTEND=noninteractive apt-get install -y -qq puppet-agent
+   ' >/tmp/puppet-install.log 2>&1; then
+  PUPPET_INSTALLED=apt
+  echo "    installed from apt.puppet.com (native $(docker exec "$NODE" dpkg --print-architecture))"
+else
+  echo "    apt.puppet.com did not work from the node; falling back to the image."
+  # Say why. The two common causes look identical in a bare failure and are
+  # not equally interesting: a TLS-intercepting proxy whose CA the node does
+  # not trust, versus the host simply being unreachable.
+  if grep -qi "self-signed certificate\|unable to get local issuer" /tmp/puppet-install.log 2>/dev/null; then
+    echo "    Reason: TLS interception -- the node does not trust the proxy CA."
+  elif grep -qi "could not resolve\|connection refused\|timed out" /tmp/puppet-install.log 2>/dev/null; then
+    echo "    Reason: the node cannot reach apt.puppet.com."
+  fi
+  echo "    Full output: /tmp/puppet-install.log"
+  HOST_ARCH="$(uname -m)"
+  if [ "$HOST_ARCH" = arm64 ] || [ "$HOST_ARCH" = aarch64 ]; then
+    echo "    !! this host is $HOST_ARCH and $PUPPET_IMAGE is linux/amd64 only;"
+    echo "       the extracted binaries will not run here."
+  fi
+  STAGE="$(mktemp -d)"
+  trap 'rm -rf "$STAGE"' EXIT
+  CID="$(docker create "$PUPPET_IMAGE")"
+  docker export "$CID" | tar -x -C "$STAGE" opt/puppetlabs
+  docker rm -f "$CID" >/dev/null
+  tar -C "$STAGE" -cf - opt/puppetlabs | docker exec -i "$NODE" tar -C / -xf -
+  PUPPET_INSTALLED=image
+fi
 
-echo "==> Installing Puppet onto $NODE"
-tar -C "$STAGE" -cf - opt/puppetlabs | docker exec -i "$NODE" tar -C / -xf -
 docker exec "$NODE" ln -sf /opt/puppetlabs/bin/puppet  /usr/local/bin/puppet
 docker exec "$NODE" ln -sf /opt/puppetlabs/bin/facter  /usr/local/bin/facter
+
+if ! docker exec "$NODE" /opt/puppetlabs/bin/puppet --version >/dev/null 2>&1; then
+  echo "!! puppet is not runnable on the node" >&2
+  [ "$PUPPET_INSTALLED" = image ] && echo "   (an amd64 build on a non-amd64 host will not execute)" >&2
+  exit 1
+fi
 
 echo "==> Staging the build artefact"
 docker exec "$NODE" mkdir -p /artifacts
