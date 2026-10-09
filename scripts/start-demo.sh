@@ -75,8 +75,23 @@ fi
 
 # ------------------------------------------------------------ app tier ----
 step "Starting the portal on :$APP_PORT"
-if curl -fsS --noproxy '*' "http://127.0.0.1:$APP_PORT$CTX/actuator/health" >/dev/null 2>&1; then
+if curl -fsS --noproxy '*' --max-time 5 "http://127.0.0.1:$APP_PORT$CTX/actuator/health" >/dev/null 2>&1; then
   ok "already running"
+elif lsof -ti ":$APP_PORT" >/dev/null 2>&1; then
+  # Something holds the port but does not answer our health endpoint. Most
+  # often a JVM left behind by a previous run that was suspended with Ctrl+Z
+  # rather than stopped. Starting a second one here would bind-fail and exit
+  # immediately, and the health loop below would then spin for two minutes
+  # against a port that is never going to answer. Say so and stop instead.
+  bad "port $APP_PORT is held by something that is not answering $CTX/actuator/health:"
+  lsof -i ":$APP_PORT" 2>/dev/null | sed '1d' | awk '{printf "      %s (pid %s), owner %s\n", $1, $2, $3}' | sort -u
+  echo
+  echo "    Free it and run this again:"
+  echo "        kill \$(lsof -ti :$APP_PORT)"
+  echo
+  echo "    If you suspended an earlier run with Ctrl+Z, that is almost"
+  echo "    certainly what this is. 'jobs' lists it; 'kill %1' ends it."
+  exit 1
 else
   # JAVA_TOOL_OPTIONS is cleared for the app's own JVM. Some build and CI
   # environments set it to route the JVM through an HTTP proxy, which makes
@@ -84,9 +99,17 @@ else
   # answers -- a confusing half-up state. A developer machine normally has it
   # unset, so this is a no-op there.
   ( unset JAVA_TOOL_OPTIONS; nohup java -jar "$WAR" > /tmp/attendance-demo.log 2>&1 & echo $! > /tmp/attendance-demo.pid )
+  APP_PID=$(cat /tmp/attendance-demo.pid)
   printf "  waiting for health "
   for i in $(seq 1 60); do
-    curl -fsS --noproxy '*' "http://127.0.0.1:$APP_PORT$CTX/actuator/health" >/dev/null 2>&1 && break
+    curl -fsS --noproxy '*' --max-time 5 "http://127.0.0.1:$APP_PORT$CTX/actuator/health" >/dev/null 2>&1 && break
+    # Stop waiting the moment the JVM is gone -- otherwise a process that
+    # died on startup costs two minutes of dots before anyone sees the error.
+    if ! kill -0 "$APP_PID" 2>/dev/null; then
+      echo; bad "the application exited during startup. Last lines of /tmp/attendance-demo.log:"
+      tail -15 /tmp/attendance-demo.log | sed 's/^/      /'
+      exit 1
+    fi
     printf "."; sleep 2
   done
   echo
