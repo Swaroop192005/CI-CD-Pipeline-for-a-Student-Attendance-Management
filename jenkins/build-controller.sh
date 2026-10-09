@@ -39,7 +39,8 @@ if [ -n "${HTTPS_PROXY:-}" ]; then
   BUILD_ARGS+=(--network host
                --build-arg "HTTPS_PROXY=$HTTPS_PROXY"
                --build-arg "https_proxy=$HTTPS_PROXY"
-               --build-arg "JVM_PROXY_OPTS=-Dhttps.proxyHost=${proxy_host} -Dhttps.proxyPort=${proxy_port} -Dhttp.proxyHost=${proxy_host} -Dhttp.proxyPort=${proxy_port}")
+               --build-arg "JVM_PROXY_OPTS=-Dhttps.proxyHost=${proxy_host} -Dhttps.proxyPort=${proxy_port} -Dhttp.proxyHost=${proxy_host} -Dhttp.proxyPort=${proxy_port}"
+               --build-arg "APT_PROXY=$HTTPS_PROXY")
 fi
 
 if [ -f "$CA_SOURCE" ]; then
