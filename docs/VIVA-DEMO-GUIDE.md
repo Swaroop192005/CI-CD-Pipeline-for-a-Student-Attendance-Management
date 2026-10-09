@@ -22,7 +22,7 @@ before you walk in:
 |---|---|---|---|
 | **A — Live app + evidence** | The portal running on your Mac, plus the committed logs and screenshots for the pipeline | ~5 min setup | Low. Recommended. |
 | **A+ — add containers and the node** | Also the registry, staging and production containers, Tomcat, and the Ansible-provisioned node | ~20 min, once | Low once it has worked a first time. `scripts/start-demo.sh --tier docker` and `scripts/start-nodes.sh`. |
-| **B — Rebuild the whole lab** | Everything live, including Jenkins | 1–2 hours, the night before | High. Jenkins uses `network_mode: host`, which Docker Desktop on macOS does not support. |
+| **B — Rebuild the whole lab** | Everything live, including Jenkins | ~45 min, the night before, then minutes on later runs | Low once each piece has worked once. All eight components run on an ordinary machine. |
 
 **Take option A.** The evidence is strong, and the thing that most often
 sinks a viva is a live demo failing in the first two minutes. You keep the
@@ -177,6 +177,20 @@ account and no configuration.
 **From evidence, if the node tier did not run.** Open
 `proofs/stage-13/puppet/03-puppet-apply-run2-idempotent.log`.
 
+### 2.4b — Jenkins (1 min)
+
+`bash jenkins/start-local.sh` gives you a working controller at
+`http://localhost:8081/` (admin / admin) with both jobs already defined by
+Configuration-as-Code — worth showing for Stage 7 and 8, since the job
+existing without anyone clicking through a wizard *is* the point of CasC.
+
+**Do not try to show the quality gate from it.** A fresh controller has no
+build history, and the history is what matters: open
+`proofs/stage-10/failed-pipeline.log` for the run where the gate blocked a
+deployment. One green build on a new controller proves less than that log
+does, so show the controller for configuration-as-code and the log for the
+gate.
+
 > Stage 13 asked for Ansible *or* Puppet. I did both, against the same
 > written specification. Second run of the Puppet manifest: exit code 0,
 > zero changes. That is idempotency as a checkable fact, not a claim.
@@ -330,7 +344,7 @@ cd ~/Desktop/CI-CD-Pipeline-for-a-Student-Attendance-Management
 bash scripts/start-demo.sh               # portal on :8080               ~2 min
 bash scripts/start-demo.sh --tier docker # + registry, containers, Tomcat ~8 min
 bash scripts/start-nodes.sh              # + Ansible-provisioned node    ~12 min
-bash scripts/start-demo.sh --tier full   # + Jenkins (Linux only)        ~12 min
+bash jenkins/start-local.sh              # the Jenkins controller        ~8 min
 bash scripts/demo-status.sh              # one-screen status
 bash scripts/start-demo.sh --stop        # stop everything
 bash scripts/start-nodes.sh --stop       # stop the node

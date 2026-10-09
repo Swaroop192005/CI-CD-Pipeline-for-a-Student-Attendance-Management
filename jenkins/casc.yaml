@@ -97,7 +97,14 @@ jobs:
             // MAVEN_OPTS: the Maven build step does not always inherit it,
             // and the symptom when it does not is a PKIX error that reads
             // like a certificate problem rather than a proxy one.
-            mavenOpts('-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=40387 -Dhttp.nonProxyHosts=localhost|127.0.0.1 -Djavax.net.ssl.trustStore=/var/jenkins_conf/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit')
+            //
+            // Empty unless the controller supplies it. These options are
+            // the lab's egress proxy and its truststore; on a machine that
+            // reaches Maven Central directly they name a proxy that is not
+            // there and a file that does not exist, and the build fails
+            // before it downloads anything. docker-compose.yml sets them;
+            // docker-compose.local.yml deliberately does not.
+            mavenOpts('${MAVEN_PROXY_OPTS:-}')
           }
         }
 
