@@ -53,10 +53,30 @@ step "Building the bare node image"
 # build-node.sh adds proxy build args only when HTTPS_PROXY is set, and the
 # Dockerfile guards every proxy step, so on an ordinary machine this builds a
 # plain Ubuntu node that uses the normal mirrors.
-if bash ansible/targetnode/build-node.sh >/tmp/node-build.log 2>&1; then
-  ok "attendance-target-node:1.0"
+bash ansible/targetnode/build-node.sh >/tmp/node-build.log 2>&1
+# Verify the image is in the local store rather than trusting the exit code.
+# A buildx builder using the docker-container driver reports success while
+# leaving the result in the build cache, so `docker build` passes and
+# `docker run` then cannot find the image.
+if ! docker image inspect attendance-target-node:1.0 >/dev/null 2>&1; then
+  warn "the build reported success but the image is not in the local store"
+  warn "(a buildx builder that does not load its output); rebuilding with --load"
+  # build-node.sh removes authorized_keys in an EXIT trap, and the Dockerfile
+  # COPYs it, so put it back for this attempt and take it away again after.
+  cp ansible/targetnode/id_node.pub ansible/targetnode/authorized_keys 2>/dev/null
+  docker build --load -t attendance-target-node:1.0 ansible/targetnode >>/tmp/node-build.log 2>&1
+  rm -f ansible/targetnode/authorized_keys
+fi
+if docker image inspect attendance-target-node:1.0 >/dev/null 2>&1; then
+  ok "attendance-target-node:1.0 ($(docker image inspect attendance-target-node:1.0 --format '{{.Architecture}}'))"
 else
-  bad "image build failed; last lines of /tmp/node-build.log:"; tail -15 /tmp/node-build.log | sed 's/^/      /'; exit 1
+  bad "image build failed; last lines of /tmp/node-build.log:"
+  tail -20 /tmp/node-build.log | sed 's/^/      /'
+  echo
+  echo "      If this says buildx or 'failed to solve', try:"
+  echo "          docker buildx use default"
+  echo "          bash scripts/start-nodes.sh"
+  exit 1
 fi
 
 step "Starting the node (systemd as PID 1)"
