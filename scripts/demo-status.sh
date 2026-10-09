@@ -43,13 +43,19 @@ if command -v docker >/dev/null && docker info >/dev/null 2>&1; then
       done
 
   printf "\n\033[1mRegistry\033[0m\n"
-  tags=$(curl -fsS --noproxy '*' --max-time 4 http://127.0.0.1:5000/v2/attendance-portal/tags/list 2>/dev/null \
+  # Read the port off the container rather than assuming 5000: start-demo.sh
+  # moves the registry to 5001-5003 when 5000 is taken, which on macOS it
+  # usually is (AirPlay Receiver).
+  RPORT=$(docker inspect attendance-registry \
+    --format '{{range $p, $c := .NetworkSettings.Ports}}{{range $c}}{{.HostPort}}{{end}}{{end}}' 2>/dev/null)
+  RPORT=${RPORT:-5000}
+  tags=$(curl -fsS --noproxy '*' --max-time 4 "http://127.0.0.1:$RPORT/v2/attendance-portal/tags/list" 2>/dev/null \
          | tr ',' '\n' | grep -oE '[0-9]+\.[0-9]+\.[0-9]+[^"]*' | sort -V)
   if [ -n "$tags" ]; then
-    printf "  %s image tags pushed:\n" "$(echo "$tags" | wc -l | tr -d ' ')"
+    printf "  serving on :%s, %s image tags pushed:\n" "$RPORT" "$(echo "$tags" | wc -l | tr -d ' ')"
     echo "$tags" | sed 's/^/    /'
   else
-    printf "  %s\n" "$(y "registry not reachable on :5000")"
+    printf "  %s\n" "$(y "registry not reachable on :$RPORT")"
   fi
 
   printf "\n\033[1mJenkins\033[0m\n"
