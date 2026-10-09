@@ -137,38 +137,70 @@ fi
 # --------------------------------------------------------- docker tier ----
 if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
   step "Registry"
+  # The registry is recreated rather than coaxed, because its storage is the
+  # named volume docker_registry_data -- images pushed earlier survive the
+  # container being thrown away. That makes "remove and recreate" the safe
+  # repair for every broken state, and there are several: a container that
+  # exists but was created without -p (it runs, and nothing can reach it), one
+  # stopped with a stale port binding, or a half-made container left by a
+  # create that failed.
+  #
+  # Correctness is judged by whether the registry API answers on the host
+  # port, never by whether a container is running.
+  REGISTRY_PORT="${REGISTRY_PORT:-5000}"
   REGISTRY_UP=no
-  if docker ps --format '{{.Names}}' | grep -qx attendance-registry; then
-    ok "already running"; REGISTRY_UP=yes
+
+  registry_answers() {  # $1 = host port
+    curl -fsS --noproxy '*' --max-time 3 "http://127.0.0.1:$1/v2/" >/dev/null 2>&1
+  }
+  published_port() {    # the host port the container actually publishes, if any
+    docker inspect attendance-registry \
+      --format '{{range $p, $c := .NetworkSettings.Ports}}{{range $c}}{{.HostPort}}{{end}}{{end}}' 2>/dev/null
+  }
+
+  # Already serving? Adopt whatever port it is on and leave it alone.
+  EXISTING=$(published_port)
+  if [ -n "$EXISTING" ] && registry_answers "$EXISTING"; then
+    REGISTRY_PORT="$EXISTING"; REGISTRY_UP=yes
+    ok "already serving on :$REGISTRY_PORT"
   else
-    # Start the existing container if there is one, otherwise create it.
-    # Deciding by existence rather than falling back on a failed `docker
-    # start` matters: a start that fails for a real reason (a port clash)
-    # used to fall through to `docker run`, which then failed again with a
-    # confusing "name already in use" and hid the actual cause.
-    if docker ps -a --format '{{.Names}}' | grep -qx attendance-registry; then
-      ERR=$(docker start attendance-registry 2>&1 >/dev/null)
-    else
-      ERR=$(docker run -d --name attendance-registry -p 5000:5000 \
+    [ -n "$(docker ps -aq -f name=^attendance-registry$)" ] && \
+      docker rm -f attendance-registry >/dev/null 2>&1
+
+    # Find a port the registry can actually have. 5000 is the convention, but
+    # on macOS it is usually taken by AirPlay Receiver, which is not worth
+    # making anyone turn off to see a demo.
+    CHOSEN=""
+    for try in "$REGISTRY_PORT" 5001 5002 5003; do
+      [ -n "$CHOSEN" ] && break
+      lsof -ti ":$try" >/dev/null 2>&1 && continue
+      ERR=$(docker run -d --name attendance-registry -p "$try:5000" \
               -v docker_registry_data:/var/lib/registry registry:2 2>&1 >/dev/null)
-    fi
-    sleep 2
-    if docker ps --format '{{.Names}}' | grep -qx attendance-registry; then
-      ok "registry on :5000"; REGISTRY_UP=yes
-    else
-      bad "registry did not start"
-      [ -n "$ERR" ] && echo "$ERR" | sed 's/^/      /'
-      if echo "$ERR" | grep -qiE "port is already allocated|address already in use|bind"; then
-        echo
-        echo "      Port 5000 is taken. On macOS that is usually AirPlay Receiver:"
-        echo "        System Settings -> General -> AirDrop & Handoff"
-        echo "        -> turn off AirPlay Receiver, then run this again."
-        echo "      Check what holds it with:  lsof -i :5000"
+      if [ -z "$ERR" ]; then
+        for _ in $(seq 1 15); do registry_answers "$try" && break; sleep 1; done
+        if registry_answers "$try"; then CHOSEN="$try"; else
+          docker rm -f attendance-registry >/dev/null 2>&1
+        fi
+      else
+        docker rm -f attendance-registry >/dev/null 2>&1
       fi
-      echo
-      echo "      Carrying on without the registry -- the portal on :$APP_PORT is"
-      echo "      unaffected, and the registry only matters for the image-tag"
-      echo "      part of the demo. proofs/stage-12/ covers that from evidence."
+    done
+
+    if [ -n "$CHOSEN" ]; then
+      REGISTRY_PORT="$CHOSEN"; REGISTRY_UP=yes
+      if [ "$REGISTRY_PORT" = 5000 ]; then ok "registry serving on :5000"
+      else
+        ok "registry serving on :$REGISTRY_PORT"
+        printf "    \033[33mnote\033[0m :5000 was taken, so the registry moved to :%s.\n" "$REGISTRY_PORT"
+        printf "         On macOS :5000 is usually AirPlay Receiver (System Settings ->\n"
+        printf "         General -> AirDrop & Handoff). Nothing here depends on 5000.\n"
+      fi
+    else
+      bad "registry could not be started on 5000-5003"
+      [ -n "$ERR" ] && echo "$ERR" | sed 's/^/      /'
+      echo "      Carrying on without it. The portal and both environment"
+      echo "      containers are unaffected; proofs/stage-12/ evidences the"
+      echo "      registry hop."
     fi
   fi
 
@@ -179,8 +211,8 @@ if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
     docker build -q -t attendance-portal:1.0.0 . >/dev/null && ok "built attendance-portal:1.0.0"
   fi
   if [ "$REGISTRY_UP" = yes ]; then
-    docker tag attendance-portal:1.0.0 localhost:5000/attendance-portal:1.0.0 2>/dev/null
-    if docker push -q localhost:5000/attendance-portal:1.0.0 >/dev/null 2>&1; then
+    docker tag attendance-portal:1.0.0 "localhost:$REGISTRY_PORT/attendance-portal:1.0.0" 2>/dev/null
+    if docker push -q "localhost:$REGISTRY_PORT/attendance-portal:1.0.0" >/dev/null 2>&1; then
       ok "pushed to the local registry"
     else
       bad "push to the local registry failed (the image itself is fine)"
@@ -195,7 +227,7 @@ if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
   # same image from the local daemon rather than failing -- the point of the
   # two containers is one image serving two environments, which holds either
   # way, and the registry hop is evidenced in proofs/stage-12/.
-  if [ "$REGISTRY_UP" = yes ]; then IMG=localhost:5000/attendance-portal:1.0.0
+  if [ "$REGISTRY_UP" = yes ]; then IMG="localhost:$REGISTRY_PORT/attendance-portal:1.0.0"
   else IMG=attendance-portal:1.0.0; fi
   for pair in "staging:8100" "production:8101"; do
     envn=${pair%%:*}; port=${pair##*:}
@@ -245,7 +277,8 @@ printf "\n  %-34s %s\n" "PORTAL (run this one)" "http://localhost:$APP_PORT$CTX/
 if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
   printf "  %-34s %s\n" "staging container"    "http://localhost:8100/attendance/login"
   printf "  %-34s %s\n" "production container" "http://localhost:8101/attendance/login"
-  printf "  %-34s %s\n" "registry tags"        "http://localhost:5000/v2/attendance-portal/tags/list"
+  [ "$REGISTRY_UP" = yes ] && printf "  %-34s %s\n" "registry tags" \
+      "http://localhost:$REGISTRY_PORT/v2/attendance-portal/tags/list"
 fi
 [ "$TIER" = full ] && printf "  %-34s %s\n" "Jenkins (Linux only)" "http://localhost:8081/"
 cat <<'EOF'
