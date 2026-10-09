@@ -10,6 +10,11 @@ out/
 # ---- Application runtime data ------------------------------------------
 # H2 file-mode datastore; never commit attendance data (constraint C9).
 data/
+# ...but puppet/data is Hiera's data layer, not runtime state. The rule
+# above matches a directory named data at any depth, which silently kept
+# the Puppet module's entire parameter set out of the repository.
+!puppet/data/
+!puppet/data/**
 *.db
 *.mv.db
 *.trace.db
