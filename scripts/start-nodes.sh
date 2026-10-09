@@ -163,17 +163,32 @@ fi
 
 if [ "$WANT_PUPPET" = yes ]; then
   step "Puppet node"
-  ARCH=$(uname -m)
-  if [ "$ARCH" = arm64 ] || [ "$ARCH" = aarch64 ]; then
-    warn "this machine is $ARCH, and puppet/puppet-agent is published only for"
-    warn "linux/amd64. Both the Puppet tree and the node would have to run"
-    warn "under emulation, which is slow and frequently breaks systemd."
-    warn "Skipping. The Puppet runs are evidenced in proofs/stage-13/puppet/,"
-    warn "including the idempotency and drift-correction logs."
-  else
-    bash puppet/lab/build-puppet-node.sh && \
+  # No architecture gate here. build-puppet-node.sh installs puppet-agent
+  # from apt.puppet.com, which publishes arm64 as well as amd64, so the node
+  # runs natively on Apple Silicon. It falls back to extracting the amd64
+  # container image only where the repository is unreachable, and refuses to
+  # continue if the result cannot execute -- so let it make that call rather
+  # than pre-judging it from `uname -m`.
+  if bash puppet/lab/build-puppet-node.sh; then
+    echo
     docker exec attendance-node-puppet bash -c \
       'export PATH=/opt/puppetlabs/bin:$PATH; cd /puppet && puppet apply \
          --modulepath=modules --hiera_config=hiera.yaml --detailed-exitcodes manifests/site.pp'
+    for _ in $(seq 1 40); do
+      curl -fsS --noproxy '*' --max-time 3 http://127.0.0.1:8300/attendance/actuator/health >/dev/null 2>&1 && break
+      sleep 3
+    done
+    if curl -fsS --noproxy '*' --max-time 15 http://127.0.0.1:8300/attendance/actuator/health >/dev/null 2>&1; then
+      ok "Puppet-provisioned node serving on :8300"
+      echo "      Show idempotency with a second apply -- expect exit code 0:"
+      echo "          docker exec attendance-node-puppet bash -c 'cd /puppet && puppet apply \\"
+      echo "              --modulepath=modules --hiera_config=hiera.yaml \\"
+      echo "              --detailed-exitcodes manifests/site.pp'"
+    else
+      bad "the Puppet node did not answer on :8300"
+    fi
+  else
+    warn "the Puppet node could not be prepared; proofs/stage-13/puppet/ has"
+    warn "the recorded runs, including idempotency and drift correction."
   fi
 fi

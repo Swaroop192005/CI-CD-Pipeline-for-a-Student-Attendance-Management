@@ -280,7 +280,16 @@ if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
     if [ -n "$ERR" ]; then
       bad "$name did not start"; echo "$ERR" | sed 's/^/      /'; continue
     fi
-    docker cp "$WAR" "$name:/usr/local/tomcat/webapps/attendance.war" >/dev/null 2>&1
+    # Check the copy landed. A silent failure here leaves Tomcat running with
+    # an empty webapps directory: the container is up, the port answers, and
+    # every request 404s -- which reads as "down" without saying why.
+    CPERR=$(docker cp "$WAR" "$name:/usr/local/tomcat/webapps/attendance.war" 2>&1 >/dev/null)
+    if [ -n "$CPERR" ]; then
+      bad "could not copy the artefact into $name"; echo "$CPERR" | sed 's/^/      /'; continue
+    fi
+    if ! docker exec "$name" test -s /usr/local/tomcat/webapps/attendance.war 2>/dev/null; then
+      bad "the artefact is not present in $name after the copy"; continue
+    fi
     printf "  deploying to %s " "$name"
     for _ in $(seq 1 40); do
       curl -fsS --noproxy '*' --max-time 3 "http://127.0.0.1:$port/attendance/actuator/health" >/dev/null 2>&1 && break
@@ -290,7 +299,10 @@ if [ "$TIER" = docker ] || [ "$TIER" = full ]; then
     if curl -fsS --noproxy '*' --max-time 3 "http://127.0.0.1:$port/attendance/actuator/health" >/dev/null 2>&1; then
       ok "$name serving on :$port"
     else
-      bad "$name deployed but did not answer; docker logs $name"
+      bad "$name deployed but did not answer on :$port"
+      echo "      webapps now holds: $(docker exec "$name" ls /usr/local/tomcat/webapps 2>/dev/null | tr '\n' ' ')"
+      echo "      last lines of its log:"
+      docker logs "$name" 2>&1 | tail -8 | sed 's/^/        /'
     fi
   done
 
