@@ -3,7 +3,7 @@
 
 **Repository:** <https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management>
 **Author:** Swaroop Naik
-**Compiled:** 2026-10-05
+**Compiled:** 2026-10-09
 
 ---
 
@@ -431,6 +431,22 @@ attendance devices. Each is recorded in the future-enhancement plan
 3. Timetable management is handled outside this system.
 4. The institution accepts an application-level audit trail (actor +
    timestamp on the record) rather than a separate immutable ledger.
+5. **Every session is reviewed before it counts.** This is the heaviest
+   assumption in the document and it is a deliberate simplification rather
+   than observed practice. In most institutions a faculty mark is
+   immediately official, and sign-off attaches instead to *corrections
+   made after the register locks*, or to the consolidated statement issued
+   before examinations. A per-session queue would not survive contact with
+   a 600-student department.
+
+   It was chosen because the workflow is what gives the system genuine
+   role separation — three roles with different authority over the same
+   record — and that is what the Stage 9 browser journeys exercise. The
+   alternative design is recorded as limitation A7 and enhancement F15:
+   marking becomes immediate, and the review queue holds only post-lock
+   corrections. BR-04, that only approved records count toward a
+   percentage, survives either way; whatever triggers the review, a
+   mistaken entry should not become a fact about a student's eligibility.
 
 ---
 
@@ -4924,6 +4940,7 @@ criticism of the design it was traded against.
 | A4 | Server-rendered pages, full reload per action | Slower than a single-page application on a poor connection | Removes a whole JavaScript build chain; constraint C12 |
 | A5 | Sessions are in memory | A restart signs everyone out | Acceptable for a single instance; a shared session store is needed before scaling out |
 | A6 | No pagination on the dashboard aggregates | The dashboard loads all visible records to aggregate; at tens of thousands this becomes slow | Within NFR-01 at the modelled volume; a database-side aggregate is the fix |
+| A7 | **Every session needs HOD approval before it counts** | At departmental scale the review queue becomes the bottleneck the system was meant to remove. Real practice is that a faculty mark is immediately official, with sign-off attaching to post-lock corrections or to the consolidated pre-examination statement | A deliberate simplification, not observed practice. The workflow is what gives three roles genuine, differing authority over one record, which is what the Stage 9 journeys exercise. Recorded as an assumption in Stage 1 §6.3; F15 is the realistic design |
 
 #### 5.2 Infrastructure
 
@@ -4969,6 +4986,7 @@ Ordered by value for effort, not by how interesting they are.
 | F8 | Immutable audit log in a separate append-only store | Removes A3 and would satisfy a stricter audit |
 | F9 | Blue-green deployment | Removes the restart gap that currently exists during a deploy |
 | F10 | Database-side dashboard aggregation | Removes A6 before the data volume reaches it |
+| F15 | Immediate marking, with review only on post-lock corrections | Removes A7, the project's least realistic design decision. Faculty marks become official on save; the register locks after a configurable window; only corrections after that point enter the HOD queue. BR-04 is unaffected — approval still gates what counts |
 
 #### Longer term
 
@@ -5013,6 +5031,28 @@ Ordered by value for effort, not by how interesting they are.
 Prepared answers, with the reasoning rather than the definition.
 
 #### Application design
+
+**Q. Attendance doesn't really work like this, does it? Why does a Head of
+Department approve every single class session?**
+It doesn't, and this is the weakest design decision in the project. In
+practice a faculty mark is official the moment it is saved; sign-off
+attaches to corrections made after the register locks, or to the
+consolidated statement issued before examinations. A per-session queue
+would not survive a 600-student department — the review queue becomes
+exactly the bottleneck the system was built to remove.
+
+I chose it because the project's subject is the delivery pipeline, and I
+wanted a domain with real role separation: three roles with genuinely
+different authority over the same record, so the Stage 9 browser journeys
+have something meaningful to assert across roles. It is recorded as
+assumption 5 in Stage 1 §6.3 and as limitation A7.
+
+The realistic design is F15: marking is immediate, the register locks
+after a configurable window, and only post-lock corrections enter the
+queue. One rule survives either way, and it is the one worth defending —
+BR-04, that only approved records count toward a percentage. Whatever
+triggers the review, a mistaken or half-entered record should never
+become a fact that decides a student's examination eligibility.
 
 **Q. Why is `WorkflowService` the only component allowed to change `workflowStatus`?**
 Because the audit trail has to be complete, not mostly complete. One code
