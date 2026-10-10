@@ -74,6 +74,19 @@ application-local.properties
 # exclude it, so it is re-included explicitly.
 !proofs/**
 
+# ...but the re-include above is a blanket one, so it also defeats the OS
+# and secret rules at the top of this file for everything under proofs/.
+# Re-ignore the files that wander in on their own - a .DS_Store appears
+# the moment the folder is opened in Finder - and keep the secret
+# patterns, since nothing that matches them is evidence.
+proofs/**/.DS_Store
+proofs/**/Thumbs.db
+proofs/**/desktop.ini
+proofs/**/*.pem
+proofs/**/*.key
+proofs/**/*.p12
+proofs/**/*.jks
+
 # ---- Tooling scratch ---------------------------------------------------
 .scannerwork/
 .jenkins-local/
