@@ -1,6 +1,6 @@
 NAMES                          IMAGE                                            STATUS                   PORTS
-attendance-tomcat-staging      tomcat:10.1-jdk21-temurin                        Up 5 minutes             0.0.0.0:8090->8080/tcp, [::]:8090->8080/tcp
-attendance-app-staging         localhost:5001/attendance-portal:1.0.6-ad0d175   Up 5 minutes (healthy)   0.0.0.0:8100->8080/tcp, [::]:8100->8080/tcp
+attendance-tomcat-staging      tomcat:10.1-jdk21-temurin                        Up 2 minutes             0.0.0.0:8090->8080/tcp, [::]:8090->8080/tcp
+attendance-app-staging         localhost:5001/attendance-portal:1.0.7-3af32ac   Up 2 minutes (healthy)   0.0.0.0:8100->8080/tcp, [::]:8100->8080/tcp
 attendance-jenkins             attendance-jenkins:1.0                           Up About an hour         0.0.0.0:8081->8081/tcp, [::]:8081->8081/tcp
 attendance-node-puppet         attendance-target-node:1.0                       Up 10 hours              0.0.0.0:2223->22/tcp, [::]:2223->22/tcp, 0.0.0.0:8300->80/tcp, [::]:8300->80/tcp, 0.0.0.0:8301->8080/tcp, [::]:8301->8080/tcp
 attendance-node                attendance-target-node:1.0                       Up 10 hours              0.0.0.0:2222->22/tcp, [::]:2222->22/tcp, 0.0.0.0:8200->80/tcp, [::]:8200->80/tcp, 0.0.0.0:8201->8080/tcp, [::]:8201->8080/tcp
