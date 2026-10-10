@@ -33,6 +33,19 @@ services:
       JENKINS_ADMIN_ID: "${JENKINS_ADMIN_ID:-admin}"
       JENKINS_ADMIN_PASSWORD: "${JENKINS_ADMIN_PASSWORD:-admin}"
       MAVEN_HOME: /opt/maven
+      # The controller is bridged here, so a published port is not on its
+      # own localhost. MAVEN_PROXY_OPTS is deliberately unset: this machine
+      # reaches Maven Central directly, and naming a proxy that is not
+      # listening would fail the build before it downloaded anything.
+      DOCKER_HOST_ADDR: host.docker.internal
+      # 5000 is usually AirPlay Receiver on macOS, so start-demo.sh moves
+      # the registry to 5001. Override if yours ended up elsewhere -- the
+      # status screen prints the port it actually took.
+      DOCKER_REGISTRY: "${DOCKER_REGISTRY:-localhost:5001}"
+    extra_hosts:
+      # Defined automatically by Docker Desktop; named here so the same
+      # file works on a Linux engine too.
+      - "host.docker.internal:host-gateway"
     volumes:
       - jenkins_home:/var/jenkins_home
       - ./casc.yaml:/var/jenkins_conf/casc.yaml:ro
