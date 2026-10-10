@@ -1,0 +1,43 @@
+
+STUDENT ATTENDANCE PORTAL — demo status
+2026-10-10 11:22:59
+
+Application endpoints
+  WHAT                     URL                          STATE  ENV
+  portal (java -jar)       :8080/attendance             UP     local
+  staging container        :8100/attendance             UP     staging
+  production container     :8101/attendance             UP     production
+  tomcat staging           :8090/attendance             UP     staging
+  tomcat production        :8091/attendance             UP     production
+  node (Ansible)           :8200/attendance             UP     production
+  node (Puppet)            :8300/attendance             UP     production
+
+Containers
+  attendance-app-production        Up 12 hours (healthy)
+  attendance-app-staging           Up 5 minutes (healthy)
+  attendance-jenkins               Up About an hour
+  attendance-node-puppet           Up 10 hours
+  attendance-node                  Up 10 hours
+  attendance-registry              Up 12 hours
+  attendance-tomcat-production     Up 11 hours
+  attendance-tomcat-staging        Up 5 minutes
+
+Registry
+  serving on :5001, 6 image tags pushed:
+    1.0.0
+    1.0.2-83c51bc
+    1.0.3-83c51bc
+    1.0.4-83c51bc
+    1.0.5-55761d5
+    1.0.6-ad0d175
+
+Jenkins
+  running  11 recorded builds
+
+Repository
+  branch        main
+  HEAD          2917eb8 macOS portability docs and second-machine evidence
+  tags          v1.0.0 v1.2.0 v1.3.0 
+  tests         73 unit + 7 integration (last recorded run)
+  proofs        115 files across 14 stages
+

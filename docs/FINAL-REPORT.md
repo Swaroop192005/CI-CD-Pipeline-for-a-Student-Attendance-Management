@@ -4829,8 +4829,22 @@ code instead of "does the image exist". A container state instead of
 them reported success while the underlying condition was false, and each
 was found only by an attempt to use the result.
 
-Full transcript:
-[`proofs/stage-15/macos-pipeline-build-05.log`](proofs/stage-15/macos-pipeline-build-05.log).
+#### Evidence, and why it is dated differently
+
+This section's evidence sits in
+[`proofs/stage-15/macos/`](proofs/stage-15/macos), separate from the
+rest: the host and Docker versions, the lab status, the running
+containers, all seven endpoints answering with the environment each
+reports, the registry's accumulated tags, and the pipeline's own console
+log. `bash scripts/capture-macos-evidence.sh` regenerates the directory.
+
+The other 111 proof files are **not** regenerated on the second machine,
+and deliberately so. Each records when a stage was done, which is most of
+what makes it evidence, and much of it records something that happened
+once: the merge conflict of Stage 6, the build that went red at the
+quality gate in Stage 10, the rollback against a corrupt artefact in
+Stage 14. Re-capturing those would replace a record of the project's
+history with a snapshot of one afternoon.
 
 ---
 
