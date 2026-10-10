@@ -8,27 +8,31 @@ the examiner's side of the table rather than yours.
 
 ## 0. Read this first
 
-**The running lab is not on your laptop.** Jenkins with its 32 builds, the
-registry with its image tags, the two provisioned nodes and the Tomcat
-deployments were all built inside a cloud container. That container is
-temporary. What is permanent is this repository: the source, the pipeline
-definition, the playbooks and manifests, and 110 evidence files recording
-every one of those runs.
+**The whole lab now runs on your laptop, Jenkins included.** That was not
+true when this guide was first written — the original runs happened in a
+cloud container — so if you remember being told to present the pipeline
+from logs, that advice is out of date. Every component has since been made
+to work on macOS and has been verified there: the portal, the registry,
+staging and production containers, two Tomcat deployments, the Ansible
+node, the Puppet node, and a Jenkins controller whose build history
+contains a fully green eleven-stage run.
 
-So there are two honest ways to present, and you should decide which
-before you walk in:
+That changes what you should show. A live controller with real build
+history is strictly better evidence than a log file, because a log file
+could have been written by anyone.
 
 | | What you show | Cost | Risk |
 |---|---|---|---|
-| **A — Live app + evidence** | The portal running on your Mac, plus the committed logs and screenshots for the pipeline | ~5 min setup | Low. Recommended. |
-| **A+ — add containers and the node** | Also the registry, staging and production containers, Tomcat, and the Ansible-provisioned node | ~20 min, once | Low once it has worked a first time. `scripts/start-demo.sh --tier docker` and `scripts/start-nodes.sh`. |
-| **B — Rebuild the whole lab** | Everything live, including Jenkins | ~45 min, the night before, then minutes on later runs | Low once each piece has worked once. All eight components run on an ordinary machine. |
+| **A — Live app only** | The portal on your Mac, the pipeline from committed logs | ~5 min | Low, but you are now underselling the project |
+| **B — Live app + live Jenkins** | Everything above, plus the controller at `:8081` with its green build #5 and the red build from the gate demonstration | ~15 min the night before, ~5 min on the day | Low. It has worked. |
 
-**Take option A.** The evidence is strong, and the thing that most often
-sinks a viva is a live demo failing in the first two minutes. You keep the
-part that demonstrates the application working — which is what they most
-want to see — and you present the pipeline from logs that are more
-detailed than anything you could produce live anyway.
+**Take option B.** Start everything the night before, confirm it with
+`scripts/demo-status.sh`, and leave it running. The one thing you should
+still present from evidence is the **blocked** build — see §2.3, because
+making the gate fail on demand is not something to attempt live.
+
+If anything is down on the morning and you cannot fix it in five minutes,
+fall back to option A without hesitation. §5 covers that.
 
 ---
 
@@ -43,7 +47,10 @@ git pull origin main
 java -version          # must be 21 or newer
 mvn -v
 
-bash scripts/start-demo.sh
+bash scripts/start-demo.sh --tier full    # app, containers, Tomcat, registry
+bash scripts/start-nodes.sh               # the Ansible and Puppet nodes
+bash jenkins/start-local.sh               # the Jenkins controller
+bash scripts/demo-status.sh               # everything, in one table
 ```
 
 Then open `http://localhost:8080/attendance/login`, sign in as
@@ -51,27 +58,41 @@ Then open `http://localhost:8080/attendance/login`, sign in as
 Doing this once the night before is the single highest-value thing in this
 guide: it is when you discover a wrong Java version, not during the viva.
 
-Stop it afterwards:
-
-```bash
-bash scripts/start-demo.sh --stop
-```
+**Leave all of it running overnight.** Nothing here needs to be restarted,
+and restarting is where things break. If your Mac sleeps, the containers
+resume with it.
 
 ### Thirty minutes before
 
 ```bash
 cd ~/Desktop/CI-CD-Pipeline-for-a-Student-Attendance-Management
-bash scripts/start-demo.sh
 bash scripts/demo-status.sh
 ```
 
-Leave it running. Have these tabs open:
+Every row should read **UP**. If one does not, §5 tells you what to do.
 
-1. `http://localhost:8080/attendance/login`
-2. The GitHub repository, on the **Tags** page
-3. `docs/FINAL-REPORT.md` on GitHub
-4. `proofs/stage-10/failed-pipeline.log` on GitHub — the gate blocking a deploy
-5. A terminal in the project directory
+Then trigger one pipeline run, so the top of the build history is from
+today: Jenkins → **attendance-portal-pipeline** → **Build with
+Parameters** → **Build**. It takes about two and a half minutes. Let it
+finish before anyone walks in — a build in progress is not what you want
+on screen.
+
+When it goes green, save the log into the repository, because the
+controller is a container and the log dies with it:
+
+```bash
+bash scripts/capture-pipeline-proof.sh
+```
+
+Have these tabs open:
+
+1. `http://localhost:8080/attendance/login` — the portal
+2. `http://localhost:8081/job/attendance-portal-pipeline/` — the Stage View
+3. `http://localhost:8100/attendance/login` — the container Jenkins deployed
+4. The GitHub repository, on the **Tags** page
+5. `docs/FINAL-REPORT.md` on GitHub
+6. `proofs/stage-10/failed-pipeline.log` on GitHub — the gate blocking a deploy
+7. A terminal in the project directory
 
 ---
 
@@ -116,20 +137,49 @@ The two business rules behind those numbers, if pressed:
 
 The role switch is the strongest 30 seconds in the demo. Make sure you do it.
 
-### 2.3 — The pipeline (3 min, from evidence)
+### 2.3 — The pipeline (3 min, live)
 
-Open `proofs/stage-15/end-to-end-run.log` on GitHub (the full build log is
-`proofs/stage-15/pipeline-build-17.log`).
+Open `http://localhost:8081/job/attendance-portal-pipeline/` and show the
+**Stage View**: five builds, eleven columns, build #5 green the whole way
+across.
 
-> Eleven stages, 178 seconds, no manual step. Checkout, build, unit tests,
+> Eleven stages, 153 seconds, no manual step. Checkout, build, unit tests,
 > package, integration tests, the Selenium gate, image build and push,
 > container deploy, Tomcat deploy, and a verification stage that checks the
 > deployed instance reports the environment the pipeline was asked for.
 
-Then open `proofs/stage-10/failed-pipeline.log`, and have
+Click into build #5 → **Console Output** and scroll to two places.
+
+The gate:
+
+```
+Tests run: 20, Failures: 0, Errors: 0, Skipped: 0
+Selenium quality gate passed.
+```
+
+And the verification stage, which is the one most worth pausing on:
+
+```
+Parameter verified: requested 'staging', deployed 'staging'
+```
+
+> That stage does not just check for a 200. It reads `/actuator/info` off
+> the deployed instance, extracts the environment it reports, and compares
+> it to the parameter the build was given. A container that is healthy but
+> configured for the wrong environment fails there. That is the difference
+> between a health check and a deployment verification.
+
+Then point at the containers on `:8100` and `:8090`:
+
+> Those two deployments were not placed there by a script I ran. Jenkins
+> put them there, in that build, from the artefact that build produced.
+
+**Then the blocked build — this part stays on evidence**, because making
+the gate fail on demand is not something to attempt in front of an
+examiner. Open `proofs/stage-10/failed-pipeline.log`, and have
 `proofs/stage-10/01-failed-build.png` ready beside it.
 
-> This is the part I would point at first. A green pipeline only proves it
+> This is the part that matters most. A green pipeline only proves it
 > can pass. I introduced a deliberate regression and build #10 went red at
 > the Selenium gate — and the deploy stages never executed.
 
@@ -177,19 +227,21 @@ account and no configuration.
 **From evidence, if the node tier did not run.** Open
 `proofs/stage-13/puppet/03-puppet-apply-run2-idempotent.log`.
 
-### 2.4b — Jenkins (1 min)
+### 2.4b — Configuration as code, in Jenkins itself (1 min)
 
-`bash jenkins/start-local.sh` gives you a working controller at
-`http://localhost:8081/` (admin / admin) with both jobs already defined by
-Configuration-as-Code — worth showing for Stage 7 and 8, since the job
-existing without anyone clicking through a wizard *is* the point of CasC.
+You have already used the controller in §2.3, so this is one extra click
+rather than a new section. Go to **Manage Jenkins → Configuration as
+Code**.
 
-**Do not try to show the quality gate from it.** A fresh controller has no
-build history, and the history is what matters: open
-`proofs/stage-10/failed-pipeline.log` for the run where the gate blocked a
-deployment. One green build on a new controller proves less than that log
-does, so show the controller for configuration-as-code and the log for the
-gate.
+> Nobody clicked through a wizard to create that job. The controller, both
+> jobs, the tool definitions and the credentials come from
+> `jenkins/casc.yaml` and a Job DSL script in the repository. If this
+> controller is deleted, `bash jenkins/start-local.sh` rebuilds it
+> identically — which is the same argument the Ansible and Puppet sections
+> make, applied to the CI server instead of the application host.
+
+That is the Stage 7 and 8 answer: the CI server is itself under version
+control.
 
 > Stage 13 asked for Ansible *or* Puppet. I did both, against the same
 > written specification. Second run of the Puppet manifest: exit code 0,
@@ -238,6 +290,16 @@ quietly fixed. Examiners notice this.
 
 **Traceability.** Requirements through to tests through to evidence, with
 13 success criteria measured against a stated baseline.
+
+**Portability demonstrated, not assumed.** The pipeline was written on
+Linux and then run unmodified on macOS, Apple Silicon and Docker Desktop
+— a different OS, CPU architecture and container runtime — with the same
+eleven stages and the same 100 tests passing. One `Jenkinsfile` reads two
+environment variables and works in both. §1a of the final report lists
+the five assumptions that had to be fixed to get there, and each one is a
+better story than a green log: every one of them was a check that measured
+a *proxy* for success instead of the thing itself, and so reported success
+while the real condition was false.
 
 ### Where it is weak — expect these
 
@@ -330,9 +392,18 @@ Do not debug in front of the examiner. You have 110 evidence files and
 > The environment isn't cooperating — let me show you the recorded run
 > instead, which has more detail anyway.
 
-Then open `docs/FINAL-REPORT.md` and work through §4 and the proofs. The
-written evidence is the stronger artefact. Treating a failed demo calmly
-costs you almost nothing; visibly panicking costs you a lot.
+Then open `docs/FINAL-REPORT.md` and work through §4 and the proofs.
+Treating a failed demo calmly costs you almost nothing; visibly panicking
+costs you a lot.
+
+Two specific recoveries, in case they happen:
+
+| What is down | What to do instead |
+|---|---|
+| Jenkins | `proofs/stage-15/macos-pipeline-build-05.log` is the same green run as a file, and `proofs/stage-10/failed-pipeline.log` is the blocked one. You lose the live controller, not the argument. |
+| Port 8080 held by an old process | `lsof -i :8080`, then `kill -9 <pid>`. A process suspended with Ctrl+Z ignores a plain `kill`. Or run the portal on another port and say so. |
+
+Do not try to restart Jenkins mid-demo. It takes minutes.
 
 ---
 
@@ -343,11 +414,16 @@ cd ~/Desktop/CI-CD-Pipeline-for-a-Student-Attendance-Management
 
 bash scripts/start-demo.sh               # portal on :8080               ~2 min
 bash scripts/start-demo.sh --tier docker # + registry, containers, Tomcat ~8 min
-bash scripts/start-nodes.sh              # + Ansible-provisioned node    ~12 min
+bash scripts/start-demo.sh --tier full   # + both Tomcat deployments      ~10 min
+bash scripts/start-nodes.sh              # + Ansible and Puppet nodes    ~12 min
 bash jenkins/start-local.sh              # the Jenkins controller        ~8 min
 bash scripts/demo-status.sh              # one-screen status
+bash scripts/capture-pipeline-proof.sh   # save a build log into proofs/
 bash scripts/start-demo.sh --stop        # stop everything
-bash scripts/start-nodes.sh --stop       # stop the node
+bash scripts/start-nodes.sh --stop       # stop the nodes
+
+# if port 5000 is taken by macOS AirPlay Receiver
+DOCKER_REGISTRY=localhost:5001 bash jenkins/start-local.sh
 
 mvn -pl app verify                       # 73 unit + 7 integration tests
 ```
