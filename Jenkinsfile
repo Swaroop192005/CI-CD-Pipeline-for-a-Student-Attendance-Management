@@ -99,6 +99,14 @@ pipeline {
         // Overridable because the conventional 5000 is taken by AirPlay
         // Receiver on macOS, where the registry moves to 5001.
         REGISTRY      = "${env.DOCKER_REGISTRY ?: 'localhost:5000'}"
+
+        // Just the port. The controller's own HTTP calls to the registry
+        // need HOST_ADDR, not the name in the image tag, and the port has
+        // to be split out in Groovy: a sh """...""" block is interpolated
+        // by Groovy before the shell ever sees it, so shell parameter
+        // expansion such as ${REGISTRY##*:} would be parsed as Groovy and
+        // fail there.
+        REGISTRY_PORT = "${(env.DOCKER_REGISTRY ?: 'localhost:5000').tokenize(':').last()}"
         IMAGE_NAME    = 'attendance-portal'
     }
 
@@ -334,7 +342,18 @@ pipeline {
                     // trusting that the push said so.
                     sh """
                         echo "Registry now holds:"
-                        curl -s http://${REGISTRY}/v2/${IMAGE_NAME}/tags/list
+                        # REGISTRY is the name the *daemon* resolves when it
+                        # pushes, and it stays in the image tag. This curl
+                        # runs in the controller instead, where localhost is
+                        # the controller itself and not the host -- so it
+                        # goes to HOST_ADDR on the registry's port.
+                        #
+                        # `|| true` because this line only prints what the
+                        # registry now contains. The push above is the step
+                        # that matters, and it has already reported its
+                        # digest; an informational echo must not fail a
+                        # build that has otherwise succeeded.
+                        curl -s "http://${HOST_ADDR}:${REGISTRY_PORT}/v2/${IMAGE_NAME}/tags/list" || true
                         echo
                     """
                 }
