@@ -1,0 +1,40 @@
+---
+# Every value the Stage 13 configuration specification names.
+#
+# The same set as ansible/group_vars/attendance_servers.yml. Keeping them
+# identical is deliberate: the two implementations are meant to be
+# comparable line for line, so that what differs is the tool and not the
+# specification.
+
+# ---- Identity ------------------------------------------------------------
+attendance::app_user: 'attendance'
+attendance::app_group: 'attendance'
+attendance::app_uid: 1501
+attendance::app_gid: 1501
+
+# ---- Directories ---------------------------------------------------------
+attendance::app_root: '/opt/attendance'
+attendance::app_data_dir: '/var/lib/attendance'
+attendance::app_log_dir: '/var/log/attendance'
+attendance::app_config_dir: '/etc/attendance'
+
+# ---- Runtime -------------------------------------------------------------
+attendance::app_port: 8080
+attendance::app_context_path: '/attendance'
+attendance::app_environment: 'production'
+attendance::app_eligibility_threshold: 75
+attendance::app_seed_data: true
+attendance::java_package: 'openjdk-21-jre-headless'
+attendance::app_java_opts: '-XX:MaxRAMPercentage=70.0 -XX:+UseSerialGC'
+
+# ---- Release -------------------------------------------------------------
+# Rollback is this value pointed at an earlier release: the releases
+# directory keeps them all, so it is a configuration change rather than a
+# rebuild.
+attendance::app_version: '1.0.0'
+attendance::artifact_dir: '/artifacts'
+attendance::releases_to_keep: 5
+
+# ---- Edge ----------------------------------------------------------------
+attendance::nginx_port: 80
+attendance::nginx_server_name: '_'

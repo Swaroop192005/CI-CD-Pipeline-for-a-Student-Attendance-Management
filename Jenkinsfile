@@ -46,7 +46,13 @@ pipeline {
         // truststore that holds the proxy's CA. Without both, dependency
         // resolution fails with a PKIX error that reads like a certificate
         // problem and is really a proxy one.
-        MAVEN_OPTS = '-Dhttps.proxyHost=127.0.0.1 -Dhttps.proxyPort=40387 -Dhttp.nonProxyHosts=localhost|127.0.0.1 -Djavax.net.ssl.trustStore=/var/jenkins_conf/truststore.jks -Djavax.net.ssl.trustStorePassword=changeit'
+        // Supplied by the controller rather than written in here. In the
+        // lab these are the egress proxy and the truststore holding its CA,
+        // without which dependency resolution fails with a PKIX error that
+        // reads like a certificate problem and is really a proxy one. On a
+        // machine that reaches Maven Central directly they must be absent,
+        // because they would name a proxy that is not listening.
+        MAVEN_OPTS = "${env.MAVEN_PROXY_OPTS ?: ''}"
 
         TOMCAT_IMAGE     = 'tomcat:10.1-jdk21-temurin'
         APP_CONTEXT      = '/attendance'
@@ -71,7 +77,28 @@ pipeline {
 
         // Local registry: no managed container registry is reachable from
         // this lab (docs/00-environment-prerequisites.md, limitation L3).
-        REGISTRY      = 'localhost:5000'
+        // Where a container's published port can be reached from inside
+        // another container.
+        //
+        // Two of them, because the controller and the browser are not in
+        // the same place and do not get the same answer.
+        //
+        // HOST_ADDR is how the controller reaches a published port. Under
+        // host networking -- the lab controller -- it shares the host's
+        // stack, so localhost is right. Docker Desktop does not implement
+        // host networking, so the controller is bridged and reaches the
+        // host through host.docker.internal.
+        //
+        // BROWSER_ADDR is how the Selenium container reaches the
+        // application under test. That container is bridged in both
+        // environments, so localhost there means the Selenium container
+        // itself and never the application. It always goes via the host.
+        HOST_ADDR     = "${env.DOCKER_HOST_ADDR ?: 'localhost'}"
+        BROWSER_ADDR  = 'host.docker.internal'
+
+        // Overridable because the conventional 5000 is taken by AirPlay
+        // Receiver on macOS, where the registry moves to 5001.
+        REGISTRY      = "${env.DOCKER_REGISTRY ?: 'localhost:5000'}"
         IMAGE_NAME    = 'attendance-portal'
     }
 
@@ -181,25 +208,35 @@ pipeline {
                         # empty directory and the container would start with
                         # no artefact. docker cp streams the file from this
                         # container's own filesystem, which is where it is.
-                        docker create --name ${GATE_CONTAINER} --network host \\
-                            -e SERVER_PORT=${GATE_PORT} \\
+                        # Published rather than host-networked, so this
+                        # works on a bridged daemon too. The application
+                        # keeps its default port inside the container and
+                        # GATE_PORT is where it appears on the host.
+                        docker create --name ${GATE_CONTAINER} \\
+                            -p ${GATE_PORT}:8080 \\
                             -e ATTENDANCE_ENVIRONMENT=quality-gate \\
                             ${RUNTIME_IMAGE} \\
                             java -jar /attendance.war >/dev/null
                         docker cp ${WAR_PATH} ${GATE_CONTAINER}:/attendance.war
                         docker start ${GATE_CONTAINER} >/dev/null
 
-                        docker run -d --name ${SELENIUM_CONTAINER} --network host \\
+                        # --add-host keeps host.docker.internal meaningful
+                        # on engines that do not define it themselves, so the
+                        # browser can reach the application under test by the
+                        # same name the controller uses.
+                        docker run -d --name ${SELENIUM_CONTAINER} \\
+                            -p ${SELENIUM_PORT}:4444 \\
+                            --add-host=host.docker.internal:host-gateway \\
                             --shm-size=2g \\
                             -e SE_NODE_MAX_SESSIONS=2 \\
                             ${SELENIUM_IMAGE} >/dev/null
 
                         echo "Waiting for the application under test..."
                         for i in \$(seq 1 60); do
-                          curl -sf http://localhost:${GATE_PORT}${APP_CONTEXT}/actuator/health >/dev/null && break
+                          curl -sf http://${HOST_ADDR}:${GATE_PORT}${APP_CONTEXT}/actuator/health >/dev/null && break
                           sleep 3
                         done
-                        if ! curl -sf http://localhost:${GATE_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
+                        if ! curl -sf http://${HOST_ADDR}:${GATE_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
                           echo "The application under test never became healthy. Container log:"
                           docker logs --tail 40 ${GATE_CONTAINER}
                           exit 1
@@ -207,16 +244,16 @@ pipeline {
 
                         echo "Waiting for the Selenium node..."
                         for i in \$(seq 1 60); do
-                          curl -sf http://localhost:${SELENIUM_PORT}/status 2>/dev/null | grep -q '"ready": *true' && break
+                          curl -sf http://${HOST_ADDR}:${SELENIUM_PORT}/status 2>/dev/null | grep -q '"ready": *true' && break
                           sleep 3
                         done
-                        if ! curl -sf http://localhost:${SELENIUM_PORT}/status 2>/dev/null | grep -q '"ready": *true'; then
+                        if ! curl -sf http://${HOST_ADDR}:${SELENIUM_PORT}/status 2>/dev/null | grep -q '"ready": *true'; then
                           echo "The Selenium node never became ready. Container log:"
                           docker logs --tail 40 ${SELENIUM_CONTAINER}
                           exit 1
                         fi
 
-                        curl -sf http://localhost:${GATE_PORT}${APP_CONTEXT}/actuator/health
+                        curl -sf http://${HOST_ADDR}:${GATE_PORT}${APP_CONTEXT}/actuator/health
                         echo
                         echo "Application under test and browser node are both ready."
                     """
@@ -231,8 +268,8 @@ pipeline {
                         def gateResult = sh(returnStatus: true, script: """
                             "\$MVN" -B -pl selenium-tests verify \\
                                 -DskipSeleniumTests=false \\
-                                -Dapp.base.url=http://localhost:${GATE_PORT}${APP_CONTEXT} \\
-                                -Dselenium.remote.url=http://localhost:${SELENIUM_PORT} \\
+                                -Dapp.base.url=http://${BROWSER_ADDR}:${GATE_PORT}${APP_CONTEXT} \\
+                                -Dselenium.remote.url=http://${HOST_ADDR}:${SELENIUM_PORT} \\
                                 -Dselenium.headless=true
                         """)
 
@@ -338,14 +375,14 @@ pipeline {
                             ${env.IMAGE_TAG} >/dev/null
 
                         for i in \$(seq 1 60); do
-                          if curl -sf http://localhost:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
+                          if curl -sf http://${HOST_ADDR}:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
                             echo "Container healthy after \${i} attempt(s)"
                             break
                           fi
                           sleep 3
                         done
 
-                        if ! curl -sf http://localhost:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
+                        if ! curl -sf http://${HOST_ADDR}:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/health >/dev/null; then
                           echo "Deployed container never became healthy:"
                           docker logs --tail 40 ${env.CONTAINER_NAME}
                           exit 1
@@ -354,7 +391,7 @@ pipeline {
                         echo "Container deployment:"
                         docker ps --filter name=${env.CONTAINER_NAME} \\
                                   --format '  {{.Names}}  {{.Image}}  {{.Status}}  {{.Ports}}'
-                        curl -s http://localhost:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/info
+                        curl -s http://${HOST_ADDR}:${env.CONTAINER_PORT}${APP_CONTEXT}/actuator/info
                         echo
                         echo "Containerised application URL: http://localhost:${env.CONTAINER_PORT}${APP_CONTEXT}"
                     """
@@ -394,7 +431,7 @@ pipeline {
         stage('Verify deployment') {
             steps {
                 script {
-                    def base = "http://localhost:${params.APP_PORT}${env.APP_CONTEXT}"
+                    def base = "http://${env.HOST_ADDR}:${params.APP_PORT}${env.APP_CONTEXT}"
 
                     // Health first: a deploy is not done when the container
                     // is running, it is done when the application answers.

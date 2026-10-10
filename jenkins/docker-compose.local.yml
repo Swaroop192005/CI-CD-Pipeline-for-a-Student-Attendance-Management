@@ -1,0 +1,56 @@
+# Running the controller on an ordinary developer machine.
+#
+# jenkins/docker-compose.yml is the lab's version: host networking, an
+# egress proxy, and the docker client and Maven bind mounted from the host.
+# None of that transfers. Docker Desktop does not implement
+# network_mode: host, there is no proxy to route through, and a macOS
+# /usr/bin/docker is a Mach-O binary that cannot execute in a Linux
+# container. The image now carries its own docker client and Maven, so this
+# file needs neither.
+#
+#   docker compose -f jenkins/docker-compose.local.yml up -d
+#   open http://localhost:8081/        admin / admin
+#
+# The controller starts with NO build history. The 32 builds behind this
+# project's Stage 7-10 evidence live in the volume of the machine that ran
+# them; they are not in the repository and cannot be. What this gives you is
+# a working controller with the pipeline job already defined by
+# Configuration-as-Code, ready to run a build of its own.
+services:
+  jenkins:
+    image: attendance-jenkins:1.0
+    container_name: attendance-jenkins
+    restart: unless-stopped
+    user: root                       # to use the mounted docker socket
+    ports:
+      - "8081:8081"
+    environment:
+      JENKINS_OPTS: "--httpPort=8081"
+      JAVA_OPTS: >-
+        -Djenkins.install.runSetupWizard=false
+        -Dhudson.model.DownloadService.noSignatureCheck=true
+      CASC_JENKINS_CONFIG: /var/jenkins_conf/casc.yaml
+      JENKINS_ADMIN_ID: "${JENKINS_ADMIN_ID:-admin}"
+      JENKINS_ADMIN_PASSWORD: "${JENKINS_ADMIN_PASSWORD:-admin}"
+      MAVEN_HOME: /opt/maven
+      # The controller is bridged here, so a published port is not on its
+      # own localhost. MAVEN_PROXY_OPTS is deliberately unset: this machine
+      # reaches Maven Central directly, and naming a proxy that is not
+      # listening would fail the build before it downloaded anything.
+      DOCKER_HOST_ADDR: host.docker.internal
+      # 5000 is usually AirPlay Receiver on macOS, so start-demo.sh moves
+      # the registry to 5001. Override if yours ended up elsewhere -- the
+      # status screen prints the port it actually took.
+      DOCKER_REGISTRY: "${DOCKER_REGISTRY:-localhost:5001}"
+    extra_hosts:
+      # Defined automatically by Docker Desktop; named here so the same
+      # file works on a Linux engine too.
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - ./casc.yaml:/var/jenkins_conf/casc.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - maven_repo:/root/.m2
+volumes:
+  jenkins_home:
+  maven_repo:

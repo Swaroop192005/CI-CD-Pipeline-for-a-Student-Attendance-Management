@@ -19,11 +19,15 @@ set -euo pipefail
 
 V100_COMMIT=6611adae7dd26245f2b29ff3beb0a2bbb2006a52
 V120_COMMIT=819b168109a1239817af52f35743deadc92c36b9
+# v1.3.0 is a restore point rather than a release: the state in which every
+# component was verified running on an ordinary machine. Returning to it is
+# `git checkout v1.3.0`, or `git reset --hard v1.3.0` to move a branch back.
+V130_COMMIT=2a7e85193c0f6afe2d039ed9fe95d66cd3efe0ce
 
 echo "==> Fetching the full history"
 git fetch --all --prune
 
-for pair in "v1.0.0:$V100_COMMIT" "v1.2.0:$V120_COMMIT"; do
+for pair in "v1.0.0:$V100_COMMIT" "v1.2.0:$V120_COMMIT" "v1.3.0:$V130_COMMIT"; do
   tag=${pair%%:*}; commit=${pair##*:}
   if ! git cat-file -e "$commit^{commit}" 2>/dev/null; then
     echo "!! commit $commit for $tag is not in this clone -- fetch the branch that carries it first" >&2
@@ -44,7 +48,7 @@ if [ -n "${DRY_RUN:-}" ]; then
 fi
 
 echo "==> Pushing"
-git push origin v1.0.0 v1.2.0
+git push origin v1.0.0 v1.2.0 v1.3.0
 echo
 echo "Done. Verify at:"
 echo "  https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/tags"

@@ -47,6 +47,46 @@ RUN set -eu; \
     [ "$found" -eq 1 ] || echo "No extra CA certificates supplied; skipping truststore import"; \
     rm -rf /tmp/extra-certs /tmp/split
 
+# The docker CLI and Maven are installed into the image rather than bind
+# mounted from the host. The original compose mounted /usr/bin/docker and
+# /opt/maven, which ties the controller to a host that has both at those
+# paths and as Linux builds -- a macOS host has neither, and its docker
+# binary is a Mach-O executable that cannot run inside a Linux container.
+#
+# Only the docker *client* is installed; it talks to the host's daemon over
+# the mounted socket, which is what the pipeline's image builds and
+# container deployments need.
+ARG MAVEN_VERSION=3.9.9
+# APT_PROXY is empty on an ordinary machine, where apt reaches the Debian
+# mirrors directly. It exists for networks that refuse plain HTTP and serve
+# only HTTPS through a proxy -- the same arrangement ansible/targetnode
+# needs, and the reason the apt steps below are written to be rewritten.
+ARG APT_PROXY=""
+RUN set -eu; \
+    if [ -n "$APT_PROXY" ]; then \
+      sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' \
+        /etc/apt/sources.list.d/debian.sources 2>/dev/null || true; \
+      sed -i 's|http://deb.debian.org|https://deb.debian.org|g; s|http://security.debian.org|https://security.debian.org|g' \
+        /etc/apt/sources.list 2>/dev/null || true; \
+      printf 'Acquire::https::Proxy "%s";\nAcquire::http::Proxy "%s";\n' "$APT_PROXY" "$APT_PROXY" \
+        > /etc/apt/apt.conf.d/01proxy; \
+    fi; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg; \
+    install -m 0755 -d /etc/apt/keyrings; \
+    if [ -n "$APT_PROXY" ]; then export https_proxy="$APT_PROXY" http_proxy="$APT_PROXY"; fi; \
+    curl -fsSL https://download.docker.com/linux/debian/gpg \
+      | gpg --dearmor -o /etc/apt/keyrings/docker.gpg; \
+    chmod a+r /etc/apt/keyrings/docker.gpg; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" > /etc/apt/sources.list.d/docker.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends docker-ce-cli; \
+    rm -rf /var/lib/apt/lists/*; \
+    curl -fsSL -o /tmp/maven.tar.gz "https://archive.apache.org/dist/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"; \
+    mkdir -p /opt/maven; \
+    tar -xzf /tmp/maven.tar.gz -C /opt/maven --strip-components=1; \
+    rm -f /tmp/maven.tar.gz; \
+    /opt/maven/bin/mvn -v
 USER jenkins
 
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
