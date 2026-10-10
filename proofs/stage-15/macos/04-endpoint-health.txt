@@ -1,0 +1,7 @@
+portal                 :8080  not reachable
+container-staging      :8100  {"status":"UP"}  {"app":{"name":"Student Attendance Management Portal","environment":"staging"}}
+container-production   :8101  {"status":"UP"}  {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+tomcat-staging         :8090  {"status":"UP"}  {"app":{"name":"Student Attendance Management Portal","environment":"staging"}}
+tomcat-production      :8091  {"status":"UP"}  {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+ansible-node           :8200  {"status":"UP"}  {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
+puppet-node            :8300  {"status":"UP"}  {"app":{"name":"Student Attendance Management Portal","environment":"production"}}
