@@ -77,12 +77,19 @@ Parameters** → **Build**. It takes about two and a half minutes. Let it
 finish before anyone walks in — a build in progress is not what you want
 on screen.
 
-When it goes green, save the log into the repository, because the
-controller is a container and the log dies with it:
+When it goes green, save the evidence into the repository, because the
+controller is a container and its logs die with it:
 
 ```bash
-bash scripts/capture-pipeline-proof.sh
+bash scripts/capture-macos-evidence.sh
 ```
+
+That captures the build log plus the state of your own lab — host,
+Docker, containers, all seven endpoints, registry tags — into
+`proofs/stage-15/macos/`. It is the only evidence in the project that
+comes from your machine rather than the build environment, and it is what
+backs §1a of the report. Read it before committing; it describes your
+computer.
 
 Have these tabs open:
 
@@ -418,7 +425,8 @@ bash scripts/start-demo.sh --tier full   # + both Tomcat deployments      ~10 mi
 bash scripts/start-nodes.sh              # + Ansible and Puppet nodes    ~12 min
 bash jenkins/start-local.sh              # the Jenkins controller        ~8 min
 bash scripts/demo-status.sh              # one-screen status
-bash scripts/capture-pipeline-proof.sh   # save a build log into proofs/
+bash scripts/capture-pipeline-proof.sh   # save one build log into proofs/
+bash scripts/capture-macos-evidence.sh   # + host, lab and registry state
 bash scripts/start-demo.sh --stop        # stop everything
 bash scripts/start-nodes.sh --stop       # stop the nodes
 
