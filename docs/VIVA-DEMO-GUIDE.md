@@ -426,7 +426,15 @@ bash scripts/start-nodes.sh --stop       # stop the nodes
 DOCKER_REGISTRY=localhost:5001 bash jenkins/start-local.sh
 
 mvn -pl app verify                       # 73 unit + 7 integration tests
+docker/build-image.sh                    # build the image by hand (Stage 11)
 ```
+
+Three further scripts exist but are **called by the ones above**, so you
+never run them yourself: `jenkins/build-controller.sh`,
+`ansible/targetnode/build-node.sh` and `puppet/lab/build-puppet-node.sh`.
+If an examiner asks how the lab nodes are built, those are the files to
+open. `scripts/publish-release-tags.sh` has already done its job — the
+three tags are on GitHub — and re-running it is unnecessary.
 
 | Account | Password | Role |
 |---|---|---|
