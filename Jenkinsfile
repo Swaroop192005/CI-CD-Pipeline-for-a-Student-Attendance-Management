@@ -483,7 +483,9 @@ pipeline {
                               "The parameter did not reach the application.")
                     }
                     echo "Parameter verified: requested '${params.DEPLOY_ENVIRONMENT}', deployed '${reported}'"
-                    echo "Deployed application URL: ${base}"
+                    // The health checks above reach the deployment the way
+                    // the controller can; the URL a person opens is the host's.
+                    echo "Deployed application URL: http://localhost:${params.APP_PORT}${env.APP_CONTEXT}"
                 }
             }
         }
