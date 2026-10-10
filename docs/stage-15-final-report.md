@@ -44,6 +44,67 @@ Full transcript: [`proofs/stage-15/end-to-end-run.log`](../proofs/stage-15/end-t
 
 ---
 
+## 1a. The same pipeline, reproduced on an unrelated machine
+
+The run above executed in the Linux container this project was built in.
+A pipeline that only works where it was written has not been shown to be
+portable, so the whole lab was afterwards stood up a second time on an
+ordinary developer machine — macOS on Apple Silicon, Docker Desktop — and
+the pipeline was run there against `develop`.
+
+**Build #5** — commit `55761d5`, version `1.0.5-55761d5`
+
+| Stage | Result on the second machine |
+|---|---|
+| Build | `BUILD SUCCESS`, 39 sources |
+| Unit test | 73 passed, 0 failed |
+| Package | `attendance.war`, 63,815,289 bytes |
+| Integration test | 7 passed, 0 failed |
+| Quality gate | 20 browser journeys passed across J1–J5 |
+| Image and registry | `sha256:04698c80…`, pushed under two tags |
+| Registry read-back | 6 tags accumulated over builds 1–5 |
+| Container deploy | healthy after 4 attempts, reports `staging` |
+| Tomcat deploy | WAR deployed to Tomcat 10.1 |
+| Verify | healthy after 6 attempts, parameter assertion passed |
+| **Total** | **153 s, `Finished: SUCCESS`** |
+
+Same eleven stages, same 100 tests, a different operating system, a
+different CPU architecture and a different Docker implementation.
+
+### What had to change, and why
+
+Docker Desktop does not run the daemon on the host. It runs it inside a
+VM, which breaks a specific assumption the original pipeline had made
+without stating it: that `--network host` on the controller and
+`localhost` in the controller's shell both refer to the same machine the
+daemon is on. On Linux they do. On macOS neither does.
+
+| Assumption | Why it failed | What replaced it |
+|---|---|---|
+| Gate container on `--network host`, addressed as `localhost` | `host` networking is not available on Docker Desktop; the published-port model is the only one that works in both | `-p` publication, and two separate variables: `HOST_ADDR` for how the *controller* reaches a published port, `BROWSER_ADDR` for how a *container* reaches the host |
+| The Selenium container reaches the app on `localhost` | The browser container is bridged in both environments, so the app is never on its loopback | `--add-host=host.docker.internal:host-gateway`, and the gate URL is built from `BROWSER_ADDR` |
+| `${REGISTRY##*:}` strips the port in the shell | A Jenkins `sh """…"""` block is **interpolated by Groovy before the shell ever sees it**, so shell parameter expansion is parsed as Groovy and fails | Derive the port in Groovy: `tokenize(':').last()` |
+| The registry can be read back at `${REGISTRY}` | Correct for `docker push`, because the *daemon* resolves that address. Wrong for `curl`, which runs in the controller — where `localhost` is the controller. The push succeeded and the read-back failed in the same stage | Read back at `${HOST_ADDR}:${REGISTRY_PORT}` |
+| `docker build` leaves the image in the local store | With the buildx `docker-container` driver it builds into the build cache and loads nothing, so the next command cannot find the image it just built | Retry with `--load` and verify the image exists rather than trusting the exit code |
+
+None of these were forks. The `Jenkinsfile` reads `DOCKER_HOST_ADDR` and
+`DOCKER_REGISTRY` from the environment and falls back to the Linux
+defaults, so one pipeline definition runs unmodified in both places; the
+controller supplies the values through `jenkins/docker-compose.local.yml`.
+
+**The common thread in all five** is worth stating plainly, because it is
+the transferable lesson of this project: each one was a check that
+measured a **proxy** for success rather than the thing itself. An exit
+code instead of "does the image exist". A container state instead of
+"does it answer". A push instead of "can it be read back". Every one of
+them reported success while the underlying condition was false, and each
+was found only by an attempt to use the result.
+
+Full transcript:
+[`proofs/stage-15/macos-pipeline-build-05.log`](../proofs/stage-15/macos-pipeline-build-05.log).
+
+---
+
 ## 2. Architecture
 
 ### 2.1 Application
@@ -185,6 +246,11 @@ have.
 | `COPY` brings in nothing and the layer stays cached | `.dockerignore` re-include needs `!dir`, not `!dir/` | Re-include the directory itself |
 | A refused POST answers **405**, not 403 | The filter chain forwards the original request to a GET-only error page | Map the page for every method and set 403 explicitly |
 | `docker stop` always takes 10 s | The JVM is not PID 1, so SIGTERM reaches a shell that does not forward it | `exec` form entrypoint |
+| On Docker Desktop, the gate container starts but no health check ever passes | `--network host` is a Linux-only feature; on macOS the daemon runs in a VM, so neither `--network host` nor the controller's `localhost` refers to the host | Publish ports with `-p`, and address the host explicitly — `HOST_ADDR` from the controller, `host.docker.internal` from a container |
+| A `sh` step containing `${VAR##*:}` fails with a Groovy parse error | A Jenkins `sh """…"""` block is interpolated by Groovy **before** the shell receives it, so shell parameter expansion never reaches bash | Compute the value in Groovy (`tokenize(':').last()`) and interpolate the result |
+| `docker push` succeeds, then `curl` of the same registry address fails with exit 7 | The push is performed by the **daemon**, the curl by the **controller**. One address cannot be correct for both when they are different machines | Push to the daemon's address, read back on the controller's |
+| "image missing after build", though `docker build` exited 0 | The buildx `docker-container` driver builds into the build cache and does not load the result into the local image store | Retry with `--load`, and test for the image rather than the exit code |
+| `kill` does not free a port held by a Spring Boot process | The process was suspended with Ctrl+Z. A stopped process queues SIGTERM and never acts on it | `kill -9`, or resume it first. `scripts/start-demo.sh` detects process state `T` and says so |
 
 ### 4.4 Browser tests
 
