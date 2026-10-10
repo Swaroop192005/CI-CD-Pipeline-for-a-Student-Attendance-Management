@@ -2,5 +2,5 @@
 
 {"repositories":["attendance-portal"]}
 
-{"name":"attendance-portal","tags":["1.0.5-55761d5","1.0.6-ad0d175","latest","1.0.2-83c51bc","1.0.0","1.0.3-83c51bc","1.0.4-83c51bc"]}
+{"name":"attendance-portal","tags":["1.0.5-55761d5","1.0.6-ad0d175","latest","1.0.2-83c51bc","1.0.7-3af32ac","1.0.0","1.0.3-83c51bc","1.0.4-83c51bc"]}
 
