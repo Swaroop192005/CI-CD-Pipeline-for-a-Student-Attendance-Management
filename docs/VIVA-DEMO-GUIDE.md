@@ -48,7 +48,7 @@ java -version          # must be 21 or newer
 mvn -v
 
 bash scripts/start-demo.sh --tier full    # app, containers, Tomcat, registry
-bash scripts/start-nodes.sh               # the Ansible and Puppet nodes
+bash scripts/start-nodes.sh --puppet      # the Ansible and Puppet nodes
 bash jenkins/start-local.sh               # the Jenkins controller
 bash scripts/demo-status.sh               # everything, in one table
 ```
@@ -233,6 +233,12 @@ account and no configuration.
 
 **From evidence, if the node tier did not run.** Open
 `proofs/stage-13/puppet/03-puppet-apply-run2-idempotent.log`.
+
+> **The Puppet node is opt-in.** `start-nodes.sh` provisions only the
+> Ansible node unless you pass `--puppet`, so a plain run leaves `:8300`
+> down and this section with nothing live to show. If the container
+> already exists from an earlier run, `docker start attendance-node-puppet`
+> brings it back in under a minute without reprovisioning.
 
 ### 2.4b — Configuration as code, in Jenkins itself (1 min)
 
@@ -422,7 +428,8 @@ cd ~/Desktop/CI-CD-Pipeline-for-a-Student-Attendance-Management
 bash scripts/start-demo.sh               # portal on :8080               ~2 min
 bash scripts/start-demo.sh --tier docker # + registry, containers, Tomcat ~8 min
 bash scripts/start-demo.sh --tier full   # + both Tomcat deployments      ~10 min
-bash scripts/start-nodes.sh              # + Ansible and Puppet nodes    ~12 min
+bash scripts/start-nodes.sh              # + the Ansible node only       ~12 min
+bash scripts/start-nodes.sh --puppet     # + the Puppet node as well     ~18 min
 bash jenkins/start-local.sh              # the Jenkins controller        ~8 min
 bash scripts/demo-status.sh              # one-screen status
 bash scripts/capture-pipeline-proof.sh   # save one build log into proofs/
