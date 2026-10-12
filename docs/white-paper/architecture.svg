@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="1130" viewBox="0 0 1700 1130" font-family="DejaVu Sans, Segoe UI, sans-serif">
+  <rect width="1700" height="1130" fill="#ffffff"/>
+  <defs>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <polygon points="0,0 10,5 0,10" fill="#4a6fa5"/></marker>
+    <marker id="r" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <polygon points="0,0 10,5 0,10" fill="#b33a3a"/></marker>
+  </defs>
+
+  <!-- ===== row 1 ===== -->
+  <g>
+    <rect x="30"   y="30" width="500" height="54" rx="6" fill="#2f5d8a"/>
+    <rect x="600"  y="30" width="500" height="54" rx="6" fill="#2f5d8a"/>
+    <rect x="1170" y="30" width="500" height="54" rx="6" fill="#c67c00"/>
+    <g fill="#ffffff" font-size="23" font-weight="bold" text-anchor="middle">
+      <text x="280"  y="66">1 · Source and version control</text>
+      <text x="850"  y="66">2 · Build and test</text>
+      <text x="1420" y="66">3 · Quality gate</text>
+    </g>
+    <rect x="30"   y="96" width="500" height="300" rx="6" fill="#f6f9fc" stroke="#c3d2e2"/>
+    <rect x="600"  y="96" width="500" height="300" rx="6" fill="#f6f9fc" stroke="#c3d2e2"/>
+    <rect x="1170" y="96" width="500" height="300" rx="6" fill="#fff8ed" stroke="#e0bb7a"/>
+  </g>
+  <g font-size="20" fill="#1f2d3d">
+    <text x="54" y="132" font-weight="bold">Git, trunk-based</text>
+    <text x="54" y="164">feature/* branches, reviewed by pull</text>
+    <text x="54" y="192">request before merging to develop</text>
+    <text x="54" y="220">main carries annotated release tags</text>
+    <text x="54" y="268" font-weight="bold">Trigger</text>
+    <text x="54" y="300">Jenkins polls the repository every</text>
+    <text x="54" y="328">two minutes; a new commit starts</text>
+    <text x="54" y="356">a build without human action</text>
+
+    <text x="624" y="132" font-weight="bold">Jenkins, declarative pipeline</text>
+    <text x="624" y="164">The Jenkinsfile lives in the repository,</text>
+    <text x="624" y="192">so a change to the delivery process is</text>
+    <text x="624" y="220">reviewed like a change to the code</text>
+    <text x="624" y="268" font-weight="bold">Stages</text>
+    <text x="624" y="300">compile, 73 unit tests, package an</text>
+    <text x="624" y="328">executable WAR, then 7 integration tests</text>
+    <text x="624" y="356">Controller itself defined as code</text>
+
+    <text x="1194" y="132" font-weight="bold">Ephemeral environment</text>
+    <text x="1194" y="164">the application in a disposable container,</text>
+    <text x="1194" y="192">beside a Selenium Grid running</text>
+    <text x="1194" y="220">headless Chromium; torn down after</text>
+    <text x="1194" y="268" font-weight="bold">20 browser journeys, five flows</text>
+    <text x="1194" y="300">Exercised through the real interface,</text>
+    <text x="1194" y="328">not through mocked collaborators.</text>
+    <text x="1194" y="356">One failure skips every stage below.</text>
+  </g>
+
+  <!-- row-1 connectors -->
+  <path d="M 534 246 L 592 246" stroke="#4a6fa5" stroke-width="3" marker-end="url(#a)"/>
+  <path d="M 1104 246 L 1162 246" stroke="#4a6fa5" stroke-width="3" marker-end="url(#a)"/>
+
+  <!-- wrap from stage 3 to stage 4 -->
+  <path d="M 1420 400 L 1420 440 L 280 440 L 280 540" stroke="#4a6fa5" stroke-width="3" fill="none" marker-end="url(#a)"/>
+  <text x="850" y="430" font-size="19" fill="#4a6fa5" text-anchor="middle">all journeys pass, and only then is an image built</text>
+
+  <!-- gate failure -->
+  <path d="M 1670 246 L 1700 246" stroke="#b33a3a" stroke-width="0"/>
+  <rect x="1170" y="470" width="500" height="92" rx="6" fill="#fdeceb" stroke="#b33a3a"/>
+  <path d="M 1420 400 L 1420 462" stroke="#b33a3a" stroke-width="3" stroke-dasharray="7 5" fill="none" marker-end="url(#r)"/>
+  <text x="1420" y="504" font-size="21" font-weight="bold" fill="#8f2b2b" text-anchor="middle">Any journey fails</text>
+  <text x="1420" y="536" font-size="19" fill="#4a1414" text-anchor="middle">no image is built; nothing is released</text>
+
+  <!-- ===== row 2 ===== -->
+  <g>
+    <rect x="30"   y="570" width="500" height="54" rx="6" fill="#2f5d8a"/>
+    <rect x="600"  y="570" width="500" height="54" rx="6" fill="#2f5d8a"/>
+    <rect x="1170" y="570" width="500" height="54" rx="6" fill="#2f5d8a"/>
+    <g fill="#ffffff" font-size="23" font-weight="bold" text-anchor="middle">
+      <text x="280"  y="606">4 · Artefact and registry</text>
+      <text x="850"  y="606">5 · Deployment targets</text>
+      <text x="1420" y="606">6 · Verification</text>
+    </g>
+    <rect x="30"   y="636" width="500" height="300" rx="6" fill="#f6f9fc" stroke="#c3d2e2"/>
+    <rect x="600"  y="636" width="500" height="300" rx="6" fill="#f6f9fc" stroke="#c3d2e2"/>
+    <rect x="1170" y="636" width="500" height="300" rx="6" fill="#eef4fb" stroke="#9db8d4"/>
+  </g>
+  <g font-size="20" fill="#1f2d3d">
+    <text x="54" y="672" font-weight="bold">Build once</text>
+    <text x="54" y="704">An OCI image is built around the WAR</text>
+    <text x="54" y="732">the gate already exercised. It is never</text>
+    <text x="54" y="760">rebuilt for a particular target</text>
+    <text x="54" y="808" font-weight="bold">Hardening and identity</text>
+    <text x="54" y="840">non-root uid, OCI labels, healthcheck</text>
+    <text x="54" y="868">pushed under an immutable tag of</text>
+    <text x="54" y="896">version and commit, plus its digest</text>
+
+    <text x="624" y="672" font-weight="bold">One artefact, three substrates</text>
+    <text x="624" y="704">a container runtime</text>
+    <text x="624" y="732">Tomcat 10.1, as a conventional WAR</text>
+    <text x="624" y="760">a host provisioned from bare by</text>
+    <text x="624" y="788">Ansible or Puppet, run under systemd</text>
+    <text x="624" y="836" font-weight="bold">Configuration, not code</text>
+    <text x="624" y="868">The application does not know which</text>
+    <text x="624" y="896">it is; the environment is a parameter</text>
+
+    <text x="1194" y="672" font-weight="bold">Two assertions, not one</text>
+    <text x="1194" y="704">1. the health endpoint returns UP</text>
+    <text x="1194" y="736">2. the running instance reports the</text>
+    <text x="1194" y="764">same environment the pipeline was</text>
+    <text x="1194" y="792">invoked with</text>
+    <text x="1194" y="840" font-weight="bold">Why the second matters</text>
+    <text x="1194" y="872">An instance that is healthy but wrongly</text>
+    <text x="1194" y="900">configured fails the build.</text>
+  </g>
+
+  <path d="M 534 786 L 592 786" stroke="#4a6fa5" stroke-width="3" marker-end="url(#a)"/>
+  <path d="M 1104 786 L 1162 786" stroke="#4a6fa5" stroke-width="3" marker-end="url(#a)"/>
+
+  <!-- verification failure -->
+  <rect x="1170" y="1010" width="500" height="80" rx="6" fill="#fdeceb" stroke="#b33a3a"/>
+  <path d="M 1420 940 L 1420 1002" stroke="#b33a3a" stroke-width="3" stroke-dasharray="7 5" fill="none" marker-end="url(#r)"/>
+  <text x="1420" y="1044" font-size="21" font-weight="bold" fill="#8f2b2b" text-anchor="middle">Either assertion fails</text>
+  <text x="1420" y="1074" font-size="19" fill="#4a1414" text-anchor="middle">roll back to the previous release tag</text>
+
+  <!-- principle band -->
+  <rect x="30" y="1010" width="1090" height="80" rx="6" fill="#eef4fb" stroke="#9db8d4"/>
+  <text x="54" y="1044" font-size="21" font-weight="bold" fill="#1f2d3d">Build once, promote the same artefact</text>
+  <text x="54" y="1074" font-size="19" fill="#1f2d3d">The binary the browser journeys exercised in stage 3 is the binary that reaches every target in stage 5.</text>
+</svg>
