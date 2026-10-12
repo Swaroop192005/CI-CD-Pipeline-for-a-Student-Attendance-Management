@@ -19,6 +19,7 @@ Two things this does that a bare `pandoc report.md -o report.docx` does not:
 
 Requires: pandoc, mermaid-cli (mmdc), a Chromium for it to drive.
 """
+import datetime
 import os
 import re
 import subprocess
@@ -111,10 +112,22 @@ def paginate_chapters(md: str) -> str:
     that begins halfway down the page someone else's report ended on
     reads as a continuation of it.
     """
+    # Track fenced code blocks. '# 1. Clone' inside a bash snippet is a
+    # shell comment, not a heading, and injecting a page break there puts
+    # a ``` fence inside the fence - which closes it early and turns the
+    # rest of the snippet, and every later '#' line, into prose.
     lines = md.splitlines(keepends=True)
-    out, seen_h1 = [], False
+    out, seen_h1, fence = [], False, None
     for line in lines:
-        if line.startswith("# ") and not line.startswith("##"):
+        stripped = line.lstrip()
+        if fence is None:
+            m = re.match(r"(`{3,}|~{3,})", stripped)
+            if m:
+                fence = m.group(1)[0] * 3
+        elif re.match(r"(`{3,}|~{3,})\s*$", stripped) and stripped[0] == fence[0]:
+            fence = None
+
+        if fence is None and line.startswith("# ") and not line.startswith("##"):
             if seen_h1:
                 out.append("\n" + PAGE_BREAK + "\n")
             seen_h1 = True
@@ -156,6 +169,53 @@ def to_docx(inputs, out: Path, title=None, toc=False):
         raise SystemExit(f"{out.name}: embedded non-image media {bad}")
 
 
+# Long command lines and long table cells are everywhere in these
+# reports, and LaTeX does not wrap inside a verbatim environment: an
+# unwrapped line runs off the page edge and is simply lost. fvextra
+# makes code wrap; the rest is the running header and a little space
+# around the code blocks.
+PDF_HEADER = r"""
+\usepackage{fvextra}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,breakanywhere,commandchars=\\\{\}}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\footnotesize\nouppercase{\leftmark}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\usepackage{etoolbox}
+\AtBeginEnvironment{Shaded}{\small}
+\setlength{\emergencystretch}{3em}
+"""
+
+
+def to_pdf(src: Path, out: Path, title: str, subtitle: str,
+           author: str, date: str):
+    cmd = [
+        "pandoc", str(src), "-o", str(out),
+        "--pdf-engine", "xelatex",
+        "--from", "markdown+pipe_tables+backtick_code_blocks",
+        "--resource-path", f"{WORK}:{REPO}:{DOCS}",
+        "--toc", "--toc-depth=2",
+        "--highlight-style", "tango",
+        "-V", "documentclass=report",
+        "-V", "geometry:a4paper,margin=2.4cm",
+        # DejaVu throughout: it is the only family installed here that
+        # covers the box-drawing characters the directory trees are made
+        # of, and a missing glyph in a 180-page PDF is easy to miss.
+        "-V", "mainfont=DejaVu Serif",
+        "-V", "sansfont=DejaVu Sans",
+        "-V", "monofont=DejaVu Sans Mono",
+        "-V", "fontsize=10pt",
+        "-V", "linkcolor=blue", "-V", "urlcolor=blue", "-V", "toccolor=black",
+        "-V", "colorlinks=true",
+        "-V", f"header-includes={PDF_HEADER}",
+        "-M", f"title={title}", "-M", f"subtitle={subtitle}",
+        "-M", f"author={author}", "-M", f"date={date}",
+    ]
+    sh(cmd)
+
+
 def main():
     WORK.mkdir(parents=True, exist_ok=True)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -185,6 +245,16 @@ def main():
                 title="Student Attendance Management Portal - CI/CD Pipeline",
                 toc=True)
         print(f"  ✓ {out.name}  ({out.stat().st_size // 1024} KB)")
+
+        if os.environ.get("SKIP_PDF") != "1":
+            print("Typesetting the PDF")
+            pdf = OUT / "Attendance-Portal-Full-Report.pdf"
+            to_pdf(prepared, pdf,
+                   "Student Attendance Management Portal",
+                   "Continuous Integration and Delivery Pipeline",
+                   "Swaroop Naik",
+                   datetime.date.today().strftime("%d %B %Y"))
+            print(f"  ✓ {pdf.name}  ({pdf.stat().st_size // 1024} KB)")
 
     print(f"\nWritten to {OUT.relative_to(REPO)}/")
 
