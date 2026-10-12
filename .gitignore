@@ -109,3 +109,5 @@ ansible/*.retry
 # copies that drift apart, and binary files that no diff can review.
 # Build them when a submission copy is needed.
 docs/docx/
+# ...and the zips of it made for handing over.
+docs/attendance-portal-reports*.zip
