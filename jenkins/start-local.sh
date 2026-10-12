@@ -63,14 +63,27 @@ if curl -fsS --noproxy '*' --max-time 10 http://127.0.0.1:8081/login >/dev/null 
   ok "Jenkins is up at http://localhost:8081/   (admin / admin)"
   jobs=$(docker exec attendance-jenkins sh -c 'ls /var/jenkins_home/jobs 2>/dev/null' 2>/dev/null | tr '\n' ' ')
   [ -n "$jobs" ] && echo "      jobs defined by Configuration-as-Code: $jobs"
-  cat <<'EOF'
-
-  This controller has no build history -- the 32 builds behind the Stage
-  7-10 evidence belong to the machine that ran them. Trigger a build from
-  the UI to give it one of its own; proofs/stage-10/ still holds the run
-  where the quality gate blocked a deployment, which is the thing worth
-  showing.
+  # Report the history this controller actually has. The build record
+  # lives in the jenkins_home volume, so it survives restarts of the
+  # container and grows every run - a fixed "no build history" line went
+  # stale the moment the first build finished.
+  builds=$(docker exec attendance-jenkins sh -c \
+      'ls -d /var/jenkins_home/jobs/*/builds/[0-9]* 2>/dev/null | wc -l' 2>/dev/null | tr -d ' ')
+  if [ "${builds:-0}" -gt 0 ]; then
+    echo "      build history on this controller: $builds recorded"
+    echo
+    echo "  SCM polling runs every 2 minutes, so a build may start on its own"
+    echo "  shortly after startup if there are commits it has not built yet."
+    echo "  Let it finish before starting the lab nodes: the quality gate adds"
+    echo "  a JVM and a Chromium, and the two together can exhaust Docker's"
+    echo "  memory allocation."
+  else
+    cat <<'EOF'
+      no build history yet -- trigger one from the UI to give this
+      controller a run of its own. proofs/stage-10/ holds the run where the
+      quality gate blocked a deployment, which is the thing worth showing.
 EOF
+  fi
 else
   bad "Jenkins did not answer on :8081"
   docker logs attendance-jenkins 2>&1 | tail -15 | sed 's/^/      /'

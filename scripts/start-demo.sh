@@ -79,27 +79,32 @@ fi
 step "Starting the portal on :$APP_PORT"
 if curl -fsS --noproxy '*' --max-time 5 "http://127.0.0.1:$APP_PORT$CTX/actuator/health" >/dev/null 2>&1; then
   ok "already running"
-elif lsof -ti ":$APP_PORT" >/dev/null 2>&1; then
-  # Something holds the port but does not answer our health endpoint. Most
-  # often a JVM left behind by a previous run that was suspended with Ctrl+Z
-  # rather than stopped. Starting a second one here would bind-fail and exit
+elif lsof -ti ":$APP_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
+  # -sTCP:LISTEN matters: without it lsof also returns every *client* with
+  # a socket to this port, so a browser tab left open on the old portal
+  # counts as "holding" it. That reported Chrome as the culprit and told
+  # the user to kill it. Only a listener can hold a port.
+  #
+  # Something listens on the port but does not answer our health endpoint.
+  # Most often a JVM left behind by a previous run that was suspended with
+  # Ctrl+Z rather than stopped. Starting a second one here would bind-fail and exit
   # immediately, and the health loop below would then spin for two minutes
   # against a port that is never going to answer. Say so and stop instead.
   bad "port $APP_PORT is held by something that is not answering $CTX/actuator/health:"
-  lsof -i ":$APP_PORT" 2>/dev/null | sed '1d' | awk '{printf "      %s (pid %s), owner %s\n", $1, $2, $3}' | sort -u
+  lsof -i ":$APP_PORT" -sTCP:LISTEN 2>/dev/null | sed '1d' | awk '{printf "      %s (pid %s), owner %s\n", $1, $2, $3}' | sort -u
   echo
   echo "    Free it and run this again:"
-  echo "        kill \$(lsof -ti :$APP_PORT)"
+  echo "        kill \$(lsof -ti :$APP_PORT -sTCP:LISTEN)"
   echo
   # A process suspended with Ctrl+Z is in state T. SIGTERM is queued for it
   # but not acted on until it resumes, so a plain kill looks like it did
   # nothing and the same pid is still holding the port on the next run.
   # SIGKILL cannot be blocked or deferred.
-  for _p in $(lsof -ti ":$APP_PORT" 2>/dev/null); do
+  for _p in $(lsof -ti ":$APP_PORT" -sTCP:LISTEN 2>/dev/null); do
     if [ "$(ps -o stat= -p "$_p" 2>/dev/null | cut -c1)" = "T" ]; then
       printf "    \033[33mNote:\033[0m pid %s is *stopped* (state T), almost certainly suspended\n" "$_p"
       echo "    with Ctrl+Z. A plain kill will not reach it -- use:"
-      echo "        kill -9 \$(lsof -ti :$APP_PORT)"
+      echo "        kill -9 \$(lsof -ti :$APP_PORT -sTCP:LISTEN)"
       echo
     fi
   done
