@@ -250,6 +250,7 @@ have.
 | Tests fail with a unique-constraint violation in `@BeforeEach` | Hibernate orders queued inserts **ahead of** queued deletes in one transaction | `deleteAllInBatch()`, which issues the DELETE immediately |
 | `*IT` tests compile but never run | Failsafe needs explicit executions | Declare `integration-test` and `verify` goals |
 | Sign-in fails only on a fresh start | Seeding ran as an `ApplicationRunner`, which fires **after** the port is bound, so health reported `UP` before the accounts existed | Seed during context refresh, via a `TransactionTemplate` |
+| A portal that had been serving for days starts answering every request with `NoClassDefFoundError` for a class that is inside its own WAR | `scripts/start-demo.sh` packaged the application **before** checking whether the portal was already running, and the portal had been launched with `java -jar app/target/attendance.war`. A Spring Boot executable WAR loads its nested classes *lazily* from the file it was launched from, so the rebuild pulled the artefact out from under the live JVM: every class it had not yet touched became unloadable. The script then probed the port, saw it listening, and reported "already running" - having just broken it | Launch from a private copy (`/tmp/attendance-demo.war`), taken only in the branch that starts a new process, so the running JVM reads a file nothing else writes |
 
 ### 4.3 Pipeline and containers
 
