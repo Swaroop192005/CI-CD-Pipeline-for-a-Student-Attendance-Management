@@ -102,3 +102,10 @@ ansible/targetnode/id_node.pub
 ansible/targetnode/authorized_keys
 ansible/targetnode/certs/*.crt
 ansible/*.retry
+
+# ---- Generated Word documents -------------------------------------------
+# docs/docx/ is built from the Markdown by scripts/build-docx.py. The
+# Markdown is the source; committing the .docx as well would mean two
+# copies that drift apart, and binary files that no diff can review.
+# Build them when a submission copy is needed.
+docs/docx/
