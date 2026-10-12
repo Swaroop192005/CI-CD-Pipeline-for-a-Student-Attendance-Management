@@ -62,6 +62,8 @@ if [ "$TIER" != app ]; then
   docker info >/dev/null 2>&1 && ok "docker" || { bad "docker is not running - start Docker Desktop"; exit 1; }
 fi
 
+RUN_WAR=/tmp/attendance-demo.war
+
 # ---------------------------------------------------------------- build ----
 step "Building the application"
 # sed, not grep -v: under `set -o pipefail` a grep that filters out every
@@ -112,7 +114,21 @@ else
   # /actuator/info hang on its outbound lookup while /actuator/health still
   # answers -- a confusing half-up state. A developer machine normally has it
   # unset, so this is a no-op there.
-  ( unset JAVA_TOOL_OPTIONS; nohup java -jar "$WAR" > /tmp/attendance-demo.log 2>&1 & echo $! > /tmp/attendance-demo.pid )
+  # Launch from a private copy, never from app/target/attendance.war.
+  #
+  # The build step above rewrites that file every time this script runs,
+  # and a Spring Boot executable WAR loads its nested classes *lazily*
+  # from the file it was launched from. So re-running this script while
+  # the portal is already up used to pull the artefact out from under the
+  # live JVM: every class it had not yet touched became unloadable, and
+  # the application answered requests with NoClassDefFoundError while
+  # still holding the port - which this script then read as
+  # "already running".
+  #
+  # The copy is only made here, in the branch that actually starts a new
+  # process, so an already-running portal's file is never touched either.
+  cp "$WAR" "$RUN_WAR"
+  ( unset JAVA_TOOL_OPTIONS; nohup java -jar "$RUN_WAR" > /tmp/attendance-demo.log 2>&1 & echo $! > /tmp/attendance-demo.pid )
   APP_PID=$(cat /tmp/attendance-demo.pid)
   printf "  waiting for health "
   for i in $(seq 1 60); do
