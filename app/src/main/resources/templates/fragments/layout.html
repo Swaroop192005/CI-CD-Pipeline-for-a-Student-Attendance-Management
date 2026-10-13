@@ -36,6 +36,7 @@
        data-testid="nav-mark">Mark attendance</a>
     <a th:href="@{/cases}" th:classappend="${active == 'cases'} ? 'active'"
        data-testid="nav-cases">Shortage cases</a>
+    <a th:href="@{/webauthn/register}" data-testid="nav-passkeys">Passkeys</a>
     <a sec:authorize="hasRole('ADMIN')"
        th:href="@{/students}" th:classappend="${active == 'students'} ? 'active'"
        data-testid="nav-students">Students</a>

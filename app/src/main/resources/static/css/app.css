@@ -238,3 +238,11 @@ footer.app-footer {
   text-align: center; color: var(--muted); font-size: 12px;
   padding: 22px; border-top: 1px solid var(--border); margin-top: 20px;
 }
+
+/* ---- Passkey sign-in ---------------------------------------------------
+   The passkey button sits under the password form rather than replacing it:
+   a student whose device has no authenticator, or who is on a lab machine,
+   still has to be able to get in. */
+.passkey-block { margin-top: 18px; padding-top: 18px; border-top: 1px solid #e3e8ee; text-align: center; }
+.passkey-block .btn { width: 100%; }
+.passkey-block .small { font-size: 12px; line-height: 1.5; margin-top: 10px; }

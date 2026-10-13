@@ -10,6 +10,15 @@ spring:
   application:
     name: attendance-portal
 
+  sql:
+    init:
+      # Not "embedded", which is the default: Spring Boot only classes an
+      # in-memory URL as embedded, and this application runs H2 in file mode,
+      # so schema.sql would silently never run and the passkey tables would
+      # not exist. The DDL is written "if not exists" because "always" means
+      # every start.
+      mode: always
+
   datasource:
     # File mode keeps data across restarts; the container maps a volume here.
     url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/attendance;DB_CLOSE_ON_EXIT=FALSE}
@@ -20,6 +29,10 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    # schema.sql creates the two passkey tables, which are not JPA entities.
+    # Deferring it means Hibernate has finished with its own tables first, so
+    # the two mechanisms cannot race on the same connection.
+    defer-datasource-initialization: true
     open-in-view: false
     properties:
       hibernate:
@@ -53,6 +66,14 @@ attendance:
   environment: ${ATTENDANCE_ENVIRONMENT:local}
   eligibility-threshold: ${ATTENDANCE_ELIGIBILITY_THRESHOLD:75}
   shortage-threshold: ${ATTENDANCE_SHORTAGE_THRESHOLD:35}
+  # WebAuthn ties a passkey to an origin on purpose: a credential created for
+  # one site cannot be replayed against another. localhost is the exception
+  # browsers make for development, which is why the demonstration works
+  # without a certificate.
+  passkey:
+    relying-party-id: ${ATTENDANCE_PASSKEY_RP_ID:localhost}
+    relying-party-name: ${ATTENDANCE_PASSKEY_RP_NAME:Student Attendance Portal}
+    allowed-origins: ${ATTENDANCE_PASSKEY_ORIGINS:http://localhost:8080,http://localhost:8100,http://localhost:8101,http://localhost:8090,http://localhost:8091}
   seed-data: ${ATTENDANCE_SEED_DATA:true}
 
 info:

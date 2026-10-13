@@ -1,7 +1,13 @@
 package com.college.attendance.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcOperations;
+import org.springframework.security.web.webauthn.management.JdbcPublicKeyCredentialUserEntityRepository;
+import org.springframework.security.web.webauthn.management.JdbcUserCredentialRepository;
+import org.springframework.security.web.webauthn.management.PublicKeyCredentialUserEntityRepository;
+import org.springframework.security.web.webauthn.management.UserCredentialRepository;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +26,19 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+    private final String relyingPartyId;
+    private final String relyingPartyName;
+    private final String[] allowedOrigins;
+
+    public SecurityConfig(
+            @Value("${attendance.passkey.relying-party-id}") String relyingPartyId,
+            @Value("${attendance.passkey.relying-party-name}") String relyingPartyName,
+            @Value("${attendance.passkey.allowed-origins}") String[] allowedOrigins) {
+        this.relyingPartyId = relyingPartyId;
+        this.relyingPartyName = relyingPartyName;
+        this.allowedOrigins = allowedOrigins;
+    }
+
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -28,6 +47,12 @@ public class SecurityConfig {
                         // Ansible playbook must not need a session (FR-27).
                         .requestMatchers("/actuator/health", "/actuator/health/**",
                                 "/actuator/info", "/css/**", "/login", "/error").permitAll()
+
+                        // The passkey ceremony happens before anyone is
+                        // authenticated, so its script and its challenge
+                        // endpoint have to be reachable from the login page.
+                        .requestMatchers("/login/webauthn.js", "/webauthn/authenticate/options")
+                            .permitAll()
 
                         // Recording and correcting attendance.
                         .requestMatchers("/attendance/new").hasAnyRole("FACULTY", "ADMIN")
@@ -69,9 +94,37 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID")
                         .permitAll())
 
+                // Passkeys. A credential is bound to an origin by the
+                // browser, so one registered here cannot be replayed against
+                // another site. localhost is the exception browsers make for
+                // development, which is what lets the demonstration run
+                // without a certificate.
+                .webAuthn(webAuthn -> webAuthn
+                        .rpId(relyingPartyId)
+                        .rpName(relyingPartyName)
+                        .allowedOrigins(allowedOrigins))
+
                 .exceptionHandling(ex -> ex.accessDeniedPage("/error/403"));
 
         return http.build();
+    }
+
+    /**
+     * Where a registered passkey lives.
+     *
+     * <p>Stored in the same H2 database as everything else, in the two
+     * tables Spring Security defines. Only a public key is kept: the private
+     * half never leaves the authenticator that made it, which is the
+     * property that makes a passkey worth having over a password.
+     */
+    @Bean
+    PublicKeyCredentialUserEntityRepository userEntityRepository(JdbcOperations jdbc) {
+        return new JdbcPublicKeyCredentialUserEntityRepository(jdbc);
+    }
+
+    @Bean
+    UserCredentialRepository userCredentialRepository(JdbcOperations jdbc) {
+        return new JdbcUserCredentialRepository(jdbc);
     }
 
     /**

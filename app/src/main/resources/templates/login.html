@@ -28,6 +28,19 @@
       <button class="btn btn-primary" type="submit" data-testid="login-submit">Sign in</button>
     </form>
 
+    <div class="passkey-block">
+      <p class="muted">or</p>
+      <button type="button" id="passkey-signin" class="btn" data-testid="passkey-signin">
+        Sign in with a passkey (Touch ID)
+      </button>
+      <p class="muted small">
+        Register a passkey from your account page first. Touch ID confirms the
+        owner of this machine; the passkey you choose is what names the
+        student, so on a shared laptop this is a convenience rather than proof
+        of who is sitting here.
+      </p>
+    </div>
+
     <div class="cred-hint">
       Demonstration accounts seeded for this project. No real student data
       is used anywhere in this system.
@@ -42,5 +55,24 @@
     </div>
   </div>
 </div>
+<script th:src="@{/login/webauthn.js}"></script>
+<script th:inline="javascript">
+  // Spring Security ships this ceremony; all the page does is point it at the
+  // button and hand it the CSRF token, which the POST back to
+  // /login/webauthn needs like any other state-changing request here.
+  /*<![CDATA[*/
+  const contextPath = /*[[@{/}]]*/ '/';
+  const headers = {};
+  const csrfHeader = /*[[${_csrf != null ? _csrf.headerName : ''}]]*/ '';
+  const csrfToken = /*[[${_csrf != null ? _csrf.token : ''}]]*/ '';
+  if (csrfHeader) { headers[csrfHeader] = csrfToken; }
+  document.addEventListener('DOMContentLoaded', () => {
+    const button = document.getElementById('passkey-signin');
+    if (button && window.setupLogin) {
+      window.setupLogin(headers, contextPath.replace(/\/$/, ''), button);
+    }
+  });
+  /*]]>*/
+</script>
 </body>
 </html>

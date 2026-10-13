@@ -51,6 +51,18 @@
     </dependency>
 
     <!--
+      Spring Security ships the WebAuthn plumbing but delegates the
+      cryptographic verification of an attestation to webauthn4j, which it
+      does not pull in for you. Without this the passkey endpoints exist and
+      fail at the first registration.
+    -->
+    <dependency>
+      <groupId>com.webauthn4j</groupId>
+      <artifactId>webauthn4j-core</artifactId>
+      <version>0.31.11.RELEASE</version>
+    </dependency>
+
+    <!--
       Provided so that the same WAR can be dropped into an external
       Tomcat 10.1 (Stage 8). spring-boot-maven-plugin still places it in
       WEB-INF/lib-provided, so `java -jar attendance.war` also works
