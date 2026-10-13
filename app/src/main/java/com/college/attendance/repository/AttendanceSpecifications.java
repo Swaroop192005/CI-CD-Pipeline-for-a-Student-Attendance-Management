@@ -2,7 +2,6 @@ package com.college.attendance.repository;
 
 import com.college.attendance.domain.AttendanceRecord;
 import com.college.attendance.domain.AttendanceStatus;
-import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.dto.AttendanceSearch;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -33,8 +32,7 @@ public final class AttendanceSpecifications {
                 .and(subjectCode(search.getSubjectCode()))
                 .and(sessionDateFrom(search.getFrom()))
                 .and(sessionDateTo(search.getTo()))
-                .and(attendanceStatus(search.getAttendanceStatus()))
-                .and(workflowStatus(search.getWorkflowStatus()));
+                .and(attendanceStatus(search.getAttendanceStatus()));
     }
 
     public static Specification<AttendanceRecord> rollNumber(String rollNumber) {
@@ -69,9 +67,4 @@ public final class AttendanceSpecifications {
                 : cb.equal(root.get("attendanceStatus"), status);
     }
 
-    public static Specification<AttendanceRecord> workflowStatus(WorkflowStatus status) {
-        return (root, query, cb) -> status == null
-                ? null
-                : cb.equal(root.get("workflowStatus"), status);
-    }
 }

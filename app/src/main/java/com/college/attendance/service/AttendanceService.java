@@ -3,7 +3,6 @@ package com.college.attendance.service;
 import com.college.attendance.config.CurrentUser;
 import com.college.attendance.domain.AttendanceRecord;
 import com.college.attendance.domain.Student;
-import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.dto.AttendanceForm;
 import com.college.attendance.dto.AttendanceSearch;
 import com.college.attendance.repository.AttendanceRecordRepository;
@@ -28,7 +27,7 @@ import java.util.Optional;
  * Creating, reading and correcting attendance records.
  *
  * <p>Status transitions are deliberately <em>not</em> here: they belong to
- * {@code WorkflowService}, which is the only component allowed to change
+ * {@code ShortageCaseService}, which is the only component allowed to change
  * {@code workflowStatus} (BR-07). This class may create a record in
  * {@code DRAFT} and may refuse to edit one that has left an editable
  * state, but it never advances the workflow itself.
@@ -82,8 +81,9 @@ public class AttendanceService {
 
         Optional<String> ownRollNumber = currentUser.restrictedToRollNumber();
         if (ownRollNumber.isPresent()) {
-            spec = spec.and(AttendanceSpecifications.rollNumber(ownRollNumber.get()))
-                    .and(AttendanceSpecifications.workflowStatus(WorkflowStatus.APPROVED));
+            // Every record about a student is official the moment it exists,
+            // so there is nothing to withhold from them here any more.
+            spec = spec.and(AttendanceSpecifications.rollNumber(ownRollNumber.get()));
         }
 
         Pageable sorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
@@ -106,8 +106,7 @@ public class AttendanceService {
             return;
         }
         boolean ownRecord = ownRollNumber.get().equals(record.getStudent().getRollNumber());
-        boolean official = record.getWorkflowStatus() == WorkflowStatus.APPROVED;
-        if (!ownRecord || !official) {
+        if (!ownRecord) {
             throw new NotPermittedException(
                     "You can only view your own attendance records, once they have been approved.");
         }
@@ -166,7 +165,7 @@ public class AttendanceService {
      * transfer authorship, and the audit trail would be worthless if it
      * did (FR-12).
      *
-     * @throws RecordLockedException  the record is submitted or approved (FR-11)
+     * @throws NotPermittedException  the caller did not enter this record (FR-11)
      * @throws NotPermittedException  the actor is neither the author nor an admin
      */
     @Transactional
@@ -217,9 +216,6 @@ public class AttendanceService {
     }
 
     private void assertMayEdit(AttendanceRecord record) {
-        if (!record.isEditable()) {
-            throw new RecordLockedException(record.getId(), record.getWorkflowStatus());
-        }
         if (!currentUser.isAdmin() && !record.wasMarkedBy(currentUser.username())) {
             throw new NotPermittedException(
                     "Record " + record.getId() + " was entered by " + record.getMarkedBy()
@@ -250,9 +246,4 @@ public class AttendanceService {
         return trimmed.isEmpty() ? null : trimmed;
     }
 
-    /** Count of records in a given workflow state, for the dashboard. */
-    @Transactional(readOnly = true)
-    public long countByStatus(WorkflowStatus status) {
-        return records.countByWorkflowStatus(status);
-    }
 }

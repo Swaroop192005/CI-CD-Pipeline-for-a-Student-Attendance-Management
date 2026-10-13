@@ -1,7 +1,6 @@
 package com.college.attendance.repository;
 
 import com.college.attendance.domain.AttendanceRecord;
-import com.college.attendance.domain.WorkflowStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,12 +27,11 @@ public interface AttendanceRecordRepository
     boolean existsByStudent_RollNumberAndSubjectCodeAndSessionDateAndPeriodNumber(
             String rollNumber, String subjectCode, LocalDate sessionDate, int periodNumber);
 
-    List<AttendanceRecord> findByWorkflowStatusOrderBySessionDateDesc(WorkflowStatus workflowStatus);
+    /** Everyone marked for one teaching session, for the live roster. */
+    List<AttendanceRecord> findBySubjectCodeAndSessionDateAndPeriodNumber(
+            String subjectCode, LocalDate sessionDate, int periodNumber);
 
-    long countByWorkflowStatus(WorkflowStatus workflowStatus);
-
-    List<AttendanceRecord> findByStudent_RollNumberAndWorkflowStatus(
-            String rollNumber, WorkflowStatus workflowStatus);
+    List<AttendanceRecord> findByStudent_RollNumberOrderBySessionDateAsc(String rollNumber);
 
     /** Distinct subject codes present in the data, for filter drop-downs. */
     @Query("select distinct r.subjectCode from AttendanceRecord r order by r.subjectCode")

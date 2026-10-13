@@ -52,6 +52,7 @@ management:
 attendance:
   environment: ${ATTENDANCE_ENVIRONMENT:local}
   eligibility-threshold: ${ATTENDANCE_ELIGIBILITY_THRESHOLD:75}
+  shortage-threshold: ${ATTENDANCE_SHORTAGE_THRESHOLD:35}
   seed-data: ${ATTENDANCE_SEED_DATA:true}
 
 info:

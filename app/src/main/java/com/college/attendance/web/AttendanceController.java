@@ -3,14 +3,11 @@ package com.college.attendance.web;
 import com.college.attendance.config.CurrentUser;
 import com.college.attendance.domain.AttendanceRecord;
 import com.college.attendance.domain.AttendanceStatus;
-import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.dto.AttendanceForm;
 import com.college.attendance.dto.AttendanceSearch;
 import com.college.attendance.service.AttendanceException;
 import com.college.attendance.service.AttendanceService;
 import com.college.attendance.service.NotPermittedException;
-import com.college.attendance.service.RecordLockedException;
-import com.college.attendance.service.WorkflowService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,24 +33,16 @@ public class AttendanceController {
     private static final int PAGE_SIZE = 10;
 
     private final AttendanceService attendanceService;
-    private final WorkflowService workflowService;
     private final CurrentUser currentUser;
 
-    public AttendanceController(AttendanceService attendanceService,
-                                WorkflowService workflowService, CurrentUser currentUser) {
+    public AttendanceController(AttendanceService attendanceService, CurrentUser currentUser) {
         this.attendanceService = attendanceService;
-        this.workflowService = workflowService;
         this.currentUser = currentUser;
     }
 
     @ModelAttribute("attendanceStatuses")
     public AttendanceStatus[] attendanceStatuses() {
         return AttendanceStatus.values();
-    }
-
-    @ModelAttribute("workflowStatuses")
-    public WorkflowStatus[] workflowStatuses() {
-        return WorkflowStatus.values();
     }
 
     // ---- Read -------------------------------------------------------------
@@ -82,8 +71,7 @@ public class AttendanceController {
         AttendanceRecord record = attendanceService.require(id);
         model.addAttribute("record", record);
         model.addAttribute("mayEdit", attendanceService.mayEdit(record));
-        model.addAttribute("maySubmit", workflowService.maySubmit(record));
-        model.addAttribute("mayReview", workflowService.mayReview(record));
+        model.addAttribute("mayEdit", attendanceService.mayEdit(record));
         model.addAttribute("isAuthor", record.wasMarkedBy(currentUser.username()));
         return "attendance/detail";
     }
@@ -130,9 +118,6 @@ public class AttendanceController {
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         AttendanceRecord record = attendanceService.require(id);
-        if (!record.isEditable()) {
-            throw new RecordLockedException(id, record.getWorkflowStatus());
-        }
         if (!attendanceService.mayEdit(record)) {
             throw new NotPermittedException("Record " + id + " was entered by "
                     + record.getMarkedBy()
@@ -163,45 +148,4 @@ public class AttendanceController {
         }
     }
 
-    // ---- Workflow transitions --------------------------------------------
-
-    @PostMapping("/{id}/submit")
-    public String submit(@PathVariable Long id, RedirectAttributes flash) {
-        try {
-            workflowService.submit(id);
-            flash.addFlashAttribute("successMessage",
-                    "Submitted for review. It is now locked until the Head of Department decides.");
-        } catch (AttendanceException | IllegalArgumentException e) {
-            flash.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        return "redirect:/attendance/" + id;
-    }
-
-    @PostMapping("/{id}/approve")
-    public String approve(@PathVariable Long id,
-                          @RequestParam(required = false) String comment,
-                          RedirectAttributes flash) {
-        try {
-            workflowService.approve(id, comment);
-            flash.addFlashAttribute("successMessage",
-                    "Approved. The record is now official and visible to the student.");
-        } catch (AttendanceException | IllegalArgumentException e) {
-            flash.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        return "redirect:/attendance/" + id;
-    }
-
-    @PostMapping("/{id}/reject")
-    public String reject(@PathVariable Long id,
-                         @RequestParam(required = false) String reason,
-                         RedirectAttributes flash) {
-        try {
-            workflowService.reject(id, reason);
-            flash.addFlashAttribute("successMessage",
-                    "Rejected and sent back for correction.");
-        } catch (AttendanceException | IllegalArgumentException e) {
-            flash.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        return "redirect:/attendance/" + id;
-    }
 }

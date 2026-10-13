@@ -2,12 +2,14 @@ package com.college.attendance.config;
 
 import com.college.attendance.domain.AppUser;
 import com.college.attendance.domain.AttendanceRecord;
+import com.college.attendance.domain.AttendanceSession;
 import com.college.attendance.domain.AttendanceStatus;
+import com.college.attendance.domain.SessionStatus;
 import com.college.attendance.domain.Role;
 import com.college.attendance.domain.Student;
-import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.repository.AppUserRepository;
 import com.college.attendance.repository.AttendanceRecordRepository;
+import com.college.attendance.repository.AttendanceSessionRepository;
 import com.college.attendance.repository.StudentRepository;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -61,19 +63,22 @@ public class DataSeeder {
     private final AppUserRepository users;
     private final StudentRepository students;
     private final AttendanceRecordRepository records;
+    private final AttendanceSessionRepository sessions;
     private final PasswordEncoder passwordEncoder;
     private final AttendanceProperties properties;
     private final TransactionTemplate transactions;
 
     public DataSeeder(AppUserRepository users, StudentRepository students,
                       AttendanceRecordRepository records, PasswordEncoder passwordEncoder,
-                      AttendanceProperties properties, TransactionTemplate transactions) {
+                      AttendanceProperties properties, TransactionTemplate transactions,
+                      AttendanceSessionRepository sessions) {
         this.users = users;
         this.students = students;
         this.records = records;
         this.passwordEncoder = passwordEncoder;
         this.properties = properties;
         this.transactions = transactions;
+        this.sessions = sessions;
     }
 
     /**
@@ -158,8 +163,15 @@ public class DataSeeder {
      *   <li>The newest sessions stay {@code DRAFT}.</li>
      * </ul>
      *
-     * <p>Student 1 is given a deliberately poor CS503 record so the
-     * at-risk list has a genuine case to show.
+     * <p>Two students are given deliberately poor records so both lists
+     * have something real in them: student 1 sits just under the
+     * eligibility threshold, and student 2 falls under the shortage
+     * threshold so the head of department has a case worth raising.
+     *
+     * <p>Every session is also recorded as a closed {@code
+     * AttendanceSession}, because that is how attendance is taken now. The
+     * records are the ones the session produced, not rows that appeared
+     * from nowhere.
      */
     private void seedAttendance(List<Student> roll) {
         Random random = new Random(RANDOM_SEED);
@@ -174,37 +186,41 @@ public class DataSeeder {
                 }
                 int period = subjectIndex + 1;
 
+                AttendanceSession taught = new AttendanceSession(subject, date, period, "faculty1");
+                int present = 0;
                 for (Student student : roll) {
                     AttendanceStatus status = pickStatus(random, student, subject, session);
-                    AttendanceRecord record = new AttendanceRecord(
-                            student, subject, date, period, status, null, "faculty1");
-                    applySeedWorkflowState(record, session);
-                    records.save(record);
+                    records.save(new AttendanceRecord(
+                            student, subject, date, period, status,
+                            status == AttendanceStatus.PRESENT
+                                    ? "Marked by the student during the open session"
+                                    : "Did not mark attendance before the session closed",
+                            status == AttendanceStatus.PRESENT
+                                    ? student.getRollNumber() : "faculty1"));
+                    if (status.countsAsAttended()) {
+                        present++;
+                    }
                 }
+                taught.setStatus(SessionStatus.CLOSED);
+                taught.setClosedBy("faculty1");
+                taught.setClosedAt(Instant.now().minus(Duration.ofDays(1)));
+                taught.setMarkedCount(present);
+                taught.setAbsentCount(roll.size() - present);
+                sessions.save(taught);
             }
         }
     }
 
-    private void applySeedWorkflowState(AttendanceRecord record, int session) {
-        if (session <= 6) {
-            record.setWorkflowStatus(WorkflowStatus.APPROVED);
-            record.setReviewedBy("hod1");
-            record.setReviewedAt(Instant.now().minus(Duration.ofDays(2)));
-        } else if (session == 7) {
-            record.setWorkflowStatus(WorkflowStatus.REJECTED);
-            record.setReviewedBy("hod1");
-            record.setReviewedAt(Instant.now().minus(Duration.ofDays(1)));
-            record.setReviewComment("Period number does not match the timetable; please re-check.");
-        } else if (session == 8) {
-            record.setWorkflowStatus(WorkflowStatus.SUBMITTED);
-        }
-        // session 9 stays DRAFT
-    }
-
     private AttendanceStatus pickStatus(Random random, Student student, String subject, int session) {
-        // Student 1 misses most CS503 sessions: gives the at-risk list a case.
+        // Student 1 misses most CS503 sessions: sits below eligibility.
         if ("1CS21CS001".equals(student.getRollNumber()) && "CS503".equals(subject)) {
             return session % 3 == 0 ? AttendanceStatus.PRESENT : AttendanceStatus.ABSENT;
+        }
+        // Student 2 misses most of everything: falls under the shortage
+        // threshold, so the head of department has a case to raise and the
+        // conversation flow has something to run against.
+        if ("1CS21CS002".equals(student.getRollNumber())) {
+            return session % 4 == 0 ? AttendanceStatus.PRESENT : AttendanceStatus.ABSENT;
         }
         int roll = random.nextInt(100);
         if (roll < 78) {

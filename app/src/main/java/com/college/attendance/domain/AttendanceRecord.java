@@ -28,10 +28,12 @@ import java.util.Objects;
  *       implements BR-01 in the database rather than only in a service
  *       check, so a race between two concurrent submissions cannot create
  *       the duplicate that the register used to suffer from.</li>
- *   <li>The audit fields are not nullable once set and are only written by
- *       the service layer. Workflow status in particular is changed only
- *       through {@code WorkflowService} (BR-07) — the setter exists for
- *       JPA and for that service, not for controllers.</li>
+ *   <li>A record counts towards a percentage the moment it is saved. There
+ *       is no approval step: the head of department reviews students who
+ *       fall below the shortage threshold, not individual sessions.</li>
+ *   <li>The excuse fields are written only by {@code ShortageCaseService},
+ *       when a head of department accepts a student's explanation. An
+ *       excused session leaves both sides of the percentage (BR-03).</li>
  * </ul>
  */
 @Entity
@@ -42,7 +44,6 @@ import java.util.Objects;
                 columnNames = {"student_id", "subject_code", "session_date", "period_number"}),
         indexes = {
                 @Index(name = "idx_attendance_session_date", columnList = "session_date"),
-                @Index(name = "idx_attendance_workflow_status", columnList = "workflow_status"),
                 @Index(name = "idx_attendance_subject_code", columnList = "subject_code")
         })
 public class AttendanceRecord {
@@ -68,10 +69,6 @@ public class AttendanceRecord {
     @Column(name = "attendance_status", nullable = false, length = 16)
     private AttendanceStatus attendanceStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "workflow_status", nullable = false, length = 16)
-    private WorkflowStatus workflowStatus = WorkflowStatus.DRAFT;
-
     @Column(length = 500)
     private String remarks;
 
@@ -86,14 +83,14 @@ public class AttendanceRecord {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    @Column(name = "reviewed_by", length = 64)
-    private String reviewedBy;
+    @Column(name = "excused_by", length = 64)
+    private String excusedBy;
 
-    @Column(name = "reviewed_at")
-    private Instant reviewedAt;
+    @Column(name = "excused_at")
+    private Instant excusedAt;
 
-    @Column(name = "review_comment", length = 500)
-    private String reviewComment;
+    @Column(name = "excuse_note", length = 500)
+    private String excuseNote;
 
     protected AttendanceRecord() {
         // required by JPA
@@ -109,7 +106,6 @@ public class AttendanceRecord {
         this.attendanceStatus = attendanceStatus;
         this.remarks = remarks;
         this.markedBy = markedBy;
-        this.workflowStatus = WorkflowStatus.DRAFT;
         this.createdAt = Instant.now();
     }
 
@@ -157,15 +153,6 @@ public class AttendanceRecord {
         this.attendanceStatus = attendanceStatus;
     }
 
-    public WorkflowStatus getWorkflowStatus() {
-        return workflowStatus;
-    }
-
-    /** Only {@code WorkflowService} may call this (BR-07). */
-    public void setWorkflowStatus(WorkflowStatus workflowStatus) {
-        this.workflowStatus = workflowStatus;
-    }
-
     public String getRemarks() {
         return remarks;
     }
@@ -190,35 +177,42 @@ public class AttendanceRecord {
         this.updatedAt = updatedAt;
     }
 
-    public String getReviewedBy() {
-        return reviewedBy;
+    public String getExcusedBy() {
+        return excusedBy;
     }
 
-    public void setReviewedBy(String reviewedBy) {
-        this.reviewedBy = reviewedBy;
+    public void setExcusedBy(String excusedBy) {
+        this.excusedBy = excusedBy;
     }
 
-    public Instant getReviewedAt() {
-        return reviewedAt;
+    public Instant getExcusedAt() {
+        return excusedAt;
     }
 
-    public void setReviewedAt(Instant reviewedAt) {
-        this.reviewedAt = reviewedAt;
+    public void setExcusedAt(Instant excusedAt) {
+        this.excusedAt = excusedAt;
     }
 
-    public String getReviewComment() {
-        return reviewComment;
+    public String getExcuseNote() {
+        return excuseNote;
     }
 
-    public void setReviewComment(String reviewComment) {
-        this.reviewComment = reviewComment;
+    public void setExcuseNote(String excuseNote) {
+        this.excuseNote = excuseNote;
     }
 
     // ---- Domain queries ---------------------------------------------------
 
-    /** Whether this record may still be changed by its author (FR-10/FR-11). */
+    /**
+     * Whether this record may still be changed.
+     *
+     * <p>Always true now. A record used to lock once it was approved;
+     * nothing approves a record any more, and a mistake in a closed session
+     * still has to be correctable by faculty. The audit fields carry who
+     * changed it and when, which is the control that replaced the lock.
+     */
     public boolean isEditable() {
-        return workflowStatus.isEditable();
+        return true;
     }
 
     /** Whether {@code username} is the faculty member who entered this record. */
@@ -249,7 +243,6 @@ public class AttendanceRecord {
                 + ", subject=" + subjectCode
                 + ", date=" + sessionDate
                 + ", period=" + periodNumber
-                + ", attendance=" + attendanceStatus
-                + ", workflow=" + workflowStatus + "}";
+                + ", attendance=" + attendanceStatus + "}";
     }
 }

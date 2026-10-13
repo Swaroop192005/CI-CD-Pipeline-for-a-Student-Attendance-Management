@@ -2,7 +2,7 @@ package com.college.attendance.web;
 
 import com.college.attendance.service.DuplicateRecordException;
 import com.college.attendance.service.NotPermittedException;
-import com.college.attendance.service.RecordLockedException;
+import com.college.attendance.service.SessionNotOpenException;
 import com.college.attendance.service.RecordNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
         return "error/problem";
     }
 
-    @ExceptionHandler({DuplicateRecordException.class, RecordLockedException.class})
+    @ExceptionHandler({DuplicateRecordException.class, SessionNotOpenException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public String conflict(RuntimeException e, Model model) {
         model.addAttribute("statusCode", 409);

@@ -1,7 +1,6 @@
 package com.college.attendance.dto;
 
 import com.college.attendance.domain.AttendanceStatus;
-import com.college.attendance.domain.WorkflowStatus;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -25,7 +24,6 @@ public class AttendanceSearch {
     private LocalDate to;
 
     private AttendanceStatus attendanceStatus;
-    private WorkflowStatus workflowStatus;
 
     public String getRollNumber() {
         return rollNumber;
@@ -68,18 +66,12 @@ public class AttendanceSearch {
         this.attendanceStatus = attendanceStatus;
     }
 
-    public WorkflowStatus getWorkflowStatus() {
-        return workflowStatus;
-    }
 
-    public void setWorkflowStatus(WorkflowStatus workflowStatus) {
-        this.workflowStatus = workflowStatus;
-    }
 
     /** Whether the user has actually narrowed anything. */
     public boolean isActive() {
         return rollNumber != null || subjectCode != null || from != null || to != null
-                || attendanceStatus != null || workflowStatus != null;
+                || attendanceStatus != null;
     }
 
     private static String blankToNull(String value) {

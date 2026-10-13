@@ -5,34 +5,42 @@ import java.util.List;
 /**
  * Everything the dashboard renders, computed once.
  *
- * @param totalRecords       records visible to the viewer
- * @param draftCount         awaiting submission
- * @param submittedCount     awaiting a decision
- * @param approvedCount      official
- * @param rejectedCount      sent back for correction
- * @param sessionsCounted    approved records that count towards the percentage (BR-03)
- * @param sessionsAttended   of those, the ones marked present or late
- * @param attendancePercent  overall percentage, from approved records only (BR-04)
+ * <p>There are no workflow counts any more. A record counts from the moment
+ * a student marks themselves present or faculty closes the session, so
+ * there is no such thing as a record that exists but does not yet count,
+ * and nothing to tally per status.
+ *
+ * @param totalRecords         records visible to the viewer
+ * @param sessionsCounted      records that count towards the percentage (BR-03)
+ * @param sessionsAttended     of those, the ones marked present or late
+ * @param attendancePercent    overall percentage
  * @param eligibilityThreshold the configured pass mark (BR-05)
- * @param subjects           per-subject breakdown
- * @param atRisk             students below the threshold
+ * @param shortageThreshold    the level below which a case is raised (BR-08)
+ * @param subjects             per-subject breakdown
+ * @param atRisk               students below the eligibility threshold
+ * @param inShortage           students below the shortage threshold, a subset of atRisk
+ * @param openCases            shortage cases awaiting somebody's attention
  */
 public record DashboardSummary(
         long totalRecords,
-        long draftCount,
-        long submittedCount,
-        long approvedCount,
-        long rejectedCount,
         long sessionsCounted,
         long sessionsAttended,
         double attendancePercent,
         int eligibilityThreshold,
+        int shortageThreshold,
         List<SubjectBreakdown> subjects,
-        List<StudentStanding> atRisk) {
+        List<StudentStanding> atRisk,
+        List<StudentStanding> inShortage,
+        long openCases) {
 
     /** Whether the viewer's own overall standing clears the threshold. */
     public boolean isMeetingThreshold() {
         return attendancePercent >= eligibilityThreshold;
+    }
+
+    /** Whether the viewer is far enough below to be escalated (BR-08). */
+    public boolean isInShortage() {
+        return attendancePercent < shortageThreshold;
     }
 
     /** Per-subject figures (FR-23). */
@@ -47,7 +55,7 @@ public record DashboardSummary(
         }
     }
 
-    /** One student's standing, used for the at-risk list (US-20). */
+    /** One student's standing, used for the at-risk and shortage lists. */
     public record StudentStanding(
             String rollNumber,
             String fullName,
@@ -57,8 +65,9 @@ public record DashboardSummary(
     }
 
     /** An empty dashboard renders zeroes, never an error (FR-24). */
-    public static DashboardSummary empty(int eligibilityThreshold) {
-        return new DashboardSummary(0, 0, 0, 0, 0, 0, 0, 0.0,
-                eligibilityThreshold, List.of(), List.of());
+    public static DashboardSummary empty(int eligibilityThreshold, int shortageThreshold) {
+        return new DashboardSummary(0, 0, 0, 0.0,
+                eligibilityThreshold, shortageThreshold,
+                List.of(), List.of(), List.of(), 0);
     }
 }
