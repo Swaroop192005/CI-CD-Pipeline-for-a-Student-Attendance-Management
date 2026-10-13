@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Case')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('cases')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">
+        Case #<span th:text="${shortageCase.id}">1</span> ·
+        <span th:text="${shortageCase.student.fullName}">Name</span>
+      </h1>
+      <p class="subtitle">
+        <span class="pill" data-testid="case-status" th:text="${shortageCase.status}">ANSWERED</span>
+        Attendance when the case was raised:
+        <strong data-testid="percent-at-open"
+                th:text="${shortageCase.percentAtOpen} + '%'">22%</strong>
+        against a <span th:text="${shortageCase.thresholdAtOpen}">35</span>% threshold.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>The question</h2>
+    <p data-testid="case-question-text" th:text="${shortageCase.question}">Why?</p>
+    <p class="muted">
+      Asked by <span th:text="${shortageCase.openedBy}">hod1</span> on
+      <span th:text="${#temporals.format(shortageCase.openedAt, 'dd MMM yyyy')}">13 Oct</span>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>The student's explanation</h2>
+    <p th:if="${shortageCase.response}" data-testid="case-response"
+       th:text="${shortageCase.response}">Explanation</p>
+    <p th:unless="${shortageCase.response}" class="muted" data-testid="awaiting-response">
+      Not answered yet.
+    </p>
+
+    <form th:if="${studentView} and ${shortageCase.status.name() == 'AWAITING_RESPONSE'}"
+          th:action="@{/cases/{id}/respond(id=${shortageCase.id})}" method="post">
+      <label>Your explanation
+        <textarea name="response" rows="4" required data-testid="response-text"
+                  placeholder="Explain why you were absent."></textarea>
+      </label>
+      <button type="submit" class="primary" data-testid="send-response">Send to the Head of Department</button>
+    </form>
+  </div>
+
+  <div class="card" th:if="${shortageCase.status.decided}">
+    <h2>Decision</h2>
+    <p>
+      <strong th:text="${shortageCase.status}">ACCEPTED</strong>
+      by <span th:text="${shortageCase.decidedBy}">hod1</span>.
+    </p>
+    <p th:if="${shortageCase.decisionNote}" th:text="${shortageCase.decisionNote}">note</p>
+    <p th:if="${shortageCase.excusedCount != null}" class="muted" data-testid="excused-summary">
+      <span th:text="${shortageCase.excusedCount}">0</span> session(s) between
+      <span th:text="${shortageCase.excusedFrom}">from</span> and
+      <span th:text="${shortageCase.excusedTo}">to</span> were marked excused,
+      which removes them from both sides of the percentage.
+    </p>
+  </div>
+
+  <div class="card" th:if="${!studentView} and ${shortageCase.status.name() == 'ANSWERED'}">
+    <h2>Decide</h2>
+    <form th:action="@{/cases/{id}/accept(id=${shortageCase.id})}" method="post">
+      <p class="muted">
+        Accepting marks the student's absences in this window as excused, so
+        the percentage genuinely improves rather than the case merely closing.
+      </p>
+      <label>From
+        <input type="date" name="from" th:value="${shortageCase.excusedFrom} ?: ${today}"
+               data-testid="excuse-from" required/>
+      </label>
+      <label>To
+        <input type="date" name="to" th:value="${today}" data-testid="excuse-to" required/>
+      </label>
+      <label>Note
+        <input type="text" name="note" size="50" data-testid="decision-note"/>
+      </label>
+      <button type="submit" class="primary" data-testid="accept-case">Accept the explanation</button>
+    </form>
+    <form th:action="@{/cases/{id}/reject(id=${shortageCase.id})}" method="post" class="inline-form">
+      <input type="text" name="note" size="40" placeholder="Why not"/>
+      <button type="submit" class="danger" data-testid="reject-case">Reject</button>
+    </form>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

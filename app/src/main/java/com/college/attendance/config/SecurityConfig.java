@@ -32,12 +32,24 @@ public class SecurityConfig {
                         // Recording and correcting attendance.
                         .requestMatchers("/attendance/new").hasAnyRole("FACULTY", "ADMIN")
                         .requestMatchers("/attendance/*/edit").hasAnyRole("FACULTY", "ADMIN")
-                        .requestMatchers("/attendance/*/submit").hasAnyRole("FACULTY", "ADMIN")
 
-                        // Review decisions.
-                        .requestMatchers("/attendance/*/approve", "/attendance/*/reject")
-                            .hasAnyRole("HOD", "ADMIN")
-                        .requestMatchers("/review").hasAnyRole("HOD", "ADMIN")
+                        // Taking a session. A student marks themselves, so
+                        // /sessions/mark and /sessions/*/mark are theirs and
+                        // everything else under /sessions belongs to faculty.
+                        .requestMatchers("/sessions/mark").hasRole("STUDENT")
+                        .requestMatchers("/sessions/*/mark").hasRole("STUDENT")
+                        .requestMatchers("/sessions/open", "/sessions/*/close",
+                                "/sessions/*/strike").hasAnyRole("FACULTY", "ADMIN")
+                        .requestMatchers("/sessions", "/sessions/*")
+                            .hasAnyRole("FACULTY", "HOD", "ADMIN")
+
+                        // Shortage cases. Raising and deciding belong to the
+                        // head of department; answering belongs to the student
+                        // the case is about, which the service checks by roll
+                        // number rather than by role alone.
+                        .requestMatchers("/cases/raise", "/cases/*/accept",
+                                "/cases/*/reject").hasAnyRole("HOD", "ADMIN")
+                        .requestMatchers("/cases/*/respond").hasRole("STUDENT")
 
                         // Roll management.
                         .requestMatchers("/students/**").hasRole("ADMIN")

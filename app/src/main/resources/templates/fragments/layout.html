@@ -28,9 +28,14 @@
     <a sec:authorize="hasAnyRole('FACULTY','ADMIN')"
        th:href="@{/attendance/new}" th:classappend="${active == 'new'} ? 'active'"
        data-testid="nav-new-record">New record</a>
-    <a sec:authorize="hasAnyRole('HOD','ADMIN')"
-       th:href="@{/review}" th:classappend="${active == 'review'} ? 'active'"
-       data-testid="nav-review">Review queue</a>
+    <a sec:authorize="hasAnyRole('FACULTY','ADMIN')"
+       th:href="@{/sessions}" th:classappend="${active == 'sessions'} ? 'active'"
+       data-testid="nav-sessions">Take attendance</a>
+    <a sec:authorize="hasRole('STUDENT')"
+       th:href="@{/sessions/mark}" th:classappend="${active == 'mark'} ? 'active'"
+       data-testid="nav-mark">Mark attendance</a>
+    <a th:href="@{/cases}" th:classappend="${active == 'cases'} ? 'active'"
+       data-testid="nav-cases">Shortage cases</a>
     <a sec:authorize="hasRole('ADMIN')"
        th:href="@{/students}" th:classappend="${active == 'students'} ? 'active'"
        data-testid="nav-students">Students</a>

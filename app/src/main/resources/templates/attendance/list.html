@@ -54,14 +54,6 @@
             <option th:each="s : ${attendanceStatuses}" th:value="${s}" th:text="${s.label}">Present</option>
           </select>
         </div>
-        <div>
-          <label for="workflowStatus">Workflow</label>
-          <select id="workflowStatus" th:field="*{workflowStatus}"
-                  data-testid="filter-workflow-status">
-            <option value="">Any</option>
-            <option th:each="s : ${workflowStatuses}" th:value="${s}" th:text="${s.label}">Draft</option>
-          </select>
-        </div>
       </div>
       <div class="actions">
         <button class="btn btn-primary" type="submit" data-testid="apply-filters">Apply filters</button>
@@ -88,7 +80,6 @@
           <th>Session date</th>
           <th class="num">Period</th>
           <th>Attendance</th>
-          <th>Workflow</th>
           <th>Marked by</th>
           <th></th>
         </tr>
@@ -104,11 +95,6 @@
             <span class="badge" th:classappend="'badge-' + ${r.attendanceStatus}"
                   data-testid="cell-attendance-status"
                   th:text="${r.attendanceStatus.label}">Present</span>
-          </td>
-          <td>
-            <span class="badge" th:classappend="'badge-' + ${r.workflowStatus}"
-                  data-testid="cell-workflow-status"
-                  th:text="${r.workflowStatus.label}">Draft</span>
           </td>
           <td th:text="${r.markedBy}">faculty1</td>
           <td>
@@ -130,8 +116,7 @@
          th:href="@{/attendance(page=${records.number - 1},
                                 rollNumber=${search.rollNumber}, subjectCode=${search.subjectCode},
                                 from=${search.from}, to=${search.to},
-                                attendanceStatus=${search.attendanceStatus},
-                                workflowStatus=${search.workflowStatus})}"
+                                attendanceStatus=${search.attendanceStatus})}"
          data-testid="page-previous">Previous</a>
       <!-- Every active filter is echoed into the page links. Without this
            the second page silently shows unfiltered results, which looks
@@ -141,8 +126,7 @@
          th:href="@{/attendance(page=${records.number + 1},
                                 rollNumber=${search.rollNumber}, subjectCode=${search.subjectCode},
                                 from=${search.from}, to=${search.to},
-                                attendanceStatus=${search.attendanceStatus},
-                                workflowStatus=${search.workflowStatus})}"
+                                attendanceStatus=${search.attendanceStatus})}"
          data-testid="page-next">Next</a>
     </div>
   </div>

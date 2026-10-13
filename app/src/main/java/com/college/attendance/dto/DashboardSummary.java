@@ -38,8 +38,16 @@ public record DashboardSummary(
         return attendancePercent >= eligibilityThreshold;
     }
 
-    /** Whether the viewer is far enough below to be escalated (BR-08). */
-    public boolean isInShortage() {
+    /**
+     * Whether the viewer is far enough below to be escalated (BR-08).
+     *
+     * <p>Not named {@code isInShortage}: a record component called
+     * {@code inShortage} already exists, and an expression language that
+     * resolves {@code summary.inShortage} would then reach the boolean
+     * rather than the list, which is a 500 at render time rather than a
+     * compile error.
+     */
+    public boolean isBelowShortageThreshold() {
         return attendancePercent < shortageThreshold;
     }
 

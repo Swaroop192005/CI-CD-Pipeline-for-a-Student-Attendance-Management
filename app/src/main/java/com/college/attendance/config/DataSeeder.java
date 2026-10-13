@@ -121,8 +121,21 @@ public class DataSeeder {
                 "Dr. S. Ramesh (HOD, CSE)", Role.HOD));
         users.save(new AppUser("admin1", passwordEncoder.encode("Admin@123"),
                 "Exam Section Administrator", Role.ADMIN));
-        users.save(new AppUser("student1", passwordEncoder.encode("Student@123"),
-                "Aditya Rao", Role.STUDENT, "1CS21CS001"));
+        // Five student logins, because the demonstration runs on one machine
+        // and the only way to show a session filling up is to sign in as
+        // several students in turn. student2 is the one in shortage, so the
+        // case conversation has somebody who can actually answer it.
+        String[][] studentLogins = {
+                {"student1", "Aditya Rao", "1CS21CS001"},
+                {"student2", "Bhavana Shetty", "1CS21CS002"},
+                {"student3", "Chirag Patil", "1CS21CS003"},
+                {"student4", "Divya Nair", "1CS21CS004"},
+                {"student5", "Eshan Gupta", "1CS21CS005"},
+        };
+        for (String[] login : studentLogins) {
+            users.save(new AppUser(login[0], passwordEncoder.encode("Student@123"),
+                    login[1], Role.STUDENT, login[2]));
+        }
     }
 
     private List<Student> seedStudents() {

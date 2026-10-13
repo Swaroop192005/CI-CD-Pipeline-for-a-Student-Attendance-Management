@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Take attendance')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('sessions')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Take attendance</h1>
+      <p class="subtitle">
+        Open a session and students mark themselves present while it runs.
+        Closing it records everyone who did not mark as absent.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Open a session</h2>
+    <form th:action="@{/sessions/open}" method="post" class="inline-form"
+          data-testid="open-session-form">
+      <label>Subject
+        <select name="subjectCode" data-testid="session-subject" required>
+          <option th:each="s : ${subjects}" th:value="${s}" th:text="${s}">CS501</option>
+        </select>
+      </label>
+      <label>Date
+        <input type="date" name="sessionDate" th:value="${today}"
+               data-testid="session-date" required/>
+      </label>
+      <label>Period
+        <input type="number" name="periodNumber" min="1" max="8" value="1"
+               data-testid="session-period" required/>
+      </label>
+      <button type="submit" class="primary" data-testid="open-session">Take attendance</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Running now</h2>
+    <p th:if="${openSessions.isEmpty()}" class="muted" data-testid="no-open-sessions">
+      No session is open. Students cannot mark attendance until you open one.
+    </p>
+    <div class="table-wrap" th:unless="${openSessions.isEmpty()}">
+      <table data-testid="open-sessions-table">
+        <thead>
+        <tr><th>Subject</th><th>Date</th><th class="num">Period</th><th>Opened by</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${openSessions}" th:data-roll="${s.id}">
+          <td th:text="${s.subjectCode}">CS501</td>
+          <td th:text="${s.sessionDate}">2026-10-13</td>
+          <td class="num" th:text="${s.periodNumber}">1</td>
+          <td th:text="${s.openedBy}">faculty1</td>
+          <td><a class="button" th:href="@{/sessions/{id}(id=${s.id})}"
+                 data-testid="view-roster">Live roster</a></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Recent sessions</h2>
+    <div class="table-wrap">
+      <table data-testid="recent-sessions-table">
+        <thead>
+        <tr><th>Subject</th><th>Date</th><th class="num">Period</th><th>Status</th>
+          <th class="num">Present</th><th class="num">Absent</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${recent}">
+          <td th:text="${s.subjectCode}">CS501</td>
+          <td th:text="${s.sessionDate}">2026-10-13</td>
+          <td class="num" th:text="${s.periodNumber}">1</td>
+          <td><span class="pill" th:text="${s.status}">CLOSED</span></td>
+          <td class="num" th:text="${s.markedCount} ?: '-'">0</td>
+          <td class="num" th:text="${s.absentCount} ?: '-'">0</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>

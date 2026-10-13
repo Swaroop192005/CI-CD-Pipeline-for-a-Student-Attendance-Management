@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Mark attendance')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('mark')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Mark attendance</h1>
+      <p class="subtitle">
+        You can only mark a session your faculty has opened, and only once.
+        You are marked as
+        <span data-testid="own-roll" th:text="${rollNumber}">roll</span>.
+      </p>
+    </div>
+  </div>
+
+  <div class="card">
+    <p th:if="${awaiting.isEmpty()}" class="muted" data-testid="nothing-to-mark">
+      There is nothing to mark right now. Either no session is open, or you
+      have already marked everything that is.
+    </p>
+    <div class="table-wrap" th:unless="${awaiting.isEmpty()}">
+      <table data-testid="markable-table">
+        <thead>
+        <tr><th>Subject</th><th>Date</th><th class="num">Period</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${awaiting}">
+          <td th:text="${s.subjectCode}">CS501</td>
+          <td th:text="${s.sessionDate}">2026-10-13</td>
+          <td class="num" th:text="${s.periodNumber}">1</td>
+          <td>
+            <form th:action="@{/sessions/{id}/mark(id=${s.id})}" method="post">
+              <button type="submit" class="primary" data-testid="mark-present">
+                Mark me present
+              </button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
