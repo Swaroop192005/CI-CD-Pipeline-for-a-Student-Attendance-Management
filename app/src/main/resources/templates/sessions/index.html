@@ -53,8 +53,20 @@
           <td th:text="${s.sessionDate}">2026-10-13</td>
           <td class="num" th:text="${s.periodNumber}">1</td>
           <td th:text="${s.openedBy}">faculty1</td>
-          <td><a class="button" th:href="@{/sessions/{id}(id=${s.id})}"
-                 data-testid="view-roster">Live roster</a></td>
+          <td class="inline-form">
+            <a class="button" th:href="@{/sessions/{id}(id=${s.id})}"
+               data-testid="view-roster">Live roster</a>
+            <!-- Closing was reachable only from the roster page. Faculty
+                 come back to this list to stop taking attendance, find no
+                 control, and conclude the session cannot be closed. One
+                 extra button is cheaper than that dead end. -->
+            <form th:action="@{/sessions/{id}/close(id=${s.id})}" method="post"
+                  class="inline-form">
+              <button type="submit" class="primary" data-testid="close-from-list">
+                Stop taking attendance
+              </button>
+            </form>
+          </td>
         </tr>
         </tbody>
       </table>
