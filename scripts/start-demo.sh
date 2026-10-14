@@ -363,10 +363,16 @@ fi
 cat <<'EOF'
 
   Sign in with any of:
-    admin1    / Admin@123      administrator
-    hod1      / Hod@12345      head of department, approves records
-    faculty1  / Faculty@123    records attendance
-    student1  / Student@123    sees only their own approved records
+    admin1              / Admin@123      administrator
+    hod1                / Hod@12345      head of department, raises shortage cases
+    faculty1            / Faculty@123    opens and closes attendance sessions
+    student1..student5  / Student@123    mark themselves, answer shortage cases
+
+  student2 is deliberately below the shortage threshold, so the head of
+  department has a real case to raise.
+
+  If the page looks like the old build, the browser cached it: reload with
+  Cmd-Shift-R.
 
   Status at any time:  bash scripts/demo-status.sh
   Stop everything:     bash scripts/start-demo.sh --stop
