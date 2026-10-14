@@ -34,6 +34,8 @@
     <a sec:authorize="hasRole('STUDENT')"
        th:href="@{/sessions/mark}" th:classappend="${active == 'mark'} ? 'active'"
        data-testid="nav-mark">Mark attendance</a>
+    <a th:href="@{/summary}" th:classappend="${active == 'summary'} ? 'active'"
+       data-testid="nav-summary">Weekly / monthly</a>
     <a th:href="@{/cases}" th:classappend="${active == 'cases'} ? 'active'"
        data-testid="nav-cases">Shortage cases</a>
     <a th:href="@{/webauthn/register}" data-testid="nav-passkeys">Passkeys</a>

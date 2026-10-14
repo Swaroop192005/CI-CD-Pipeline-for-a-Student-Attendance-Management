@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Weekly and monthly attendance')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar('summary')}"></header>
+<main>
+  <div th:replace="~{fragments/layout :: alerts}"></div>
+
+  <div class="page-head">
+    <div>
+      <h1 data-testid="page-title">Weekly and monthly attendance</h1>
+      <p class="subtitle">
+        A running total says whether a student is short. Grouping by period
+        says when it started, which is what decides whether anything needs
+        doing now.
+      </p>
+    </div>
+  </div>
+
+  <form th:if="${staff}" method="get" th:action="@{/summary}" class="card inline-form">
+    <label for="rollNumber">Student</label>
+    <select id="rollNumber" name="rollNumber" data-testid="student-select">
+      <option value="">Choose a student</option>
+      <option th:each="s : ${roll}" th:value="${s.rollNumber}"
+              th:text="${s.rollNumber} + ' -- ' + ${s.fullName}"
+              th:selected="${selected != null and selected.rollNumber == s.rollNumber}">roll</option>
+    </select>
+    <button type="submit" class="primary" data-testid="show-summary">Show</button>
+  </form>
+
+  <p th:if="${selected == null}" class="muted" data-testid="choose-student">
+    Choose a student to see their attendance by week and by month.
+  </p>
+
+  <div th:if="${selected != null}">
+    <p class="subtitle" data-testid="summary-for">
+      <strong th:text="${selected.rollNumber}">roll</strong>
+      <span th:text="${selected.fullName}">name</span>
+    </p>
+
+    <p th:if="${nothingRecorded}" class="muted" data-testid="nothing-recorded">
+      No attendance has been recorded for this student yet.
+    </p>
+
+    <div th:unless="${nothingRecorded}">
+      <div class="card">
+        <h2>By week</h2>
+        <div class="table-wrap">
+          <table data-testid="weekly-table">
+            <thead>
+            <tr><th>Week</th><th>From</th><th>To</th>
+              <th class="num">Attended</th><th class="num">Of</th>
+              <th class="num">Excused</th><th class="num">Attendance</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${weekly}">
+              <td th:text="${b.label}">Week 42, 2026</td>
+              <td th:text="${b.from}">2026-10-12</td>
+              <td th:text="${b.to}">2026-10-18</td>
+              <td class="num" th:text="${b.attended}">4</td>
+              <td class="num" th:text="${b.counted}">5</td>
+              <td class="num" th:text="${b.excused}">0</td>
+              <!-- A period with nothing counted has no percentage: every
+                   session in it was excused, and 0% would read as the
+                   opposite of what the records say. -->
+              <td class="num" th:if="${b.hasPercent()}" th:text="${b.percent()} + '%'">80%</td>
+              <td class="num muted" th:unless="${b.hasPercent()}">all excused</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>By month</h2>
+        <div class="table-wrap">
+          <table data-testid="monthly-table">
+            <thead>
+            <tr><th>Month</th>
+              <th class="num">Attended</th><th class="num">Of</th>
+              <th class="num">Excused</th><th class="num">Attendance</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="b : ${monthly}">
+              <td th:text="${b.label}">October 2026</td>
+              <td class="num" th:text="${b.attended}">16</td>
+              <td class="num" th:text="${b.counted}">20</td>
+              <td class="num" th:text="${b.excused}">1</td>
+              <td class="num" th:if="${b.hasPercent()}" th:text="${b.percent()} + '%'">80%</td>
+              <td class="num muted" th:unless="${b.hasPercent()}">all excused</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+</body>
+</html>
