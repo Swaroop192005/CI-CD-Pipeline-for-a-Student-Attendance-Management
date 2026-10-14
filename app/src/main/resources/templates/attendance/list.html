@@ -100,6 +100,14 @@
           <td>
             <a class="btn btn-secondary btn-sm" th:href="@{/attendance/{id}(id=${r.id})}"
                data-testid="view-record">View</a>
+            <!-- Correcting a wrong mark was two clicks away behind View.
+                 A mis-marked absence is noticed while looking at the list,
+                 so the correction belongs on the row. sec:authorize matches
+                 the URL rule in SecurityConfig; the service re-checks it. -->
+            <a sec:authorize="hasAnyRole('FACULTY','ADMIN')"
+               class="btn btn-secondary btn-sm"
+               th:href="@{/attendance/{id}/edit(id=${r.id})}"
+               data-testid="edit-record-row">Edit</a>
           </td>
         </tr>
         </tbody>

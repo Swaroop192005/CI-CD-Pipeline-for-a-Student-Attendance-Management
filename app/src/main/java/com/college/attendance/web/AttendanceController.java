@@ -71,7 +71,6 @@ public class AttendanceController {
         AttendanceRecord record = attendanceService.require(id);
         model.addAttribute("record", record);
         model.addAttribute("mayEdit", attendanceService.mayEdit(record));
-        model.addAttribute("mayEdit", attendanceService.mayEdit(record));
         model.addAttribute("isAuthor", record.wasMarkedBy(currentUser.username()));
         return "attendance/detail";
     }

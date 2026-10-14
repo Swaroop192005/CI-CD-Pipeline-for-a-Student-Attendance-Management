@@ -83,6 +83,19 @@ public class AttendanceRecord {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    /**
+     * Who last corrected this record.
+     *
+     * <p>Needed because authorship no longer gates editing. Attendance is
+     * marked by the student, or written automatically when a session closes,
+     * so "only the author may correct it" locked faculty out of the records
+     * they are answerable for. With that gate gone, this column is the
+     * accountability: it does not say who the record is about, it says who
+     * last changed it.
+     */
+    @Column(length = 64)
+    private String updatedBy;
+
     @Column(name = "excused_by", length = 64)
     private String excusedBy;
 
@@ -175,6 +188,14 @@ public class AttendanceRecord {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
     }
 
     public String getExcusedBy() {

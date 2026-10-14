@@ -2,6 +2,7 @@ package com.college.attendance.service;
 
 import com.college.attendance.config.CurrentUser;
 import com.college.attendance.domain.AttendanceRecord;
+import com.college.attendance.domain.Role;
 import com.college.attendance.domain.Student;
 import com.college.attendance.dto.AttendanceForm;
 import com.college.attendance.dto.AttendanceSearch;
@@ -194,6 +195,7 @@ public class AttendanceService {
         record.setAttendanceStatus(form.getAttendanceStatus());
         record.setRemarks(trimToNull(form.getRemarks()));
         record.setUpdatedAt(Instant.now());
+        record.setUpdatedBy(currentUser.username());
 
         AttendanceRecord saved = records.save(record);
         log.info("Updated attendance record {} by {} (author remains {})",
@@ -204,22 +206,37 @@ public class AttendanceService {
     // ---- Authorisation ----------------------------------------------------
 
     /**
-     * Whether the acting user may edit this record: it must still be in an
-     * editable state, and they must be its author or an administrator.
+     * Whether the acting user may correct this record.
+     *
+     * <p>Faculty and administrators may correct any record; students may
+     * correct none, including their own.
+     *
+     * <p>This used to require authorship: the author or an admin. That rule
+     * made sense while faculty typed every record in, and became wrong the
+     * moment students started marking themselves. A student-marked record
+     * has the student's roll number as its author, and an absence written
+     * when a session closes has whoever closed it, so faculty were refused
+     * on precisely the records they are answerable for -- including the
+     * mis-marked absence this method exists to let them fix.
+     *
+     * <p>Letting a student correct their own attendance would of course
+     * defeat the point of recording it, so the check is by role rather than
+     * dropped. Accountability moves to {@code updatedBy}: who changed it,
+     * rather than who may.
      */
     @Transactional(readOnly = true)
     public boolean mayEdit(AttendanceRecord record) {
         if (!record.isEditable()) {
             return false;
         }
-        return currentUser.isAdmin() || record.wasMarkedBy(currentUser.username());
+        return currentUser.isAdmin() || currentUser.hasRole(Role.FACULTY);
     }
 
     private void assertMayEdit(AttendanceRecord record) {
-        if (!currentUser.isAdmin() && !record.wasMarkedBy(currentUser.username())) {
+        if (!currentUser.isAdmin() && !currentUser.hasRole(Role.FACULTY)) {
             throw new NotPermittedException(
-                    "Record " + record.getId() + " was entered by " + record.getMarkedBy()
-                            + " and can only be corrected by them or an administrator");
+                    "Record " + record.getId() + " can only be corrected by faculty "
+                    + "or an administrator.");
         }
     }
 
