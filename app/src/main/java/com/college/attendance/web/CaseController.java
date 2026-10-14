@@ -1,6 +1,8 @@
 package com.college.attendance.web;
 
 import com.college.attendance.config.CurrentUser;
+import com.college.attendance.domain.CaseTier;
+import com.college.attendance.domain.Role;
 import com.college.attendance.dto.DashboardSummary;
 import com.college.attendance.service.AttendanceException;
 import com.college.attendance.service.DashboardService;
@@ -53,22 +55,31 @@ public class CaseController {
         }
 
         DashboardSummary summary = dashboard.summary();
-        model.addAttribute("cases", cases.all());
+        // Only this user's tier. Showing both would invite a decision on a
+        // case belonging to the other role, which the service refuses --
+        // better not to offer it.
+        model.addAttribute("cases", cases.mine());
+        model.addAttribute("candidates", cases.candidates());
         model.addAttribute("studentView", false);
-        // Students eligible for a case, minus anyone who already has one open.
-        List<String> alreadyOpen = cases.open().stream()
-                .map(c -> c.getStudent().getRollNumber()).toList();
-        model.addAttribute("candidates", summary.inShortage().stream()
-                .filter(s -> !alreadyOpen.contains(s.rollNumber()))
-                .toList());
+        model.addAttribute("facultyView", currentUser.hasRole(Role.FACULTY)
+                && !currentUser.isAdmin());
         model.addAttribute("shortageThreshold", summary.shortageThreshold());
+        model.addAttribute("eligibilityThreshold", summary.eligibilityThreshold());
         return "cases/index";
     }
 
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id, Model model) {
-        model.addAttribute("shortageCase", cases.require(id));
+        var shortage = cases.require(id);
+        boolean faculty = currentUser.hasRole(Role.FACULTY) && !currentUser.isAdmin();
+        model.addAttribute("shortageCase", shortage);
         model.addAttribute("studentView", currentUser.isStudent());
+        model.addAttribute("facultyView", faculty);
+        // Whether this viewer is the one with a move to make. The service
+        // re-checks it; this only decides whether to draw the buttons.
+        model.addAttribute("mayDecide", !currentUser.isStudent()
+                && shortage.getStatus().awaitsDecision()
+                && shortage.getTier() == (faculty ? CaseTier.FACULTY : CaseTier.HOD));
         model.addAttribute("today", LocalDate.now());
         return "cases/detail";
     }
@@ -90,17 +101,30 @@ public class CaseController {
         }
     }
 
+    /**
+     * Accept the explanation.
+     *
+     * <p>{@code from} and {@code to} are optional because a faculty case
+     * excuses nothing: requiring dates there would ask faculty for a window
+     * that is never applied. The service refuses a head-of-department case
+     * without them.
+     */
     @PostMapping("/{id}/accept")
     public String accept(@PathVariable Long id,
                          @RequestParam(required = false) String note,
-                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-                         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+                         @RequestParam(required = false)
+                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+                         @RequestParam(required = false)
+                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
                          RedirectAttributes flash) {
         try {
             var decided = cases.accept(id, note, from, to);
-            flash.addFlashAttribute("successMessage",
-                    "Explanation accepted. " + decided.getExcusedCount()
-                    + " session(s) marked excused, which removes them from the percentage.");
+            int excused = decided.getExcusedCount() == null ? 0 : decided.getExcusedCount();
+            flash.addFlashAttribute("successMessage", excused > 0
+                    ? "Explanation accepted. " + excused + " session(s) marked excused, "
+                      + "which removes them from the percentage."
+                    : "Explanation accepted and the case is closed. No sessions were excused, "
+                      + "so the attendance figure is unchanged.");
         } catch (AttendanceException e) {
             flash.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -120,6 +144,20 @@ public class CaseController {
         return "redirect:/cases/" + id;
     }
 
+    @PostMapping("/{id}/escalate")
+    public String escalate(@PathVariable Long id,
+                           @RequestParam(required = false) String note,
+                           RedirectAttributes flash) {
+        try {
+            cases.escalate(id, note);
+            flash.addFlashAttribute("successMessage",
+                    "Passed to the Head of Department with the student's reply attached.");
+        } catch (AttendanceException e) {
+            flash.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/cases/" + id;
+    }
+
     // ---- student ----------------------------------------------------------
 
     @PostMapping("/{id}/respond")
@@ -127,9 +165,10 @@ public class CaseController {
                           @RequestParam String response,
                           RedirectAttributes flash) {
         try {
-            cases.respond(id, response);
-            flash.addFlashAttribute("successMessage",
-                    "Your explanation has been sent to the Head of Department.");
+            var answered = cases.respond(id, response);
+            flash.addFlashAttribute("successMessage", "Your explanation has been sent to "
+                    + (answered.getTier() == CaseTier.FACULTY
+                       ? "your faculty." : "the Head of Department."));
         } catch (AttendanceException e) {
             flash.addFlashAttribute("errorMessage", e.getMessage());
         }

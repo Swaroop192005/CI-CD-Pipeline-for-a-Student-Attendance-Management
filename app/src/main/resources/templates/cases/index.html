@@ -10,12 +10,21 @@
     <div>
       <h1 data-testid="page-title">Shortage cases</h1>
       <p class="subtitle" th:if="${studentView}">
-        Questions the Head of Department has asked you about your attendance.
+        Questions your faculty or the Head of Department have asked you about
+        your attendance.
       </p>
-      <p class="subtitle" th:unless="${studentView}">
-        Students far enough below the threshold to be worth asking about.
-        Attendance is not approved session by session; this is where a head
-        of department's attention goes instead.
+      <p class="subtitle" th:if="${!studentView and facultyView}">
+        Students short of the <span th:text="${eligibilityThreshold}">75</span>%
+        eligibility mark but still above the
+        <span th:text="${shortageThreshold}">35</span>% shortage threshold.
+        Ask them first. If the answer does not hold up, pass it to the Head of
+        Department rather than deciding alone.
+      </p>
+      <p class="subtitle" th:if="${!studentView and !facultyView}">
+        Students below the <span th:text="${shortageThreshold}">35</span>%
+        shortage threshold, plus anything faculty have escalated. Attendance
+        is not approved session by session; this is where a head of
+        department's attention goes instead.
       </p>
     </div>
   </div>
@@ -23,9 +32,7 @@
   <div class="card" th:unless="${studentView}">
     <h2>Raise a case</h2>
     <p class="muted" th:if="${candidates.isEmpty()}" data-testid="no-candidates">
-      No student is below the
-      <span th:text="${shortageThreshold}">35</span>% shortage threshold with
-      no case already open.
+      No student is in your band without a case already open.
     </p>
     <div class="table-wrap" th:unless="${candidates.isEmpty()}">
       <table data-testid="candidates-table">
@@ -41,7 +48,9 @@
             <form th:action="@{/cases/raise}" method="post" class="inline-form">
               <input type="hidden" name="rollNumber" th:value="${c.rollNumber}"/>
               <input type="text" name="question" size="40" required
-                     placeholder="Why has your attendance fallen this far?"
+                     th:placeholder="${facultyView}
+                       ? 'Why have you been missing these classes?'
+                       : 'Why has your attendance fallen this far?'"
                      data-testid="case-question"/>
               <button type="submit" class="primary" data-testid="raise-case">Raise</button>
             </form>
@@ -53,7 +62,7 @@
   </div>
 
   <div class="card">
-    <h2 th:text="${studentView} ? 'Your cases' : 'All cases'">Cases</h2>
+    <h2 th:text="${studentView} ? 'Your cases' : 'Your queue'">Cases</h2>
     <p th:if="${cases.isEmpty()}" class="muted" data-testid="no-cases">
       No cases have been raised.
     </p>
@@ -61,13 +70,19 @@
       <table data-testid="cases-table">
         <thead>
         <tr><th>#</th><th th:unless="${studentView}">Student</th><th>Status</th>
+          <th th:if="${studentView}">Asked by</th>
           <th class="num">At open</th><th>Raised</th><th></th></tr>
         </thead>
         <tbody>
         <tr th:each="c : ${cases}">
           <td th:text="${c.id}">1</td>
           <td th:unless="${studentView}" th:text="${c.student.rollNumber}">1CS21CS002</td>
-          <td><span class="pill" th:text="${c.status}" th:data-status="${c.status}">ANSWERED</span></td>
+          <td>
+            <span class="pill" th:text="${c.status}" th:data-status="${c.status}">ANSWERED</span>
+            <span th:if="${c.wasEscalated()}" class="pill danger"
+                  data-testid="escalated-pill">escalated</span>
+          </td>
+          <td th:if="${studentView}" th:text="${c.tier.label}">Faculty query</td>
           <td class="num" th:text="${c.percentAtOpen} + '%'">22%</td>
           <td th:text="${#temporals.format(c.openedAt, 'dd MMM')}">13 Oct</td>
           <td><a class="button" th:href="@{/cases/{id}(id=${c.id})}"

@@ -56,6 +56,15 @@ public class ShortageCase {
     @Column(name = "threshold_at_open", nullable = false)
     private int thresholdAtOpen;
 
+    /**
+     * Whose case this is. Starts as the tier of whoever raised it and moves
+     * to {@code HOD} on escalation, so one field answers both "who may
+     * decide this" and "whose list does it appear in".
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tier", nullable = false, length = 10)
+    private CaseTier tier = CaseTier.HOD;
+
     // ---- the conversation -------------------------------------------------
 
     @Column(name = "question", nullable = false, length = 1000)
@@ -82,6 +91,25 @@ public class ShortageCase {
     @Column(name = "decided_at")
     private Instant decidedAt;
 
+    // ---- escalation -------------------------------------------------------
+
+    /**
+     * Why faculty were not satisfied by the reply.
+     *
+     * <p>Kept separate from {@code decisionNote}: this is an argument put to
+     * the head of department, not a ruling. Folding the two together would
+     * make a case look decided by the person who only asked for a second
+     * opinion.
+     */
+    @Column(name = "escalation_note", length = 1000)
+    private String escalationNote;
+
+    @Column(name = "escalated_by", length = 64)
+    private String escalatedBy;
+
+    @Column(name = "escalated_at")
+    private Instant escalatedAt;
+
     /** How many sessions were marked EXCUSED when the case was accepted. */
     @Column(name = "excused_count")
     private Integer excusedCount;
@@ -97,12 +125,13 @@ public class ShortageCase {
     }
 
     public ShortageCase(Student student, double percentAtOpen, int thresholdAtOpen,
-                        String question, String openedBy) {
+                        String question, String openedBy, CaseTier tier) {
         this.student = student;
         this.percentAtOpen = percentAtOpen;
         this.thresholdAtOpen = thresholdAtOpen;
         this.question = question;
         this.openedBy = openedBy;
+        this.tier = tier;
         this.openedAt = Instant.now();
         this.status = CaseStatus.AWAITING_RESPONSE;
     }
@@ -197,6 +226,43 @@ public class ShortageCase {
 
     public void setExcusedFrom(LocalDate excusedFrom) {
         this.excusedFrom = excusedFrom;
+    }
+
+    public CaseTier getTier() {
+        return tier;
+    }
+
+    public void setTier(CaseTier tier) {
+        this.tier = tier;
+    }
+
+    public String getEscalationNote() {
+        return escalationNote;
+    }
+
+    public void setEscalationNote(String escalationNote) {
+        this.escalationNote = escalationNote;
+    }
+
+    public String getEscalatedBy() {
+        return escalatedBy;
+    }
+
+    public void setEscalatedBy(String escalatedBy) {
+        this.escalatedBy = escalatedBy;
+    }
+
+    public Instant getEscalatedAt() {
+        return escalatedAt;
+    }
+
+    public void setEscalatedAt(Instant escalatedAt) {
+        this.escalatedAt = escalatedAt;
+    }
+
+    /** Whether this case reached the head of department from faculty. */
+    public boolean wasEscalated() {
+        return escalatedBy != null;
     }
 
     public LocalDate getExcusedTo() {

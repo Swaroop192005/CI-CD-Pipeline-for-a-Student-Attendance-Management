@@ -18,6 +18,8 @@
         <strong data-testid="percent-at-open"
                 th:text="${shortageCase.percentAtOpen} + '%'">22%</strong>
         against a <span th:text="${shortageCase.thresholdAtOpen}">35</span>% threshold.
+        <span class="pill" data-testid="case-tier"
+              th:text="${shortageCase.tier.label}">Faculty query</span>
       </p>
     </div>
   </div>
@@ -45,8 +47,21 @@
         <textarea name="response" rows="4" required data-testid="response-text"
                   placeholder="Explain why you were absent."></textarea>
       </label>
-      <button type="submit" class="primary" data-testid="send-response">Send to the Head of Department</button>
+      <button type="submit" class="primary" data-testid="send-response"
+              th:text="${shortageCase.tier.name() == 'FACULTY'}
+                       ? 'Send to your faculty' : 'Send to the Head of Department'">Send</button>
     </form>
+  </div>
+
+  <div class="card" th:if="${shortageCase.wasEscalated()}" data-testid="escalation-card">
+    <h2>Escalated to the Head of Department</h2>
+    <p data-testid="escalation-note" th:text="${shortageCase.escalationNote}">why</p>
+    <p class="muted">
+      Passed on by <span th:text="${shortageCase.escalatedBy}">faculty1</span> on
+      <span th:text="${#temporals.format(shortageCase.escalatedAt, 'dd MMM yyyy HH:mm')}">13 Oct</span>.
+      The student was not asked again: the reply above is what the Head of
+      Department decides on.
+    </p>
   </div>
 
   <div class="card" th:if="${shortageCase.status.decided}">
@@ -64,29 +79,70 @@
     </p>
   </div>
 
-  <div class="card" th:if="${!studentView} and ${shortageCase.status.name() == 'ANSWERED'}">
+  <!-- Drawn only for the person whose case this is. ShortageCaseService
+       re-checks the tier on every decision; this keeps the other role from
+       being offered a button that would be refused. -->
+  <div class="card" th:if="${mayDecide}">
     <h2>Decide</h2>
-    <form th:action="@{/cases/{id}/accept(id=${shortageCase.id})}" method="post">
-      <p class="muted">
-        Accepting marks the student's absences in this window as excused, so
-        the percentage genuinely improves rather than the case merely closing.
-      </p>
-      <label>From
-        <input type="date" name="from" th:value="${shortageCase.excusedFrom} ?: ${today}"
-               data-testid="excuse-from" required/>
-      </label>
-      <label>To
-        <input type="date" name="to" th:value="${today}" data-testid="excuse-to" required/>
-      </label>
-      <label>Note
-        <input type="text" name="note" size="50" data-testid="decision-note"/>
-      </label>
-      <button type="submit" class="primary" data-testid="accept-case">Accept the explanation</button>
-    </form>
-    <form th:action="@{/cases/{id}/reject(id=${shortageCase.id})}" method="post" class="inline-form">
-      <input type="text" name="note" size="40" placeholder="Why not"/>
-      <button type="submit" class="danger" data-testid="reject-case">Reject</button>
-    </form>
+
+    <!-- Faculty: satisfied, or pass it up. No excusing here, because
+         excusing changes the figure eligibility rests on. -->
+    <div th:if="${facultyView}">
+      <form th:action="@{/cases/{id}/accept(id=${shortageCase.id})}" method="post">
+        <p class="muted">
+          Closing the case accepts the explanation. It excuses nothing, so the
+          attendance figure is unchanged -- only the head of department can
+          excuse sessions.
+        </p>
+        <label>Note
+          <input type="text" name="note" size="50" data-testid="decision-note"/>
+        </label>
+        <button type="submit" class="primary" data-testid="accept-case">
+          Accept and close
+        </button>
+      </form>
+      <form th:action="@{/cases/{id}/escalate(id=${shortageCase.id})}" method="post">
+        <p class="muted">
+          If the reply does not hold up, send it to the Head of Department with
+          your reasoning. The student is not asked again.
+        </p>
+        <label>Why the explanation was not enough
+          <input type="text" name="note" size="50" required
+                 data-testid="escalation-reason"
+                 placeholder="e.g. no evidence, and the absences continued after"/>
+        </label>
+        <button type="submit" class="danger" data-testid="escalate-case">
+          Escalate to the Head of Department
+        </button>
+      </form>
+    </div>
+
+    <!-- Head of department: the tier that can excuse. -->
+    <div th:unless="${facultyView}">
+      <form th:action="@{/cases/{id}/accept(id=${shortageCase.id})}" method="post">
+        <p class="muted">
+          Accepting marks the student's absences in this window as excused, so
+          the percentage genuinely improves rather than the case merely closing.
+        </p>
+        <label>From
+          <input type="date" name="from" th:value="${shortageCase.excusedFrom} ?: ${today}"
+                 data-testid="excuse-from" required/>
+        </label>
+        <label>To
+          <input type="date" name="to" th:value="${today}" data-testid="excuse-to" required/>
+        </label>
+        <label>Note
+          <input type="text" name="note" size="50" data-testid="decision-note"/>
+        </label>
+        <button type="submit" class="primary" data-testid="accept-case">
+          Accept the explanation
+        </button>
+      </form>
+      <form th:action="@{/cases/{id}/reject(id=${shortageCase.id})}" method="post" class="inline-form">
+        <input type="text" name="note" size="40" placeholder="Why not"/>
+        <button type="submit" class="danger" data-testid="reject-case">Reject</button>
+      </form>
+    </div>
   </div>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>

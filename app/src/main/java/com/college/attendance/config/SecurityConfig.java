@@ -82,8 +82,14 @@ public class SecurityConfig {
                         // head of department; answering belongs to the student
                         // the case is about, which the service checks by roll
                         // number rather than by role alone.
+                        // Faculty raise and decide too, in their own band.
+                        // Which band a given case is in is a property of the
+                        // row, not the URL, so the tier check lives in
+                        // ShortageCaseService; this rule only keeps students
+                        // out.
                         .requestMatchers("/cases/raise", "/cases/*/accept",
-                                "/cases/*/reject").hasAnyRole("HOD", "ADMIN")
+                                "/cases/*/reject").hasAnyRole("FACULTY", "HOD", "ADMIN")
+                        .requestMatchers("/cases/*/escalate").hasAnyRole("FACULTY", "ADMIN")
                         .requestMatchers("/cases/*/respond").hasRole("STUDENT")
 
                         // Roll management.
