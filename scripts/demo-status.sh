@@ -97,7 +97,40 @@ printf "\n\033[1mRepository\033[0m\n"
 printf "  branch        %s\n" "$(git rev-parse --abbrev-ref HEAD)"
 printf "  HEAD          %s\n" "$(git log --oneline -1)"
 printf "  tags          %s\n" "$(git tag -l | tr '\n' ' ')"
-printf "  tests         %s unit + %s integration (last recorded run)\n" 73 7
+# Counted from the reports Maven actually wrote, not typed in. This line
+# read "73 unit + 7 integration" for weeks after the suite grew past it,
+# while the proofs line directly below was computed all along -- a status
+# display that states a number nobody checks is worse than omitting it,
+# because it gets quoted.
+count_tests() {
+  reports=$1
+  sources=$2
+  [ -d "$reports" ] || { echo 0; return; }
+  total=0
+  for xml in "$reports"/TEST-*.xml; do
+    [ -f "$xml" ] || continue
+    # The XML, not the .txt: a class whose tests live in @Nested classes
+    # reports 0 in the .txt and the real figure here.
+    class=$(basename "$xml" .xml); class=${class#TEST-}
+    # Skip a report left behind by a deleted test class. target/ is not
+    # cleaned between runs, so a stale report keeps counting tests that no
+    # longer exist -- WorkflowServiceTest went on contributing 16 of them
+    # after the file was removed.
+    [ -f "$sources/$(echo "$class" | tr '.' '/').java" ] || continue
+    n=$(sed -n 's/.*[^a-zA-Z]tests="\([0-9]*\)".*/\1/p' "$xml" | head -1)
+    total=$((total + ${n:-0}))
+  done
+  echo "$total"
+}
+unit=$(count_tests app/target/surefire-reports app/src/test/java)
+integration=$(count_tests app/target/failsafe-reports app/src/test/java)
+journeys=$(count_tests selenium-tests/target/failsafe-reports selenium-tests/src/test/java)
+if [ "${unit:-0}" -gt 0 ] || [ "${integration:-0}" -gt 0 ]; then
+  printf "  tests         %s unit + %s integration + %s journeys (last local run)\n" \
+    "${unit:-0}" "${integration:-0}" "${journeys:-0}"
+else
+  printf "  tests         not run in this working copy yet -- mvn test\n"
+fi
 printf "  proofs        %s files across %s stages\n" \
   "$(find proofs -type f 2>/dev/null | wc -l | tr -d ' ')" \
   "$(ls -d proofs/*/ 2>/dev/null | wc -l | tr -d ' ')"
