@@ -1,6 +1,8 @@
 package com.college.attendance.web;
 
 import com.college.attendance.service.DuplicateRecordException;
+import com.college.attendance.service.DuplicateSessionException;
+import com.college.attendance.service.PasskeyRequiredException;
 import com.college.attendance.service.NotPermittedException;
 import com.college.attendance.service.SessionNotOpenException;
 import com.college.attendance.service.RecordNotFoundException;
@@ -45,7 +47,8 @@ public class GlobalExceptionHandler {
         return "error/problem";
     }
 
-    @ExceptionHandler({DuplicateRecordException.class, SessionNotOpenException.class})
+    @ExceptionHandler({DuplicateRecordException.class, DuplicateSessionException.class,
+            SessionNotOpenException.class, PasskeyRequiredException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public String conflict(RuntimeException e, Model model) {
         model.addAttribute("statusCode", 409);

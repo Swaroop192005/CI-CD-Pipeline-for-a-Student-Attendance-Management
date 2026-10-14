@@ -33,7 +33,10 @@
           <td th:text="${s.sessionDate}">2026-10-13</td>
           <td class="num" th:text="${s.periodNumber}">1</td>
           <td>
-            <form th:action="@{/sessions/{id}/mark(id=${s.id})}" method="post">
+            <form th:action="@{/sessions/{id}/mark(id=${s.id})}" method="post"
+                  th:classappend="${passkeyRequired} ? 'mark-form' : ''"
+                  th:attr="data-challenge=@{/sessions/{id}/mark/challenge(id=${s.id})}">
+              <input th:if="${passkeyRequired}" type="hidden" name="assertion" value="">
               <button type="submit" class="primary" data-testid="mark-present">
                 Mark me present
               </button>
@@ -44,7 +47,109 @@
       </table>
     </div>
   </div>
+
+  <p class="muted" th:if="${passkeyRequired}" data-testid="passkey-note">
+    Marking asks for your passkey each time. Signing in proved your device was
+    present when you logged in; this proves it is present now, in the room.
+  </p>
 </main>
 <footer th:replace="~{fragments/layout :: footer}"></footer>
+<script th:inline="none" th:if="${passkeyRequired}">
+  // Marking attendance is a passkey ceremony, not a plain form post. The
+  // form still carries the CSRF token and still posts to the same URL, so a
+  // browser without WebAuthn degrades to a visible refusal rather than
+  // silently marking attendance with no proof of presence.
+  (function () {
+    var fromB64Url = function (value) {
+      var padded = value.replace(/-/g, '+').replace(/_/g, '/');
+      while (padded.length % 4 !== 0) { padded += '='; }
+      var raw = atob(padded);
+      var bytes = new Uint8Array(raw.length);
+      for (var i = 0; i < raw.length; i++) { bytes[i] = raw.charCodeAt(i); }
+      return bytes;
+    };
+
+    var toB64Url = function (buffer) {
+      var bytes = new Uint8Array(buffer);
+      var binary = '';
+      for (var i = 0; i < bytes.length; i++) { binary += String.fromCharCode(bytes[i]); }
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    };
+
+    var csrfToken = function () {
+      var field = document.querySelector('input[name="_csrf"]');
+      return field ? field.value : null;
+    };
+
+    var fail = function (message) {
+      var box = document.querySelector('[data-testid="passkey-error"]');
+      if (!box) {
+        box = document.createElement('p');
+        box.className = 'alert error';
+        box.setAttribute('data-testid', 'passkey-error');
+        document.querySelector('main').prepend(box);
+      }
+      box.textContent = message;
+    };
+
+    document.querySelectorAll('form.mark-form').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        // Already carrying a verified assertion: let it post.
+        var field = form.querySelector('input[name="assertion"]');
+        if (field.value) { return; }
+
+        event.preventDefault();
+
+        if (!window.PublicKeyCredential) {
+          fail('This browser cannot use passkeys, so attendance cannot be marked here.');
+          return;
+        }
+
+        var button = form.querySelector('button');
+        button.disabled = true;
+
+        var headers = { 'Accept': 'application/json' };
+        var token = csrfToken();
+        if (token) { headers['X-CSRF-TOKEN'] = token; }
+
+        fetch(form.getAttribute('data-challenge'), {
+          method: 'POST', headers: headers, credentials: 'same-origin'
+        }).then(function (response) {
+          return response.json().then(function (body) {
+            if (!response.ok) { throw new Error(body.error || 'Could not start the passkey check.'); }
+            return body;
+          });
+        }).then(function (options) {
+          options.challenge = fromB64Url(options.challenge);
+          options.allowCredentials = (options.allowCredentials || []).map(function (c) {
+            return { id: fromB64Url(c.id), type: c.type, transports: c.transports };
+          });
+          return navigator.credentials.get({ publicKey: options });
+        }).then(function (credential) {
+          field.value = JSON.stringify({
+            id: credential.id,
+            rawId: toB64Url(credential.rawId),
+            type: credential.type,
+            authenticatorAttachment: credential.authenticatorAttachment,
+            clientExtensionResults: credential.getClientExtensionResults(),
+            response: {
+              clientDataJSON: toB64Url(credential.response.clientDataJSON),
+              authenticatorData: toB64Url(credential.response.authenticatorData),
+              signature: toB64Url(credential.response.signature),
+              userHandle: credential.response.userHandle
+                  ? toB64Url(credential.response.userHandle) : null
+            }
+          });
+          form.submit();
+        }).catch(function (error) {
+          button.disabled = false;
+          fail(error && error.message
+              ? error.message
+              : 'The passkey prompt was cancelled, so nothing was marked.');
+        });
+      });
+    });
+  })();
+</script>
 </body>
 </html>

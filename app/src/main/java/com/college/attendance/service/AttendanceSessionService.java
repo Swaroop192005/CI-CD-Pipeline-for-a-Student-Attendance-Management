@@ -81,7 +81,7 @@ public class AttendanceSessionService {
         }
         if (sessions.existsBySubjectCodeAndSessionDateAndPeriodNumber(
                 subjectCode, sessionDate, periodNumber)) {
-            throw new DuplicateRecordException("-", subjectCode, sessionDate, periodNumber);
+            throw new DuplicateSessionException(subjectCode, sessionDate, periodNumber);
         }
         AttendanceSession session = sessions.save(
                 new AttendanceSession(subjectCode, sessionDate, periodNumber, currentUser.username()));
@@ -248,5 +248,22 @@ public class AttendanceSessionService {
     public AttendanceSession require(Long sessionId) {
         return sessions.findById(sessionId)
                 .orElseThrow(() -> new RecordNotFoundException(sessionId));
+    }
+
+    /**
+     * The session, provided it is still open.
+     *
+     * <p>Used before a passkey prompt is raised, so that a student whose
+     * window has closed is told so instead of being asked for a fingerprint
+     * and refused afterwards. {@link #markPresent} checks this again: this
+     * one is for the message, that one is the enforcement.
+     */
+    public AttendanceSession requireOpen(Long sessionId) {
+        AttendanceSession session = require(sessionId);
+        if (!session.isOpen()) {
+            throw new SessionNotOpenException(
+                    "Attendance for this session has closed. Speak to your faculty.");
+        }
+        return session;
     }
 }

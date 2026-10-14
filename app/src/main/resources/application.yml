@@ -74,6 +74,12 @@ attendance:
     relying-party-id: ${ATTENDANCE_PASSKEY_RP_ID:localhost}
     relying-party-name: ${ATTENDANCE_PASSKEY_RP_NAME:Student Attendance Portal}
     allowed-origins: ${ATTENDANCE_PASSKEY_ORIGINS:http://localhost:8080,http://localhost:8100,http://localhost:8101,http://localhost:8090,http://localhost:8091}
+    # Whether marking attendance demands a fresh passkey assertion, not just
+    # a session that began with one. Off by default: it is the stronger
+    # control, but it makes enrolling a passkey a prerequisite for being
+    # marked present at all, and a student who has not enrolled simply
+    # cannot attend. Turn it on to demonstrate presence-at-the-moment.
+    required-to-mark: ${ATTENDANCE_PASSKEY_REQUIRED_TO_MARK:false}
   seed-data: ${ATTENDANCE_SEED_DATA:true}
 
 info:

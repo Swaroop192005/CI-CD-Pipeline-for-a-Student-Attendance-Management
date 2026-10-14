@@ -9,16 +9,16 @@
   <div class="page-head">
     <div>
       <h1 data-testid="page-title">
-        <span th:text="${session.subjectCode}">CS501</span> ·
-        <span th:text="${session.sessionDate}">2026-10-13</span> ·
-        period <span th:text="${session.periodNumber}">1</span>
+        <span th:text="${teachingSession.subjectCode}">CS501</span> ·
+        <span th:text="${teachingSession.sessionDate}">2026-10-13</span> ·
+        period <span th:text="${teachingSession.periodNumber}">1</span>
       </h1>
       <p class="subtitle">
-        <span class="pill" data-testid="session-status" th:text="${session.status}">OPEN</span>
+        <span class="pill" data-testid="session-status" th:text="${teachingSession.status}">OPEN</span>
         Students mark themselves from their own account. Refresh to see new marks.
       </p>
     </div>
-    <form th:if="${session.open}" th:action="@{/sessions/{id}/close(id=${session.id})}"
+    <form th:if="${teachingSession.open}" th:action="@{/sessions/{id}/close(id=${teachingSession.id})}"
           method="post">
       <button type="submit" class="primary" data-testid="close-session">
         Stop taking attendance
@@ -50,8 +50,8 @@
           <td><span class="pill" th:text="${r.attendanceStatus.label}">Present</span></td>
           <td class="muted" th:text="${r.remarks}">marked by the student</td>
           <td>
-            <form th:if="${session.open} and ${r.attendanceStatus.countsAsAttended()}"
-                  th:action="@{/sessions/{id}/strike(id=${session.id})}" method="post"
+            <form th:if="${teachingSession.open and r.attendanceStatus.countsAsAttended()}"
+                  th:action="@{/sessions/{id}/strike(id=${teachingSession.id})}" method="post"
                   class="inline-form">
               <input type="hidden" name="rollNumber" th:value="${r.student.rollNumber}"/>
               <input type="text" name="reason" placeholder="Reason" size="18"/>

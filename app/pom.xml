@@ -56,10 +56,23 @@
       does not pull in for you. Without this the passkey endpoints exist and
       fail at the first registration.
     -->
+    <!--
+      Held below 0.31.0 deliberately. webauthn4j moved to Jackson 3
+      (tools.jackson.*) at 0.31.0, while Spring Boot manages Jackson 2. Both
+      then land on the classpath, and Jackson 3's databind binds against
+      Jackson 2's annotations, which fails at runtime with
+
+        NoSuchMethodError: JsonTypeInfo$Value.getWriteTypeIdForDefaultImpl()
+
+      inside AttestationObjectConverter. Only an actual registration reaches
+      that converter, so the mismatch is invisible to compilation and to
+      issuing a challenge: it surfaces as HTTP 500 the first time someone
+      enrols a passkey. 0.30.3 is the last release on Jackson 2.
+    -->
     <dependency>
       <groupId>com.webauthn4j</groupId>
       <artifactId>webauthn4j-core</artifactId>
-      <version>0.31.11.RELEASE</version>
+      <version>0.30.3.RELEASE</version>
     </dependency>
 
     <!--

@@ -4,8 +4,14 @@ import com.college.attendance.config.CurrentUser;
 import com.college.attendance.domain.AttendanceSession;
 import com.college.attendance.service.AttendanceException;
 import com.college.attendance.service.AttendanceSessionService;
+import com.college.attendance.service.PasskeyAssertionService;
+import com.college.attendance.service.PasskeyRequiredException;
 import com.college.attendance.repository.AttendanceRecordRepository;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -33,13 +40,16 @@ public class SessionController {
     private final AttendanceSessionService sessions;
     private final AttendanceRecordRepository records;
     private final CurrentUser currentUser;
+    private final PasskeyAssertionService passkeys;
 
     public SessionController(AttendanceSessionService sessions,
                              AttendanceRecordRepository records,
-                             CurrentUser currentUser) {
+                             CurrentUser currentUser,
+                             PasskeyAssertionService passkeys) {
         this.sessions = sessions;
         this.records = records;
         this.currentUser = currentUser;
+        this.passkeys = passkeys;
     }
 
     /** Faculty view: open a session, or watch one that is running. */
@@ -69,8 +79,12 @@ public class SessionController {
     /** The live roster for one session. */
     @GetMapping("/{id}")
     public String roster(@PathVariable Long id, Model model) {
-        AttendanceSession session = sessions.require(id);
-        model.addAttribute("session", session);
+        // Deliberately NOT called "session": Thymeleaf reserves that name for
+        // the HTTP session, so ${session.open} resolved against servlet
+        // session attributes instead of this object. It did not fail loudly
+        // -- it rendered an empty heading and silently hid the close and
+        // strike controls, because a missing property is simply false.
+        model.addAttribute("teachingSession", sessions.require(id));
         model.addAttribute("marked", sessions.markedSoFar(id));
         return "sessions/roster";
     }
@@ -114,17 +128,76 @@ public class SessionController {
                 : sessions.openSessionsAwaiting(roll);
         model.addAttribute("awaiting", awaiting);
         model.addAttribute("rollNumber", roll);
+        model.addAttribute("passkeyRequired", passkeys.isRequiredToMark());
         return "sessions/mark";
     }
 
-    @PostMapping("/{id}/mark")
-    public String mark(@PathVariable Long id, RedirectAttributes flash) {
+    /**
+     * Issue a passkey challenge for the student about to mark this session.
+     *
+     * <p>Returns the options as JSON rather than rendering a page, because
+     * the browser hands them straight to {@code navigator.credentials.get()}.
+     */
+    @PostMapping(value = "/{id}/mark/challenge", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<String> markChallenge(@PathVariable Long id, HttpSession httpSession) {
+        // Checked before a challenge is issued so that a student whose
+        // session has already closed gets the real reason, rather than a
+        // Touch ID prompt followed by a refusal.
+        sessions.requireOpen(id);
         try {
+            return ResponseEntity.ok(passkeys.challengeJson(httpSession));
+        } catch (AttendanceException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\":" + quote(e.getMessage()) + "}");
+        }
+    }
+
+    /**
+     * Mark the signed-in student present, but only on a verified assertion.
+     *
+     * <p>{@code assertion} is required, so a request that omits it is
+     * rejected by the binding before any attendance is written. That matters
+     * more than it looks: an optional parameter would mean a hand-rolled POST
+     * could mark attendance with no passkey at all, and the biometric would
+     * be decoration.
+     */
+    @PostMapping("/{id}/mark")
+    public String mark(@PathVariable Long id,
+                       @RequestParam(required = false) String assertion,
+                       HttpSession httpSession,
+                       RedirectAttributes flash) {
+        try {
+            boolean verified = false;
+            if (passkeys.isRequiredToMark()) {
+                // Required: a missing assertion is refused here rather than
+                // bound as optional and quietly ignored, which would leave the
+                // biometric as decoration.
+                if (assertion == null || assertion.isBlank()) {
+                    throw new PasskeyRequiredException(
+                            "Marking attendance needs your passkey. Reload the page and try again.");
+                }
+                passkeys.verify(assertion, httpSession);
+                verified = true;
+            } else if (assertion != null && !assertion.isBlank()) {
+                // Not required, but one was offered: still verify it, so an
+                // assertion is never accepted without being checked.
+                passkeys.verify(assertion, httpSession);
+                verified = true;
+            }
             sessions.markPresent(id);
-            flash.addFlashAttribute("successMessage", "You are marked present for this session.");
+            flash.addFlashAttribute("successMessage", verified
+                    ? "Passkey verified. You are marked present for this session."
+                    : "You are marked present for this session.");
         } catch (AttendanceException e) {
             flash.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/sessions/mark";
+    }
+
+    /** Minimal JSON string quoting, so an error message cannot break the body. */
+    private static String quote(String text) {
+        return "\"" + (text == null ? "" : text.replace("\\", "\\\\").replace("\"", "\\\"")) + "\"";
     }
 }
