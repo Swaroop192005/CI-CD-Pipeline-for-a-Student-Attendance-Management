@@ -53,7 +53,7 @@ class J5AuthorisationIT extends BaseJourney {
     }
 
     @Test
-    @DisplayName("J5c: a student is refused the record, review and roll pages, by URL as well as by UI")
+    @DisplayName("J5c: a student is refused the record and roll pages, by URL as well as by UI")
     void studentIsRefusedStaffPages() {
         signIn(TestData.STUDENT_USER, TestData.STUDENT_PASS);
 
@@ -62,11 +62,19 @@ class J5AuthorisationIT extends BaseJourney {
         assertThat(list.canRecordAttendance())
                 .as("a student must not be offered the record-attendance action")
                 .isFalse();
-        assertThat(driver().findElements(By.cssSelector("[data-testid='nav-review']"))).isEmpty();
         assertThat(driver().findElements(By.cssSelector("[data-testid='nav-students']"))).isEmpty();
 
-        // And the server refuses them when asked directly.
-        for (String path : new String[] {"/attendance/new", "/review", "/students"}) {
+        // Shortage cases are the one staff page a student does reach, because
+        // their own side of the conversation lives there. The nav offering it
+        // is correct, not a leak.
+        assertThat(driver().findElements(By.cssSelector("[data-testid='nav-cases']")))
+                .as("a student answers their own case, so the link belongs to them too")
+                .isNotEmpty();
+
+        // And the server refuses the rest when asked directly. /review is
+        // gone with the approval queue, so /sessions stands in for it: the
+        // faculty side of taking attendance.
+        for (String path : new String[] {"/attendance/new", "/sessions", "/students"}) {
             driver().get(baseUrl + path);
             assertThat(showsRefusal())
                     .as("requesting %s directly as a student must be refused by the server, "
@@ -76,11 +84,12 @@ class J5AuthorisationIT extends BaseJourney {
     }
 
     @Test
-    @DisplayName("J5d: a faculty member is refused the HOD and administrator pages")
+    @DisplayName("J5d: a faculty member is refused the administrator pages")
     void facultyIsRefusedHodAndAdminPages() {
         signIn(TestData.FACULTY_USER, TestData.FACULTY_PASS);
 
-        for (String path : new String[] {"/review", "/students"}) {
+        // /review is gone. Roll management is still the administrator's.
+        for (String path : new String[] {"/students"}) {
             driver().get(baseUrl + path);
             assertThat(showsRefusal())
                     .as("requesting %s as a faculty member must be refused", path)

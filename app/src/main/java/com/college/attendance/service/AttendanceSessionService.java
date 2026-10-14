@@ -209,6 +209,12 @@ public class AttendanceSessionService {
                 ? "Struck by faculty: not present in class"
                 : "Struck by faculty: " + reason.trim());
         record.setUpdatedAt(Instant.now());
+        // The page promises the override is logged against the faculty
+        // member's name, and the remark alone did not keep that promise:
+        // "Struck by faculty" names a role, not a person. A strike is a
+        // judgement no server-side check can verify, so it is exactly the
+        // change that has to be traceable to who made it.
+        record.setUpdatedBy(currentUser.username());
 
         log.info("Student {} struck from session {} by {}",
                 rollNumber, sessionId, currentUser.username());

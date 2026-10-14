@@ -45,7 +45,7 @@
         </thead>
         <tbody>
         <tr th:each="r : ${marked}">
-          <td th:text="${r.student.rollNumber}">1CS21CS001</td>
+          <td data-testid="roster-row-roll" th:text="${r.student.rollNumber}">1CS21CS001</td>
           <td th:text="${r.student.fullName}">Name</td>
           <td><span class="pill" th:text="${r.attendanceStatus.label}">Present</span></td>
           <td class="muted" th:text="${r.remarks}">marked by the student</td>
@@ -54,7 +54,8 @@
                   th:action="@{/sessions/{id}/strike(id=${teachingSession.id})}" method="post"
                   class="inline-form">
               <input type="hidden" name="rollNumber" th:value="${r.student.rollNumber}"/>
-              <input type="text" name="reason" placeholder="Reason" size="18"/>
+              <input type="text" name="reason" placeholder="Reason" size="18"
+                     data-testid="strike-reason"/>
               <button type="submit" class="danger" data-testid="strike">Not present</button>
             </form>
           </td>

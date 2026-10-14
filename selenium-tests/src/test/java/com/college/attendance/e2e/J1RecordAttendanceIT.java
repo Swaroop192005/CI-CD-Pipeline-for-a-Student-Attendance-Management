@@ -30,7 +30,7 @@ class J1RecordAttendanceIT extends BaseJourney {
      * runs or with the fixtures.
      */
     private static int freePeriod() {
-        return 7;
+        return TestData.PERIOD_J1_RECORD;
     }
 
     @Test
@@ -57,8 +57,9 @@ class J1RecordAttendanceIT extends BaseJourney {
 
         Duration elapsed = Duration.ofNanos(System.nanoTime() - startedAt);
 
-        // FR-04: a new record is a draft, not an official mark.
-        assertThat(detail.workflowStatus()).isEqualTo("Draft");
+        // FR-04: the record counts from the moment it is written. There is
+        // no draft state for it to wait in, so what is worth asserting is
+        // that it is immediately both correct and correctable.
         assertThat(detail.attendanceStatus()).isEqualTo("Present");
         assertThat(detail.student()).contains(TestData.STUDENT_ROLL);
         assertThat(detail.subject()).isEqualTo(TestData.SUBJECT_A);
@@ -67,9 +68,12 @@ class J1RecordAttendanceIT extends BaseJourney {
         assertThat(detail.markedBy()).isEqualTo(TestData.FACULTY_USER);
         assertThat(detail.createdAt()).isNotBlank();
         assertThat(detail.updatedAt()).isEqualTo("Never");
-        assertThat(detail.reviewedBy()).isEqualTo("Not yet reviewed");
+        assertThat(detail.excusedBy()).isEqualTo("Not excused");
+        assertThat(detail.canEdit())
+                .as("a mistake must be correctable by the person who notices it")
+                .isTrue();
 
-        assertThat(detail.successMessage()).contains("draft");
+        assertThat(detail.successMessage()).containsIgnoringCase("recorded");
 
         // SC1 - the measurable objective, not a vague "it was quick".
         assertThat(elapsed)

@@ -2,7 +2,6 @@ package com.college.attendance.web;
 
 import com.college.attendance.domain.AttendanceStatus;
 import com.college.attendance.domain.Role;
-import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.repository.AppUserRepository;
 import com.college.attendance.repository.AttendanceRecordRepository;
 import com.college.attendance.repository.StudentRepository;
@@ -92,8 +91,10 @@ class AttendanceWebFlowIT {
             assertThat(r.getSubjectCode()).isEqualTo("CS501");
             assertThat(r.getPeriodNumber()).isEqualTo(2);
             assertThat(r.getAttendanceStatus()).isEqualTo(AttendanceStatus.PRESENT);
-            assertThat(r.getWorkflowStatus()).isEqualTo(WorkflowStatus.DRAFT);
             assertThat(r.getMarkedBy()).isEqualTo("faculty1");
+            assertThat(r.getUpdatedBy())
+                    .as("a record that has never been corrected names nobody")
+                    .isNull();
         });
     }
 

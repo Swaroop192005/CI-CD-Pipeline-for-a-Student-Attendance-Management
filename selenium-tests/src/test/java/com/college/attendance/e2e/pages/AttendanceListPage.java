@@ -38,11 +38,6 @@ public class AttendanceListPage extends BasePage {
         return findAll("cell-subject").stream().map(e -> e.getText().trim()).collect(Collectors.toList());
     }
 
-    public List<String> workflowStatusesOnPage() {
-        return findAll("cell-workflow-status").stream()
-                .map(e -> e.getText().trim()).collect(Collectors.toList());
-    }
-
     public List<String> attendanceStatusesOnPage() {
         return findAll("cell-attendance-status").stream()
                 .map(e -> e.getText().trim()).collect(Collectors.toList());
@@ -76,11 +71,6 @@ public class AttendanceListPage extends BasePage {
 
     public AttendanceListPage filterByAttendanceStatus(String status) {
         new Select(find("filter-attendance-status")).selectByValue(status);
-        return this;
-    }
-
-    public AttendanceListPage filterByWorkflowStatus(String status) {
-        new Select(find("filter-workflow-status")).selectByValue(status);
         return this;
     }
 
@@ -121,23 +111,36 @@ public class AttendanceListPage extends BasePage {
     public AttendanceDetailPage openFirstRecord() {
         findAll("view-record").get(0).click();
         waitForUrlContaining("/attendance/");
-        waitForTestId("detail-workflow-status");
+        waitForTestId("detail-attendance-status");
         return new AttendanceDetailPage(driver, baseUrl);
     }
 
-    /** Opens the first record whose workflow status matches, or fails. */
-    public AttendanceDetailPage openFirstRecordWithStatus(String workflowStatus) {
-        List<WebElement> statuses = findAll("cell-workflow-status");
+    /** Whether the row-level correction link is offered to this user. */
+    public boolean canEditFromRow() {
+        return !findAll("edit-record-row").isEmpty();
+    }
+
+    /** Corrects a mistake straight from the list, the way faculty notice one. */
+    public AttendanceFormPage editFirstRecord() {
+        findAll("edit-record-row").get(0).click();
+        waitForTestId("attendance-form");
+        return new AttendanceFormPage(driver, baseUrl);
+    }
+
+    /** Opens the first record whose attendance status matches, or fails. */
+    public AttendanceDetailPage openFirstRecordWithAttendance(String attendanceStatus) {
+        List<WebElement> statuses = findAll("cell-attendance-status");
         List<WebElement> links = findAll("view-record");
         for (int i = 0; i < statuses.size() && i < links.size(); i++) {
-            if (statuses.get(i).getText().trim().equalsIgnoreCase(workflowStatus)) {
+            if (statuses.get(i).getText().trim().equalsIgnoreCase(attendanceStatus)) {
                 links.get(i).click();
-                wait.until(ExpectedConditions.presenceOfElementLocated(testId("detail-workflow-status")));
+                wait.until(ExpectedConditions.presenceOfElementLocated(
+                        testId("detail-attendance-status")));
                 return new AttendanceDetailPage(driver, baseUrl);
             }
         }
-        throw new AssertionError("No record with workflow status '" + workflowStatus
-                + "' on this page. Statuses present: " + workflowStatusesOnPage());
+        throw new AssertionError("No record marked '" + attendanceStatus
+                + "' on this page. Statuses present: " + attendanceStatusesOnPage());
     }
 
     public AttendanceFormPage startNewRecord() {

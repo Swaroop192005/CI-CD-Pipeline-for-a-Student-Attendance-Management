@@ -11,6 +11,7 @@ import com.college.attendance.repository.AttendanceSpecifications;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,7 +88,12 @@ public class DashboardService {
                 studentView
                         ? cases.findByStudent_RollNumberOrderByOpenedAtDesc(ownRollNumber.get())
                                .stream().filter(c -> c.getStatus().isOpen()).count()
-                        : cases.countByStatusIn(List.of(CaseStatus.AWAITING_RESPONSE, CaseStatus.ANSWERED)));
+                        // Every open status, ESCALATED included. Listing
+                        // them by hand here is what let ESCALATED be
+                        // forgotten when it was added, so the filter is the
+                        // enum's own definition of open.
+                        : cases.countByStatusIn(Arrays.stream(CaseStatus.values())
+                                .filter(CaseStatus::isOpen).toList()));
     }
 
     private List<DashboardSummary.SubjectBreakdown> subjectBreakdown(List<AttendanceRecord> visible) {

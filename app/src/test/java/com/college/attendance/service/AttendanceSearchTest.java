@@ -3,7 +3,6 @@ package com.college.attendance.service;
 import com.college.attendance.domain.AttendanceRecord;
 import com.college.attendance.domain.AttendanceStatus;
 import com.college.attendance.domain.Role;
-import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.dto.AttendanceSearch;
 import com.college.attendance.repository.AppUserRepository;
 import com.college.attendance.repository.AttendanceRecordRepository;
@@ -133,18 +132,6 @@ class AttendanceSearchTest {
     }
 
     @Test
-    @DisplayName("filtering by workflow status")
-    void filterByWorkflowStatus() {
-        AttendanceSearch criteria = search();
-        criteria.setWorkflowStatus(WorkflowStatus.DRAFT);
-
-        assertThat(run(criteria)).hasSize(5);
-
-        criteria.setWorkflowStatus(WorkflowStatus.APPROVED);
-        assertThat(run(criteria)).isEmpty();
-    }
-
-    @Test
     @DisplayName("AC-4: filters combine with AND semantics")
     void filtersCombine() {
         AttendanceSearch criteria = search();
@@ -189,40 +176,23 @@ class AttendanceSearchTest {
     }
 
     @Test
-    @DisplayName("FR-25: a student sees only their own approved records, whatever they filter by")
+    @DisplayName("FR-25: a student sees only their own records, whatever they filter by")
     void studentScopeCannotBeWidened() {
-        // Approve one of student1's records and one of the other student's.
-        var all = records.findAll();
-        all.stream()
-                .filter(r -> r.getStudent().getRollNumber().equals(TestFixtures.ROLL_1))
-                .findFirst().ifPresent(r -> {
-                    r.setWorkflowStatus(WorkflowStatus.APPROVED);
-                    records.save(r);
-                });
-        all.stream()
-                .filter(r -> r.getStudent().getRollNumber().equals(TestFixtures.ROLL_2))
-                .findFirst().ifPresent(r -> {
-                    r.setWorkflowStatus(WorkflowStatus.APPROVED);
-                    records.save(r);
-                });
-
         TestFixtures.actAs("student1", Role.STUDENT);
 
-        // Deliberately ask for the other student's records and for drafts.
+        // Deliberately ask for the other student's records.
         AttendanceSearch criteria = search();
         criteria.setRollNumber(TestFixtures.ROLL_2);
-        criteria.setWorkflowStatus(WorkflowStatus.DRAFT);
 
         assertThat(run(criteria))
                 .as("a student's own filters must never widen their scope")
-                .isEmpty();
+                .allSatisfy(r -> assertThat(r.getStudent().getRollNumber())
+                        .isEqualTo(TestFixtures.ROLL_1));
 
         assertThat(run(search()))
-                .hasSize(1)
-                .allSatisfy(r -> {
-                    assertThat(r.getStudent().getRollNumber()).isEqualTo(TestFixtures.ROLL_1);
-                    assertThat(r.getWorkflowStatus()).isEqualTo(WorkflowStatus.APPROVED);
-                });
+                .isNotEmpty()
+                .allSatisfy(r -> assertThat(r.getStudent().getRollNumber())
+                        .isEqualTo(TestFixtures.ROLL_1));
     }
 
     @Test
@@ -241,17 +211,20 @@ class AttendanceSearchTest {
     }
 
     @Test
-    @DisplayName("FR-25: a student is refused their own record while it is not yet approved")
-    void studentCannotOpenOwnUnapprovedRecord() {
-        Long ownDraft = records.findAll().stream()
+    @DisplayName("a student may open their own record as soon as it exists")
+    void studentCanOpenOwnRecord() {
+        Long own = records.findAll().stream()
                 .filter(r -> r.getStudent().getRollNumber().equals(TestFixtures.ROLL_1))
-                .filter(r -> r.getWorkflowStatus() == WorkflowStatus.DRAFT)
                 .findFirst().orElseThrow().getId();
 
         TestFixtures.actAs("student1", Role.STUDENT);
 
-        org.assertj.core.api.Assertions
-                .assertThatThrownBy(() -> attendanceService.require(ownDraft))
-                .isInstanceOf(NotPermittedException.class);
+        // Replaces a test asserting the opposite: a student used to be
+        // refused their own record until somebody approved it. Nothing is
+        // withheld now, which is the point of dropping per-record approval
+        // -- a student can see what was recorded about them while they can
+        // still remember whether it is right.
+        assertThat(attendanceService.require(own).getStudent().getRollNumber())
+                .isEqualTo(TestFixtures.ROLL_1);
     }
 }

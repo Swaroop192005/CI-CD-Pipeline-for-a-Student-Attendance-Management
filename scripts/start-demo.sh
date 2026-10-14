@@ -68,13 +68,11 @@ RUN_WAR=/tmp/attendance-demo.war
 step "Building the application"
 # sed, not grep -v: under `set -o pipefail` a grep that filters out every
 # line exits 1 and would fail the pipeline even though Maven succeeded.
-# -Dmaven.test.skip=true, not -DskipTests: the latter still *compiles* the
-# test sources, and on this branch about thirty of them still reference the
-# per-record approval workflow that the session/shortage-case redesign
-# removed. Until those are rewritten, compiling them fails the demo build.
-# This flag is for the demo launcher only -- the Jenkins pipeline must keep
-# running the real suite, so do not copy it into the Jenkinsfile.
-if mvn -q -pl app -Dmaven.test.skip=true package 2>&1 | sed '/Picked up JAVA_TOOL_OPTIONS/d' | tail -5; then
+# -DskipTests, not -Dmaven.test.skip=true: the demo launcher has no reason
+# to run the suite, but it should still compile it. A launcher that skipped
+# compilation too would start happily while the tests were broken, which is
+# exactly how this branch spent a week with a suite that did not build.
+if mvn -q -pl app -DskipTests package 2>&1 | sed '/Picked up JAVA_TOOL_OPTIONS/d' | tail -5; then
   WAR=$(ls -1 app/target/*.war 2>/dev/null | grep -v original | head -1)
   [ -n "$WAR" ] && ok "packaged $(basename "$WAR") ($(du -h "$WAR" | cut -f1))" || { bad "no war produced"; exit 1; }
 else

@@ -71,7 +71,7 @@ public class AttendanceFormPage extends BasePage {
     /** Saves, expecting to land on the new record's detail page. */
     public AttendanceDetailPage saveExpectingSuccess() {
         findClickable("save-record").click();
-        waitForTestId("detail-workflow-status");
+        waitForTestId("detail-attendance-status");
         return new AttendanceDetailPage(driver, baseUrl);
     }
 

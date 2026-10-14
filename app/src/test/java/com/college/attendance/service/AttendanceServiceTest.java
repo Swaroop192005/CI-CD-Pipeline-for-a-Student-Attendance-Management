@@ -3,7 +3,6 @@ package com.college.attendance.service;
 import com.college.attendance.domain.AttendanceRecord;
 import com.college.attendance.domain.AttendanceStatus;
 import com.college.attendance.domain.Role;
-import com.college.attendance.domain.WorkflowStatus;
 import com.college.attendance.dto.AttendanceForm;
 import com.college.attendance.repository.AppUserRepository;
 import com.college.attendance.repository.AttendanceRecordRepository;
@@ -58,6 +57,7 @@ class AttendanceServiceTest {
         users.save(TestFixtures.user("faculty1", Role.FACULTY, "{noop}x"));
         users.save(TestFixtures.user("faculty2", Role.FACULTY, "{noop}x"));
         users.save(TestFixtures.user("admin1", Role.ADMIN, "{noop}x"));
+        users.save(TestFixtures.studentUser("student1", "{noop}x", ROLL_1));
     }
 
     @Nested
@@ -66,13 +66,17 @@ class AttendanceServiceTest {
 
         @Test
         @WithMockUser(username = "faculty1", roles = "FACULTY")
-        @DisplayName("AC-2: a new record starts in DRAFT and is retrievable")
-        void createStartsInDraft() {
+        @DisplayName("AC-2: a new record counts immediately and is retrievable")
+        void createdRecordCountsImmediately() {
             AttendanceRecord saved = attendanceService.create(TestFixtures.validForm());
 
             assertThat(saved.getId()).isNotNull();
-            assertThat(saved.getWorkflowStatus()).isEqualTo(WorkflowStatus.DRAFT);
             assertThat(attendanceService.require(saved.getId()).getSubjectCode()).isEqualTo(SUBJECT);
+            // Used to assert a DRAFT state. There is no pending state now,
+            // so the meaningful claim is that the record is immediately
+            // editable rather than waiting on an approval that will never
+            // come.
+            assertThat(saved.isEditable()).isTrue();
         }
 
         @Test
@@ -171,38 +175,56 @@ class AttendanceServiceTest {
 
         @Test
         @WithMockUser(username = "faculty1", roles = "FACULTY")
-        @DisplayName("AC-2: a SUBMITTED record is locked against correction (FR-11)")
-        void submittedIsLocked() {
+        @DisplayName("no state locks a record against correction")
+        void nothingLocksARecord() {
             AttendanceRecord saved = attendanceService.create(TestFixtures.validForm());
-            saved.setWorkflowStatus(WorkflowStatus.SUBMITTED);
-            records.save(saved);
 
-            assertThatThrownBy(() -> attendanceService.update(saved.getId(), TestFixtures.validForm()))
-                    .isInstanceOf(RecordLockedException.class)
-                    .hasMessageContaining("Submitted");
+            // Replaces two tests that asserted SUBMITTED and APPROVED
+            // records were locked. Those states are gone, and so is the
+            // lock: a mistake in a past session still has to be fixable,
+            // which is what the audit trail is for.
+            AttendanceForm correction = TestFixtures.validForm();
+            correction.setAttendanceStatus(AttendanceStatus.EXCUSED);
+
+            assertThat(attendanceService.update(saved.getId(), correction).getAttendanceStatus())
+                    .isEqualTo(AttendanceStatus.EXCUSED);
         }
 
         @Test
-        @WithMockUser(username = "faculty1", roles = "FACULTY")
-        @DisplayName("an APPROVED record is locked against correction")
-        void approvedIsLocked() {
-            AttendanceRecord saved = attendanceService.create(TestFixtures.validForm());
-            saved.setWorkflowStatus(WorkflowStatus.APPROVED);
-            records.save(saved);
-
-            assertThatThrownBy(() -> attendanceService.update(saved.getId(), TestFixtures.validForm()))
-                    .isInstanceOf(RecordLockedException.class);
-        }
-
-        @Test
-        @DisplayName("AC-4: one faculty member cannot correct another's record")
-        void cannotEditOthersRecord() {
+        @DisplayName("any faculty member may correct a colleague's record, and is named for it")
+        void anyFacultyMayCorrectAndIsAttributed() {
             Long id = asFaculty1CreateRecord();
             TestFixtures.actAs("faculty2", Role.FACULTY);
 
+            // This test used to assert the opposite. Authorship stopped
+            // being a usable gate once students mark themselves: a
+            // student-marked record is authored by a roll number, and an
+            // absence written at session close by whoever closed it, so
+            // "only the author may correct it" refused faculty on the very
+            // records they answer for. Attribution moved to updatedBy.
+            AttendanceForm correction = TestFixtures.validForm();
+            correction.setAttendanceStatus(AttendanceStatus.LATE);
+            AttendanceRecord updated = attendanceService.update(id, correction);
+
+            assertThat(updated.getAttendanceStatus()).isEqualTo(AttendanceStatus.LATE);
+            assertThat(updated.getMarkedBy())
+                    .as("authorship is not transferred by a correction")
+                    .isEqualTo("faculty1");
+            assertThat(updated.getUpdatedBy())
+                    .as("the corrector is recorded instead")
+                    .isEqualTo("faculty2");
+        }
+
+        @Test
+        @DisplayName("a student may not correct their own attendance")
+        void studentMayNotCorrectOwnAttendance() {
+            Long id = asFaculty1CreateRecord();
+            TestFixtures.actAs("student1", Role.STUDENT);
+
+            // The one case the role check exists for: a student who could
+            // edit their own record would make recording it pointless.
             assertThatThrownBy(() -> attendanceService.update(id, TestFixtures.validForm()))
-                    .isInstanceOf(NotPermittedException.class)
-                    .hasMessageContaining("faculty1");
+                    .isInstanceOf(NotPermittedException.class);
         }
 
         @Test
