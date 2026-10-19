@@ -44,7 +44,11 @@ say()  { printf '  %s\n' "$*"; }
 ok()   { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 bad()  { printf '  \033[31m✗\033[0m %s\n' "$*"; }
 
-jcurl() { curl -sS --noproxy '*' -u "$USER_PASS" "$@"; }
+# -g disables curl's URL globbing. Jenkins' tree queries contain [ and ],
+# which curl otherwise reads as a range: the request never leaves, it fails
+# with "bad range in URL", and a 2>/dev/null on the caller turns that into
+# an empty answer that looks like a legitimate "no parameters".
+jcurl() { curl -g -sS --noproxy '*' -u "$USER_PASS" "$@"; }
 
 printf '\n\033[1mTriggering %s\033[0m\n' "$JOB"
 
@@ -99,11 +103,26 @@ fi
 ok "crumb issued"
 
 # ---- does the job define the parameters we are about to send? ----------
-params=$(jcurl "$JENKINS/job/$JOB/api/json?tree=property[parameterDefinitions[name]]" 2>/dev/null || true)
+# Not silenced. The previous version sent this to /dev/null, so a request
+# that never ran was indistinguishable from a job with no parameters, and
+# the script confidently posted to the wrong endpoint.
+params=$(jcurl "$JENKINS/job/$JOB/api/json?tree=property[parameterDefinitions[name]]") || {
+  bad "could not read the job's parameters from $JENKINS/job/$JOB/"
+  say "does the job exist?  $JENKINS/view/all/"
+  exit 1
+}
 case "$params" in
-  *DEPLOY_ENVIRONMENT*) PARAMETERISED=yes ;;
+  *parameterDefinitions*name*) PARAMETERISED=yes ;;
   *) PARAMETERISED=no ;;
 esac
+
+# What branch will this actually build? Worth printing before the build
+# rather than reading it out of the console afterwards: the job is defined
+# by casc.yaml, and a controller that did not reload its configuration goes
+# on building the previous branch while looking perfectly healthy.
+branch=$(jcurl "$JENKINS/job/$JOB/config.xml" 2>/dev/null \
+         | sed -n 's|.*<name>\(.*\)</name>.*|\1|p' | head -1)
+[ -n "${branch:-}" ] && say "configured branch: $branch"
 
 if [ "$PARAMETERISED" = yes ]; then
   URL="$JENKINS/job/$JOB/buildWithParameters?DEPLOY_ENVIRONMENT=$ENVIRONMENT&APP_PORT=$PORT&RUN_SELENIUM=$SELENIUM"
@@ -120,6 +139,13 @@ if [ "$code" = 201 ] || [ "$code" = 200 ]; then
   ok "queued (HTTP $code)"
 else
   bad "the trigger was refused (HTTP $code)"
+  case "$code" in
+    403) say "403 here is usually /build posted to a job that requires"
+         say "parameters, or a crumb from a different session." ;;
+    404) say "no such job: $JOB" ;;
+    405) say "this job does not accept that trigger; try the other endpoint" ;;
+  esac
+  say "url was: $URL"
   exit 1
 fi
 
