@@ -120,8 +120,11 @@ esac
 # rather than reading it out of the console afterwards: the job is defined
 # by casc.yaml, and a controller that did not reload its configuration goes
 # on building the previous branch while looking perfectly healthy.
-branch=$(jcurl "$JENKINS/job/$JOB/config.xml" 2>/dev/null \
-         | sed -n 's|.*<name>\(.*\)</name>.*|\1|p' | head -1)
+# Scoped to the BranchSpec. Matching <name> anywhere in config.xml finds
+# the first parameter definition instead, which is how this line came to
+# announce "configured branch: DEPLOY_ENVIRONMENT".
+branch=$(jcurl "$JENKINS/job/$JOB/config.xml" 2>/dev/null | tr -d '\n' \
+         | sed -n 's|.*<hudson.plugins.git.BranchSpec>[[:space:]]*<name>\([^<]*\)</name>.*|\1|p')
 [ -n "${branch:-}" ] && say "configured branch: $branch"
 
 if [ "$PARAMETERISED" = yes ]; then
@@ -134,7 +137,11 @@ else
   say "this job takes no parameters; triggering a plain build"
 fi
 
-code=$(jcurl -b "$COOKIE" -X POST "$URL" -o /dev/null -w '%{http_code}')
+# -H "$CRUMB" is the whole point of the two steps above. Without it the
+# POST is refused with 403 no matter how carefully the crumb was fetched
+# and checked, and the script that fetched it reports the refusal as if
+# something else were wrong.
+code=$(jcurl -b "$COOKIE" -H "$CRUMB" -X POST "$URL" -o /dev/null -w '%{http_code}')
 if [ "$code" = 201 ] || [ "$code" = 200 ]; then
   ok "queued (HTTP $code)"
 else
