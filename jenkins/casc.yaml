@@ -67,12 +67,21 @@ jobs:
           artifactNumToKeep(10)
         }
 
+        // Parameterised for the same reason as the pipeline below: a job
+        // pinned to develop polls and builds the pre-redesign application
+        // every two minutes, producing a verdict about code nobody is
+        // working on.
+        parameters {
+          stringParam('BRANCH', 'claude/upbeat-cannon-o509o5',
+            'Branch to build. Set to develop to build the original application.')
+        }
+
         scm {
           git {
             remote {
               url('https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git')
             }
-            branch('*/develop')
+            branch('*/${BRANCH}')
           }
         }
 
@@ -136,6 +145,12 @@ jobs:
         }
 
         parameters {
+          stringParam('BRANCH', 'claude/upbeat-cannon-o509o5',
+            '''Branch to build. The pipeline used to be pinned to develop,
+               which meant it kept testing the pre-redesign application while
+               the work happened elsewhere: a green run that said nothing
+               about the code under development. Set this to develop to build
+               the original application instead.''')
           choiceParam('DEPLOY_ENVIRONMENT', ['staging', 'production', 'local'],
             'Environment label the deployed application reports. Rendered in the UI banner so a misconfigured deploy is visible rather than silent.')
           stringParam('APP_PORT', '8090',
@@ -155,11 +170,17 @@ jobs:
                 remote {
                   url('https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git')
                 }
-                branch('*/develop')
+                // Expanded from the build parameter, so the Jenkinsfile and
+                // the source it builds always come from the same branch.
+                branch('*/${BRANCH}')
               }
             }
             scriptPath('Jenkinsfile')
-            lightweight(true)
+            // Lightweight checkout fetches only the Jenkinsfile, before
+            // build parameters are resolved, so it would read the literal
+            // string ${BRANCH} as a branch name. A full checkout costs a
+            // few seconds and makes the parameter actually work.
+            lightweight(false)
           }
         }
       }
