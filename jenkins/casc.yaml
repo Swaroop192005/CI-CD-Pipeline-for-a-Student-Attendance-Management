@@ -67,21 +67,17 @@ jobs:
           artifactNumToKeep(10)
         }
 
-        // Parameterised for the same reason as the pipeline below: a job
-        // pinned to develop polls and builds the pre-redesign application
-        // every two minutes, producing a verdict about code nobody is
-        // working on.
-        parameters {
-          stringParam('BRANCH', 'claude/upbeat-cannon-o509o5',
-            'Branch to build. Set to develop to build the original application.')
-        }
-
+        // Named outright, matching the pipeline. A build parameter would
+        // work in a freestyle job, whose checkout happens inside the build,
+        // but then one job would take a branch parameter and the other
+        // would ignore one, which is a worse thing to explain than a line
+        // that has to be edited.
         scm {
           git {
             remote {
               url('https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git')
             }
-            branch('*/${BRANCH}')
+            branch('*/claude/upbeat-cannon-o509o5')
           }
         }
 
@@ -145,12 +141,6 @@ jobs:
         }
 
         parameters {
-          stringParam('BRANCH', 'claude/upbeat-cannon-o509o5',
-            '''Branch to build. The pipeline used to be pinned to develop,
-               which meant it kept testing the pre-redesign application while
-               the work happened elsewhere: a green run that said nothing
-               about the code under development. Set this to develop to build
-               the original application instead.''')
           choiceParam('DEPLOY_ENVIRONMENT', ['staging', 'production', 'local'],
             'Environment label the deployed application reports. Rendered in the UI banner so a misconfigured deploy is visible rather than silent.')
           stringParam('APP_PORT', '8090',
@@ -170,17 +160,30 @@ jobs:
                 remote {
                   url('https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management.git')
                 }
-                // Expanded from the build parameter, so the Jenkinsfile and
-                // the source it builds always come from the same branch.
-                branch('*/${BRANCH}')
+                // Named outright, not taken from a build parameter.
+                //
+                // A parameter cannot work here. Jenkins fetches the
+                // Jenkinsfile to find out what the build is before the build
+                // exists -- the failing log says "#20 did not yet start"
+                // -- so no build parameter is in scope, and '*/${BRANCH}'
+                // expanded to an empty string. The checkout then looked for
+                // a branch called 'origin/' and failed every retry with
+                // "Couldn't find any revision to build", which names the
+                // branch configuration without saying it had been blanked.
+                //
+                // Turning off lightweight checkout did not help: the problem is
+                // when the fetch happens, not how much it fetches.
+                //
+                // To build a different branch, change this line and restart
+                // the controller. casc.yaml is mounted read-only, so that is
+                // a restart, not an image rebuild. A multibranch pipeline
+                // would build every branch without editing anything, and is
+                // the right answer if this starts happening often.
+                branch('*/claude/upbeat-cannon-o509o5')
               }
             }
             scriptPath('Jenkinsfile')
-            // Lightweight checkout fetches only the Jenkinsfile, before
-            // build parameters are resolved, so it would read the literal
-            // string ${BRANCH} as a branch name. A full checkout costs a
-            // few seconds and makes the parameter actually work.
-            lightweight(false)
+            lightweight(true)
           }
         }
       }
