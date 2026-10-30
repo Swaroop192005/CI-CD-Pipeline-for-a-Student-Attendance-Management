@@ -252,7 +252,7 @@ def main():
             to_pdf(prepared, pdf,
                    "Student Attendance Management Portal",
                    "Continuous Integration and Delivery Pipeline",
-                   "Swaroop Naik",
+                   "Swaroop Naik — Roll 23102A0001",
                    datetime.date.today().strftime("%d %B %Y"))
             print(f"  ✓ {pdf.name}  ({pdf.stat().st_size // 1024} KB)")
 
