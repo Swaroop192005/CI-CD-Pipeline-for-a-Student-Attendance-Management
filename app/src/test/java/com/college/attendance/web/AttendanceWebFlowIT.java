@@ -165,7 +165,11 @@ class AttendanceWebFlowIT {
                 .andExpect(content().string(containsString(TestFixtures.ROLL_1)))
                 .andExpect(content().string(containsString("CS501")))
                 .andExpect(content().string(containsString("Late")))
-                .andExpect(content().string(containsString("Draft")));
+                // "Draft" was the workflow status column, removed with
+                // per-record approval. The row's own actions stand in: a
+                // record that renders without a way to correct it is the
+                // failure this assertion is really guarding against.
+                .andExpect(content().string(containsString("edit-record-row")));
     }
 
     @Test
