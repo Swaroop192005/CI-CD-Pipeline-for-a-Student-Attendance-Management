@@ -1,5 +1,7 @@
 # Stage 4 — Git and GitHub Repository Initialisation
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** repository URL, README, initial commits, issues and branch policy.
 
 ---

@@ -1,5 +1,7 @@
 # Stage 6 — MVP Completion and Git Collaboration
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** functional MVP, resolved merge conflict, tagged version
 and updated backlog.
 **Issue:** [#2](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/issues/2) · **Pull requests:** [#13](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/pull/13), [#14](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/pull/14) · **Tag:** `v1.0.0`

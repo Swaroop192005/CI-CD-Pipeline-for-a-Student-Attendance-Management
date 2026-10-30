@@ -1,5 +1,7 @@
 # Stage 3 — Requirements, Architecture and Technology Setup
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Project:** Student Attendance Management Portal
 **Scope basis:** MVP frozen in Stage 1 §8
 

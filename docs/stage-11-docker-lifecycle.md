@@ -1,5 +1,7 @@
 # Stage 11 — Docker Image and Container Lifecycle
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** Dockerfile, image details, Docker command log and running
 container evidence.
 **Issue:** [#7](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/issues/7) · **Pull request:** [#17](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/pull/17)

@@ -1,5 +1,7 @@
 # Student Attendance Management Portal
 
+**Swaroop Naik** · Roll 23102A0001
+
 A role-aware attendance system of record for an engineering college,
 delivered end to end through a **Git → Jenkins → Selenium → Docker →
 Ansible** continuous delivery pipeline.

@@ -1,5 +1,7 @@
 # Stage 2 — Agile Planning and DevOps Workflow
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Project:** Student Attendance Management Portal
 **Method:** Scrum with a Kanban work-in-progress limit (Scrumban)
 **Cadence:** 3 sprints × 5 tasks = the frozen 15-task plan from Stage 1

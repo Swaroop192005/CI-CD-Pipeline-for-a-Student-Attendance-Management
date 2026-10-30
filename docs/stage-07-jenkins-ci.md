@@ -1,5 +1,7 @@
 # Stage 7 — Jenkins Installation and Continuous Integration Job
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** configured Jenkins job, successful build log, trigger
 evidence and archived artefact.
 **Issue:** [#3](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/issues/3) · **Pull request:** [#15](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/pull/15)

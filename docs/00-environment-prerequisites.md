@@ -1,5 +1,7 @@
 # Environment Prerequisites — Readiness Check
 
+**Swaroop Naik** · Roll 23102A0001
+
 Run before Stage 4, so that no stage is blocked half-way by a missing
 tool. Every row below was verified by executing the command shown; the
 captured output is in `proofs/stage-00/tool-versions.txt`.

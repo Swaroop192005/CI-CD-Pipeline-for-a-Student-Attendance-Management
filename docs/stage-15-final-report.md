@@ -1,5 +1,7 @@
 # Stage 15 — Final End-to-End Release, Documentation and Viva
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** final repository, live demonstration, complete report,
 screenshots, presentation and viva pack.
 **Issue:** [#11](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/issues/11)

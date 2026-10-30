@@ -1,5 +1,7 @@
 # Stage 12 — Jenkins–Docker Continuous Deployment
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** versioned image, registry evidence and an end-to-end
 commit-to-container pipeline.
 **Issue:** [#8](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/issues/8) · **Pull request:** [#17](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/pull/17)

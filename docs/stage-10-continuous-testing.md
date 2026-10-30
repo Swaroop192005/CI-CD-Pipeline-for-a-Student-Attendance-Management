@@ -1,5 +1,7 @@
 # Stage 10 — Continuous Testing in Jenkins
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** Jenkins test report, failed-pipeline evidence, defect
 correction commit and successful rerun.
 **Issue:** [#6](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/issues/6) · **Pull request:** [#16](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/pull/16)

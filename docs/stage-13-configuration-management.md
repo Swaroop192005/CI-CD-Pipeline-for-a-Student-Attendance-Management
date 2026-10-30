@@ -1,5 +1,7 @@
 # Stage 13 — Configuration Management Script
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** *"Create either a Puppet manifest/modules or an Ansible
 inventory and YAML playbook"* — configuration specification, the
 implementation, and first execution log.

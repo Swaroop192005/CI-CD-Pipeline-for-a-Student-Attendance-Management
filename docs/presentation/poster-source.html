@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CI/CD Pipeline for a Student Attendance Management Portal</title>
+<style>
+  /* A2 portrait, the common size for a project poster session. Prints
+     down to A3 without reflowing, because every size below is in mm. */
+  @page { size: 420mm 594mm; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:      #16191D;
+    --slate:    #36454F;
+    --muted:    #7A8B9C;
+    --pass:     #00A86B;
+    --teal:     #0E8C9B;
+    --fail:     #D7263D;
+    --attn:     #E9A317;
+    --deep:     #21295C;
+    --paper:    #FFFFFF;
+    --tint:     #F3F5F6;
+  }
+
+  html, body { width: 420mm; height: 594mm; }
+  body {
+    font-family: Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+    color: var(--ink); background: var(--paper);
+    display: flex; flex-direction: column;
+  }
+  h1, h2, h3 { font-family: Cambria, Caladea, Georgia, serif; }
+
+  /* ---------------------------------------------------------- header -- */
+  header { background: var(--ink); color: #fff; padding: 12mm 16mm 10mm; }
+  .stages { display: flex; gap: 2mm; margin-bottom: 7mm; }
+  .stages i { height: 2mm; flex: 1; background: var(--pass); border-radius: 1.2mm; }
+  h1 { font-size: 21mm; line-height: 1.06; letter-spacing: -0.3mm; }
+  .sub { margin-top: 4mm; font-size: 6.6mm; color: var(--pass); font-weight: 600; }
+  .by  { margin-top: 5mm; font-size: 5mm; color: #B9C4CE;
+         display: flex; gap: 10mm; flex-wrap: wrap; }
+  .by b { color: #fff; }
+
+  /* ------------------------------------------------------------ body -- */
+  /* Zoom measured, not guessed: main's natural height was 1924px against
+     1780px between the header and footer bands, so 0.925 makes it fill the
+     sheet exactly. The two bands keep their printed size. */
+  main { flex: 1; padding: 9mm 16mm 0; display: flex; flex-direction: column;
+         gap: 7mm; zoom: 0.925; }
+  .row { display: flex; gap: 7mm; }
+  .col { flex: 1; }
+
+  .card { background: var(--tint); border-radius: 3mm; padding: 7.5mm 8mm; }
+  .card.dark { background: var(--ink); color: #fff; }
+  .card.warn { background: #FDEBEE; }
+
+  h2 { font-size: 8.4mm; margin-bottom: 4.5mm; }
+  .card.dark h2 { color: #fff; }
+  h3 { font-size: 5.8mm; color: var(--teal); margin-bottom: 3mm; }
+
+  p, li { font-size: 5mm; line-height: 1.46; color: var(--slate); }
+  .card.dark p, .card.dark li { color: #C9D1D9; }
+  ul { list-style: none; }
+  li { padding-left: 6mm; position: relative; margin-bottom: 2.6mm; }
+  li::before { content: ""; position: absolute; left: 0; top: 2mm;
+               width: 2.2mm; height: 2.2mm; border-radius: 50%; background: var(--teal); }
+  .card.dark li::before { background: var(--pass); }
+
+  .big { font-size: 17mm; font-weight: 700; line-height: 1; font-family: Cambria, Georgia, serif; }
+  .cap { font-size: 4.3mm; color: var(--muted); margin-top: 2mm; }
+
+  /* -------------------------------------------------------- pipeline -- */
+  .pipe { display: flex; gap: 1.8mm; margin: 5mm 0 4mm; }
+  .st { flex: 1; background: var(--slate); color: #fff; border-radius: 2mm;
+        padding: 3.8mm 1mm; text-align: center; }
+  .st.gate { background: var(--attn); color: var(--ink); }
+  .st .n { font-size: 4.5mm; font-weight: 700; color: var(--pass); }
+  .st.gate .n { color: var(--ink); }
+  .st .l { font-size: 3.8mm; margin-top: 1.4mm; line-height: 1.2; }
+
+  /* ----------------------------------------------------------- stats -- */
+  .stats { display: flex; gap: 4mm; }
+  .stat { flex: 1; background: var(--tint); border-radius: 3mm; padding: 6mm 5mm; }
+  .stat .big { font-size: 14.5mm; }
+  .stat.on-dark { background: #1E2329; }
+
+  /* ----------------------------------------------------------- tools -- */
+  .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5mm; }
+  .tool { display: flex; gap: 4mm; align-items: flex-start; }
+  .dot { width: 6.5mm; height: 6.5mm; border-radius: 50%; flex: none; margin-top: 1mm; }
+  .tool b { font-size: 5.6mm; display: block; margin-bottom: 1.5mm; }
+  .tool span { font-size: 4.5mm; color: var(--slate); line-height: 1.4; }
+
+  /* --------------------------------------------------------- testing -- */
+  .lvl { display: flex; align-items: center; gap: 4mm; margin-bottom: 3.4mm; }
+  .bar { color: #fff; border-radius: 2mm; padding: 3mm 4.5mm; font-size: 5mm;
+         font-weight: 700; white-space: nowrap; }
+  .lvl span { font-size: 4.5mm; color: var(--muted); }
+
+  /* ---------------------------------------------------------- footer -- */
+  footer { margin-top: auto; background: var(--deep); color: #fff;
+           padding: 7mm 16mm; display: flex; justify-content: space-between;
+           align-items: center; gap: 12mm; font-size: 4.6mm; }
+  footer .tag { color: #9FB0C4; font-size: 4mm; text-align: right;
+               white-space: nowrap; flex: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="stages">
+    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+  </div>
+  <h1>CI/CD Pipeline for a Student<br>Attendance Management Portal</h1>
+  <div class="sub">Build · Test · Gate · Containerise · Deploy · Provision</div>
+  <div class="by">
+    <span><b>Swaroop Naik</b></span>
+    <span>Roll <b>23102A0001</b></span>
+    <span>Guide: <b>Snehal Andhare</b></span>
+  </div>
+</header>
+
+<main>
+
+  <!-- problem / solution ------------------------------------------------ -->
+  <div class="row">
+    <div class="col card">
+      <h2>The problem</h2>
+      <ul>
+        <li>Attendance written on paper and keyed in later</li>
+        <li>A student learns their standing weeks afterwards</li>
+        <li>Eligibility disputes have no audit trail</li>
+      </ul>
+      <div class="big" style="color: var(--fail); margin-top: 6mm;">9–14 days</div>
+      <div class="cap">measured delay from mark to student visibility</div>
+    </div>
+    <div class="col card dark">
+      <h2>A system of record</h2>
+      <ul>
+        <li>Faculty opens a session; students mark themselves</li>
+        <li>Closing records everyone who did not as absent</li>
+        <li>Only extreme cases escalate to a conversation</li>
+      </ul>
+      <div class="big" style="color: var(--pass); margin-top: 6mm;">Immediate</div>
+      <div class="cap">the student sees the record as it is written</div>
+    </div>
+  </div>
+
+  <!-- pipeline ----------------------------------------------------------- -->
+  <div class="card">
+    <h2>The pipeline — eleven stages, one verdict</h2>
+    <div class="pipe">
+      <div class="st"><div class="n">1</div><div class="l">Checkout</div></div>
+      <div class="st"><div class="n">2</div><div class="l">Build</div></div>
+      <div class="st"><div class="n">3</div><div class="l">Unit test</div></div>
+      <div class="st"><div class="n">4</div><div class="l">Package</div></div>
+      <div class="st"><div class="n">5</div><div class="l">Integration</div></div>
+      <div class="st gate"><div class="n">6</div><div class="l">Quality gate</div></div>
+      <div class="st"><div class="n">7</div><div class="l">Build image</div></div>
+      <div class="st"><div class="n">8</div><div class="l">Deploy container</div></div>
+      <div class="st"><div class="n">9</div><div class="l">Deploy Tomcat</div></div>
+      <div class="st"><div class="n">10</div><div class="l">Verify</div></div>
+      <div class="st"><div class="n">11</div><div class="l">Post</div></div>
+    </div>
+    <p><b>The gate sits at stage 6, before the image is built.</b> If a browser journey fails,
+       no image is published and nothing deploys. A check that runs after deployment can only
+       report what users already have. The gate tests a throwaway container started from the
+       very artefact that ships if it passes.</p>
+  </div>
+
+  <!-- toolchain ----------------------------------------------------------- -->
+  <div class="card">
+    <h2>What each tool is for</h2>
+    <div class="tools">
+      <div class="tool"><div class="dot" style="background: var(--teal)"></div>
+        <div><b>Docker</b><span>Packages the app with its runtime, and provides the lab:
+        eight containers standing in for machines.</span></div></div>
+      <div class="tool"><div class="dot" style="background: var(--pass)"></div>
+        <div><b>Jenkins</b><span>Decides when a change ships. Eleven stages, defined in a
+        Jenkinsfile versioned with the code.</span></div></div>
+      <div class="tool"><div class="dot" style="background: var(--attn)"></div>
+        <div><b>Selenium</b><span>Drives a real browser through real tasks, so the gate tests
+        the page a human sees.</span></div></div>
+      <div class="tool"><div class="dot" style="background: var(--deep)"></div>
+        <div><b>Ansible</b><span>Declares the state a host should be in and converges it.
+        Agentless, over SSH.</span></div></div>
+      <div class="tool"><div class="dot" style="background: var(--slate)"></div>
+        <div><b>Puppet</b><span>The same job, masterless, in its own declarative language.
+        Both are demonstrated.</span></div></div>
+      <div class="tool"><div class="dot" style="background: var(--muted)"></div>
+        <div><b>Maven</b><span>One command compiles, tests and packages, so the pipeline needs
+        no bespoke build steps.</span></div></div>
+    </div>
+  </div>
+
+  <!-- verification -------------------------------------------------------- -->
+  <div class="row">
+    <div class="col card">
+      <h2>Verification</h2>
+      <div class="lvl"><div class="bar" style="background: var(--pass); width: 66mm;">103 unit</div>
+        <span>the business rules</span></div>
+      <div class="lvl"><div class="bar" style="background: var(--teal); width: 50mm;">7 integration</div>
+        <span>web layer and persistence</span></div>
+      <div class="lvl"><div class="bar" style="background: var(--attn); width: 37mm;">19 browser</div>
+        <span>a real browser, real tasks</span></div>
+      <p style="margin-top: 5mm;"><b>67.9%</b> line coverage overall, <b>85.8%</b> across the
+         service layer where the business rules live. The 19 browser journeys contribute
+         nothing to that figure: they drive a separate JVM the coverage agent never sees.</p>
+    </div>
+    <div class="col card warn">
+      <h2>What the tests caught</h2>
+      <ul>
+        <li><b>The roster rendered blank.</b> A template read a property that no longer
+            existed, so the page silently hid its own Stop and Strike buttons. It passed
+            every unit test.</li>
+        <li><b>A promise the code did not keep.</b> The page said an override was logged
+            against your name; only the role was recorded.</li>
+        <li><b>An escalated case vanished</b> from the dashboard count.</li>
+      </ul>
+      <p style="margin-top: 4mm; font-style: italic; color: var(--fail);">None would fail a
+         compile. None would be obvious in a demonstration.</p>
+    </div>
+  </div>
+
+  <!-- results -------------------------------------------------------------- -->
+  <div class="card dark">
+    <h2>Results</h2>
+    <div class="stats">
+      <div class="stat on-dark"><div class="big" style="color: var(--pass)">129</div>
+        <div class="cap">tests, zero failing</div></div>
+      <div class="stat on-dark"><div class="big" style="color: var(--pass)">11</div>
+        <div class="cap">pipeline stages, all green</div></div>
+      <div class="stat on-dark"><div class="big" style="color: var(--teal)">16</div>
+        <div class="cap">versioned images in the registry</div></div>
+      <div class="stat on-dark"><div class="big" style="color: var(--attn)">&lt; 2 min</div>
+        <div class="cap">to record a session (SC1)</div></div>
+      <div class="stat on-dark"><div class="big" style="color: var(--attn)">0 days</div>
+        <div class="cap">until a student sees it (SC2)</div></div>
+    </div>
+    <p style="margin-top: 6mm;">One artefact is promoted, never rebuilt: the image tagged
+       <b>1.0.19-6be7e00</b> — build number plus commit — is the one that reaches staging and
+       production alike. Never only <b>:latest</b>, because a tag that moves cannot be rolled
+       back to.</p>
+  </div>
+
+  <!-- limitations ----------------------------------------------------------- -->
+  <div class="card">
+    <h2>What this project does not solve</h2>
+    <div class="tools">
+      <div class="tool"><div class="dot" style="background: var(--fail)"></div>
+        <div><b>No database migrations</b><span>Schema managed by ddl-auto with no Flyway.
+        A NOT NULL column cannot be added to a populated table — in production, data loss.</span></div></div>
+      <div class="tool"><div class="dot" style="background: var(--fail)"></div>
+        <div><b>Observability stops at a health check</b><span>Up or down. Nothing reports
+        slow, or failing for a fraction of users.</span></div></div>
+      <div class="tool"><div class="dot" style="background: var(--fail)"></div>
+        <div><b>Single node</b><span>No load balancing, no blue-green, and a window during
+        deployment where the service is down.</span></div></div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <span><b>DevOps is replacing “I think it works” with evidence</b> — and automating the step
+    so the evidence appears whether or not anyone asks</span>
+  <span class="tag">github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management</span>
+</footer>
+
+</body>
+</html>

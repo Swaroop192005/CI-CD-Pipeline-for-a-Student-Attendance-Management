@@ -1,5 +1,7 @@
 # Stage 1 — Problem Definition and Scope
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Project:** Student Attendance Management Portal
 **Course theme:** CI/CD Pipeline for a Student Attendance Management Portal
 **Document status:** Approved (baseline for Stages 2–15)

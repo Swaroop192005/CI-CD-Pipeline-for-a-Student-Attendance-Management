@@ -1,5 +1,7 @@
 # Stage 14 — Automated Provisioning and Reliability Validation
 
+**Swaroop Naik** · Roll 23102A0001
+
 **Deliverable:** provisioned node, idempotency evidence, health-check
 result and rollback/recovery demonstration.
 **Issue:** [#10](https://github.com/Swaroop192005/CI-CD-Pipeline-for-a-Student-Attendance-Management/issues/10)
