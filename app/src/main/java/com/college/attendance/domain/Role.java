@@ -6,16 +6,24 @@ package com.college.attendance.domain;
  */
 public enum Role {
 
-    /** Records attendance and submits it for review. */
+    /**
+     * Opens and closes attendance sessions, corrects records, and raises
+     * queries about students below the eligibility threshold but above the
+     * shortage one.
+     */
     FACULTY("Faculty"),
 
-    /** Approves or rejects submitted attendance. */
+    /**
+     * Owns students below the shortage threshold and decides cases faculty
+     * escalate. The only role that can excuse sessions, because excusing
+     * changes the figure the eligibility decision rests on.
+     */
     HOD("Head of Department"),
 
     /** Full access, including the student roll. */
     ADMIN("Administrator"),
 
-    /** Sees only their own approved attendance. */
+    /** Marks their own attendance, and answers cases raised about them. */
     STUDENT("Student");
 
     private final String label;
