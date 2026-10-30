@@ -34,6 +34,12 @@ BLOB = ("https://github.com/Swaroop192005/"
         "CI-CD-Pipeline-for-a-Student-Attendance-Management/blob/main")
 
 MMDC = os.environ.get("MMDC", "mmdc")
+# mermaid-cli drives a headless Chromium, which refuses to start as root
+# without --no-sandbox. Point this at a JSON file holding
+#   { "args": ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"] }
+# Without it every diagram fails and the script falls back to printing the
+# mermaid source, which still produces a report -- just one with no
+# diagrams in it.
 PUPPETEER_CFG = os.environ.get("PUPPETEER_CFG", "")
 
 
